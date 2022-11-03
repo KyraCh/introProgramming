@@ -1,3 +1,4 @@
+### FIRST ROUGH OUTLINE ###
 # Please nevermind the incorrect spelling; am tired
 
 # Docstring aren't serious docstrings but rough estimates of what certain method/class is all about
