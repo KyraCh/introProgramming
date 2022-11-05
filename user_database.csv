@@ -1,3 +1,4 @@
-﻿username,password,role
-admin,123,admin
-m_dacosta,111,volunteer
+﻿username,password,role,activated
+admin,123,admin,TRUE
+mev,1,volunteer,FALSE
+rick,1,volunteer,TRUE
