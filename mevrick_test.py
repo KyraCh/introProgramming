@@ -1,18 +1,14 @@
-import sys
-from PyQt5.QtWidgets import QApplication,QGridLayout,QPushButton,QWidget,QLabel, QLineEdit, QShortcut, QMainWindow, QVBoxLayout, QInputDialog, QMessageBox
-from PyQt5.QtGui import QKeySequence
+import sys 
+from PyQt5.QtWidgets import QApplication,QGridLayout,QPushButton,QWidget,QLabel, QLineEdit, QMainWindow, QVBoxLayout, QInputDialog, QMessageBox
 from PyQt5.QtCore import Qt
 import pandas as pd
 import logging
-
+        
 class Login(QWidget):
-    def __init__(self):
+    def __init__(self, database):
         super().__init__()
         self.login_page_UI()
-        
-        df = pd.read_csv('user_database.csv').set_index('username')
-        df['password'] = df['password'].astype(str)
-        self.volunteer = df.to_dict(orient='index')
+        self.database = database
 
         logging.basicConfig(filename='logfile.log', filemode='a', format='%(asctime)s - %(name)s - %(levelname)s - %(message)s')
         self.logger = logging.getLogger()
@@ -46,19 +42,22 @@ class Login(QWidget):
         self.show()
 
     def login_validity(self):
-        if self.username.text() in self.volunteer:
-            user = self.volunteer[self.username.text()]
+        if self.username.text() in self.database:
+            user = self.database[self.username.text()]
             if user['password'] == self.password.text() and user['activated'] == True:
-                    self.hide()
+                    
+                    self.logger.info(f'{self.username.text()} logged in successfully!')
+                    self.close()
+                    
                     if user['role'] == 'admin':
-                        self.admin_page = AdminWindow(self.username.text())
+                        self.admin_page = AdminWindow(self.username.text(), self.database)
                         self.admin_page.show()
                     else:
-                        self.volunteer_page = VolunteerWindow(self.username.text())
+                        self.volunteer_page = VolunteerWindow(self.username.text(), self.database)
                         self.volunteer_page.show()
 
             elif user['password'] == self.password.text() and user['activated'] == False:
-                self.logger.error(f'{self.username.text()} account has been deactivated!')
+                self.logger.error(f"{self.username.text()}'s account has been deactivated!")
                 errorMsg = QMessageBox()
                 errorMsg.setIcon(QMessageBox.Critical)
                 errorMsg.setText('Your account has been deactivated, contact the administrator')
@@ -70,8 +69,9 @@ class Login(QWidget):
             self.logger.error('User attempted to log into an account which does not exist.')
 
 class AdminWindow(QMainWindow):
-    def __init__(self, username):
+    def __init__(self, username, database):
         super().__init__()
+        self.database = database
         self.objName = username
 
         self.admin_ui()
@@ -107,8 +107,9 @@ class AdminWindow(QMainWindow):
         self.setCentralWidget(w)
 
 class VolunteerWindow(QMainWindow):
-    def __init__(self, username):
+    def __init__(self, username, database):
         super().__init__()
+        self.database = database
         self.objName = username
         self.volunteer_ui()
         
@@ -142,8 +143,11 @@ class VolunteerWindow(QMainWindow):
         assigned_camp = QInputDialog.getText(self, 'Input Dialog', 'What camp are you assigned to?: ') 
 
 if __name__ == '__main__':
+        
+    df = pd.read_csv('user_database.csv').set_index('username')
+    df['password'] = df['password'].astype(str)
+    volunteer = df.to_dict(orient='index')
 
     app = QApplication(sys.argv)
-    win = Login()
-    win.show()
+    win = Login(volunteer)
     sys.exit(app.exec_())
