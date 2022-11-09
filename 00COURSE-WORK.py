@@ -97,8 +97,8 @@ class CentralFunctions():
             >count camps in each area
             >active camps (not closed)
             >closed camps
-           (> Each camp's resource capacity)
         '''
+        
         list_of_camps=pd.read_excel("camplist.xlsx")
         print("See camp list: \n",list_of_camps)
         print("Number of camps: ",len(list_of_camps.index))
