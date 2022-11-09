@@ -51,17 +51,40 @@ class CentralFunctions():
         (Potentially can be conditionally configured to also return their quantitative needs upon further request, such as food,
         water and shelter demands and how much we got in the "central hub" + graphs(!) which can be done with pandas but better done with matplotlib)
         '''
+
+        '''Reads the file and prints out the general list of families in a system with 
+        some summary about them by sating the number of refugees, their mental and physical 
+        state per each camp and gives information about each family that is assigned to certain camp'''
+        
         pd.set_option('display.max_columns',15)
         list_of_refugee = pd.read_excel('RefugeeList.xlsx')
         print(list_of_refugee)
+
         number_of_refugee = len(list_of_refugee)
-        print("Number or refugee: " + str(number_of_refugee))
+        print("Number or refugee: ", number_of_refugee)
+
         count_camps = list_of_refugee['Camp ID'].value_counts()
+        print("Number of families in each camp:")
         print(count_camps)
         count_camps.plot.bar()
+        plt.title(" Bar chart representing the number of families in each camp")
+        plt.xlabel("Camp name")
+        plt.ylabel("No.of families per camp")
         plt.show()
+
         mental_state_count = list_of_refugee['Mental State'].value_counts()
+        print("Number of families for each mental state group:")
         print(mental_state_count)
+
+        physical_state_count = list_of_refugee['Physical State'].value_counts()
+        print("Number of families for each physical state group:")
+        print(physical_state_count)
+
+        group_camps = list_of_refugee.groupby('Camp ID')
+        for name,camp in group_camps:
+            print("Camp "+name + "->" + str(len(camp)) + " family/families")
+            print(camp)
+            print()
     def call_camps(self):
         '''
         Sounds fucking evil, we might need to change the name of the method XD
