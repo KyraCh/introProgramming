@@ -70,9 +70,31 @@ class CentralFunctions():
             > How many refugees in each
             > Each camp's capacity
             > How many volunteers in each camp
+            >bar plot emergency type
+            >count camps in each area
+            >active camps (not closed)
+            >closed camps
            (> Each camp's resource capacity)
         '''
-        pass
+        list_of_camps=pd.read_excel("camplist.xlsx")
+        print("See camp list: \n",list_of_camps)
+        print("Number of camps: ",len(list_of_camps.index))
+        print("Number of volunteers per camp: \n",list_of_camps[list_of_camps.columns[7:9]])
+        print("Number of refugees per camp: \n", list_of_camps[list_of_camps.columns[6:8]])
+        column_headers = list(list_of_camps.columns.values)
+        print("Capacity by camp: \n",list_of_camps[[column_headers[7], column_headers[9]]])
+        print("Camps in each area: ")
+        print(list_of_camps[column_headers[3]].value_counts())
+
+
+        print("Active Camps: ",list_of_camps[column_headers[5]].isna().sum())
+        print("Closed Camps: ", list_of_camps[column_headers[5]].notna().sum())
+
+        list_of_camps[column_headers[1]].value_counts().plot(kind='bar')
+        plt.title("Emergency Tipes Counted")
+        plt.show()
+
+
 
     def call_volunteers(self):
         '''
@@ -259,3 +281,4 @@ def execute():
 
 c = CentralFunctions()
 c.call_no_of_refugees()
+c.call_camps()
