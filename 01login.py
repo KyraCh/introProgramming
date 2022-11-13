@@ -147,29 +147,34 @@ class test():
     def __init__(self):
         self.user_data = None
     
-    def users(self):
+    def users_login(self):
+        '''
+        Reads (or if first time logging in creates) users_dataframe.csv.
+        Creates self.user_data DataFrame. # when admin wants to call all details of all users they'd use this
+        Calls login widget.
+        '''
         try:
             df = pd.read_csv('user_database.csv').set_index('username')
             df['password'] = df['password'].astype(str)
             users_dict = df.to_dict(orient='index')
             self.user_data = df
-            app = QApplication(sys.argv)
-            win = Login(users_dict)
-            sys.exit(app.exec_())
         except FileNotFoundError:
             users_dict = {'username':['admin'],'password':['111'],'role':['admin'],'activated':['TRUE']}
             df = pd.DataFrame(users_dict)
             df.set_index('username', inplace=True)
+            df['password'] = df['password'].astype(str)
             df.to_csv('user_database.csv')
             self.user_data = df
-        #else:
-         #   print("System couldn'd read your user data base file. Please ensure everything is fine")
+        except:
+            print("System couldn'd read your user data base file.")
         pass
 
-        
+        app = QApplication(sys.argv)
+        win = Login(users_dict)
+        sys.exit(app.exec_())
 
 
 if __name__ == '__main__':
         
     a = test()
-    a.users()
+    a.users_login()
