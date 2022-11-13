@@ -4,7 +4,6 @@
 # Docstring aren't serious docstrings but rough estimates of what certain method/class is all about
 # Comments set my immediate ideas on how to implement
 import pandas as pd
-import openpyxl
 import matplotlib.pyplot as plt
 import numpy as np
 
