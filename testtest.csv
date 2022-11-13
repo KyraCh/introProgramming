@@ -1,2 +1,2 @@
-username,password,role
-admin,111,TRUE
+username,password,role,activated
+admin,111,admin,TRUE
