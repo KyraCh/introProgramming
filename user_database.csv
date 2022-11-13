@@ -1,0 +1,4 @@
+﻿username,password,role,activated
+admin,123,admin,TRUE
+mev,1,volunteer,FALSE
+rick,1,volunteer,TRUE
