@@ -1,12 +1,13 @@
 ### FIRST ROUGH OUTLINE ###
 # Please nevermind the incorrect spelling; am tired
-
+import pandas
 # Docstring aren't serious docstrings but rough estimates of what certain method/class is all about
 # Comments set my immediate ideas on how to implement
 import pandas as pd
 import openpyxl
 import matplotlib.pyplot as plt
 import numpy as np
+
 
 
 class CentralFunctions():
@@ -44,7 +45,7 @@ class CentralFunctions():
         what file we are saving should be specified
         '''
         pass
-    
+
     def call_no_of_refugees(self):
         '''
         Reads the .csv file with refugees and returns the number of refugees + no of refugees broken down across camps
@@ -52,10 +53,10 @@ class CentralFunctions():
         water and shelter demands and how much we got in the "central hub" + graphs(!) which can be done with pandas but better done with matplotlib)
         '''
 
-        '''Reads the file and prints out the general list of families in a system with 
-        some summary about them by sating the number of refugees, their mental and physical 
+        '''Reads the file and prints out the general list of families in a system with
+        some summary about them by sating the number of refugees, their mental and physical
         state per each camp and gives information about each family that is assigned to certain camp'''
-        
+
         pd.set_option('display.max_columns',15)
         list_of_refugee = pd.read_excel('RefugeeList.xlsx')
         print(list_of_refugee)
@@ -98,7 +99,7 @@ class CentralFunctions():
             >active camps (not closed)
             >closed camps
         '''
-        
+
         list_of_camps=pd.read_excel("camplist.xlsx")
         print("See camp list: \n",list_of_camps)
         print("Number of camps: ",len(list_of_camps.index))
@@ -130,7 +131,56 @@ class CentralFunctions():
         So we can use this method in the future for activating and deactivating volunteers in a curtailed form.
         It would be convinient to look at the list of volunteers when you type out a deletion command)
         '''
-        pass
+        on = True
+        camp_dict = {
+            '1': 'A1',
+            '2': 'A2',
+            '3': 'A3'
+        }
+        choose_action = input('''
+        Enter [1] to view all volunteer data
+        Enter [2] to see volunteer data by camp
+        Enter [3] to see total number of volunteers
+        Enter [4] to see number of volunteers by camp
+        Enter [5] to check if the volunteer exists
+        Enter here: ''')
+        data = pandas.read_csv('VolunteersData.csv')
+
+        if choose_action == '1':
+            print(f"\n{data}")
+        elif choose_action == '2':
+            while on:
+                choose_camp = input('Choose camp. [1] A1 [2] A2 [3] A3 : ')
+                try:
+                    print(data[data['CampID'] == camp_dict[choose_camp].title()])
+                    on = False
+                except KeyError:
+                    print('Invalid Camp. Try again. ')
+        elif choose_action == '3':
+            print(f"There are {len(data)} volunteers")
+        elif choose_action == '4':
+            while on:
+                choose_camp = input('Choose camp. [1] A1 [2] A2 [3] A3 : ')
+                try:
+                    lst1 = [item for item in data['CampID'] if item == camp_dict[choose_camp].title()]
+                    print(len(lst1))
+                    on = False
+                except KeyError:
+                    print('Invalid Camp. Try again. ')
+        elif choose_action == '5':
+            while on:
+                first_name = input('Enter First Name: ')
+                last_name = input('Enter Last Name: ')
+                if first_name in data['First Name']:
+                    print(data[(data['First Name'] == first_name.title()) & (data['Last Name'] == last_name.title())])
+                    on = False
+                else:
+                    print(f'There is no volunteer with the name {first_name} {last_name}')
+                    try_again = input('Would you like to try again? y/n : ')
+                    if try_again == 'y':
+                        on = True
+                    else:
+                        on = False
 
     def login(self):
         '''
@@ -147,6 +197,7 @@ class CentralFunctions():
         an account creation procedure)
         '''
         # User input will be interpreted and checked via a dictionary of admins and volunteers.
+        # Mevrick
         pass
 
     def users(self):
@@ -221,7 +272,6 @@ class admin(CentralFunctions):
         Method that will write into the volunteer dataframe adding new volunteers but only with their username and password and camp assigned to.
         Make sure to have a method that will update the users dictionary (either by rerunning the users() method or manually adding a new entry into the
         existing dictionary)
-
         (When run maybe show the names of exisiting camps for user friendliness)
         '''
         pass
@@ -303,5 +353,6 @@ def execute():
     pass
 
 c = CentralFunctions()
-c.call_no_of_refugees()
-c.call_camps()
+# c.call_no_of_refugees()
+# c.call_camps()
+c.call_volunteers()

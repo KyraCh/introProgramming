@@ -1,13 +1,13 @@
-﻿Username,First name ,Second name ,Phone ,Camp ID,Avability ,Status,Password
-Volunteer1,Mike,Smith ,441234567,A1,15h ,1,1111
-Volunteer2,Jane,Smith ,449876543,A1,40h,1,1111
-Volunteer3,Meghan,Brown ,441312456,A2,10h,1,1111
-Volunteer4,Sam ,Richards,446745891,A1,30h,1,1111
-Volunteer5,Amber,Robinson ,448967124,A2,17h,1,1111
+﻿Username,First Name,Last Name,Phone,CampID,Avability,Status,Password
+Volunteer1,Mike,Smith,441234567,A1,15h ,1,1111
+Volunteer2,Jane,Smith,449876543,A1,40h,1,1111
+Volunteer3,Meghan,Brown,441312456,A2,10h,1,1111
+Volunteer4,Sam,Richards,446745891,A1,30h,1,1111
+Volunteer5,Amber,Robinson,448967124,A2,17h,1,1111
 Volunteer6,Alex,Gold,445689541,A2,8h,1,1111
 Volunteer7,Henry,Vincent,445897352,A1,33h,1,1111
-Volunteer8,Jessica ,Vincent,442356789,A1,18h,1,1111
-Volunteer9,George ,Thompson ,445612345,A1,10h,1,1111
+Volunteer8,Jessica,Vincent,442356789,A1,18h,1,1111
+Volunteer9,George,Thompson,445612345,A1,10h,1,1111
 Volunteer10,Emily,Jones,445612346,A1,10h,1,1111
 Volunteer11,Sophie,Taylor,445612347,A1,10h,1,1111
 Volunteer12,William,Owen,445612348,A1,10h,1,1111
