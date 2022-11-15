@@ -55,36 +55,58 @@ class CentralFunctions():
         '''Reads the file and prints out the general list of families in a system with 
         some summary about them by sating the number of refugees, their mental and physical 
         state per each camp and gives information about each family that is assigned to certain camp'''
-        
-        pd.set_option('display.max_columns',15)
-        list_of_refugee = pd.read_excel('RefugeeList.xlsx')
+
+        # pd.set_option('display.max_columns', 15)
+        list_of_refugee = pd.read_csv('RefugeeList.csv')
         print(list_of_refugee)
+        list_of_camps= pd.read_csv('camplist.csv')
+        countries_camps = list_of_camps["Emergency ID"]
 
-        number_of_refugee = len(list_of_refugee)
-        print("Number or refugee: ", number_of_refugee)
+        print(countries_camps)
 
-        count_camps = list_of_refugee['Camp ID'].value_counts()
-        print("Number of families in each camp:")
-        print(count_camps)
-        count_camps.plot.bar()
-        plt.title(" Bar chart representing the number of families in each camp")
-        plt.xlabel("Camp name")
-        plt.ylabel("No.of families per camp")
-        plt.show()
+        choose_emergency = input("Choose emergency for which you want to see the summary:")
+        choose_emergency= choose_emergency.upper()
 
-        mental_state_count = list_of_refugee['Mental State'].value_counts()
-        print("Number of families for each mental state group:")
-        print(mental_state_count)
+        print("Choose 1 if you want to see the list of all refugees")
+        print("Choose 2 if you want to see the total number of refugees")
+        print("Choose 3 if you want to see the number of families in each camp")
+        print("Choose 4 if you want to see the summary of mental state of refugees")
+        print("Choose 5 if you want to see the summary of physical state of refugees")
+        print("Choose 6 if you want to see the summary for each camp")
+        print("Choose Quit if you want exit this summary")
 
-        physical_state_count = list_of_refugee['Physical State'].value_counts()
-        print("Number of families for each physical state group:")
-        print(physical_state_count)
+        user_input = input("Choose interaction: ")
+        if user_input == '1':
+            country_refugees = list_of_camps[list_of_camps["Emergency ID"] == choose_emergency]
+            print(country_refugees)
+        elif user_input == "2":
+            number_of_refugee = list_of_camps[list_of_camps["Emergency ID"] == choose_emergency]['Number of refugees']
+            # number_of_refugee = len(list_of_refugee)
+            print("Number or refugee: ", number_of_refugee)
+        elif user_input == "3":
+            count_camps = list_of_refugee['Camp ID'].value_counts()
+            print("Number of families in each camp:")
+            print(count_camps)
+                # count_camps.plot.bar()
+                # plt.title(" Bar chart representing the number of families in each camp")
+                # plt.xlabel("Camp name")
+                # plt.ylabel("No.of families per camp")
+                # plt.show()
+        elif user_input == "4":
+            mental_state_count = list_of_refugee['Mental State'].value_counts()
+            print("Number of families for each mental state group:")
+            print(mental_state_count)
+        elif user_input == "5":
+            physical_state_count = list_of_refugee['Physical State'].value_counts()
+            print("Number of families for each physical state group:")
+            print(physical_state_count)
+        elif user_input == "6":
+            group_camps = list_of_refugee.groupby('Camp ID')
+            for name, camp in group_camps:
+                print("Camp " + name + "->" + str(len(camp)) + " family/families")
+                print(camp)
 
-        group_camps = list_of_refugee.groupby('Camp ID')
-        for name,camp in group_camps:
-            print("Camp "+name + "->" + str(len(camp)) + " family/families")
-            print(camp)
-            print()
+
     def call_camps(self):
         '''
         Sounds fucking evil, we might need to change the name of the method XD
@@ -98,24 +120,24 @@ class CentralFunctions():
             >active camps (not closed)
             >closed camps
         '''
-        
-        list_of_camps=pd.read_excel("camplist.xlsx")
-        print("See camp list: \n",list_of_camps)
-        print("Number of camps: ",len(list_of_camps.index))
-        print("Number of volunteers per camp: \n",list_of_camps[list_of_camps.columns[7:9]])
-        print("Number of refugees per camp: \n", list_of_camps[list_of_camps.columns[6:8]])
-        column_headers = list(list_of_camps.columns.values)
-        print("Capacity by camp: \n",list_of_camps[[column_headers[7], column_headers[9]]])
-        print("Camps in each area: ")
-        print(list_of_camps[column_headers[3]].value_counts())
-
-
-        print("Active Camps: ",list_of_camps[column_headers[5]].isna().sum())
-        print("Closed Camps: ", list_of_camps[column_headers[5]].notna().sum())
-
-        list_of_camps[column_headers[1]].value_counts().plot(kind='bar')
-        plt.title("Emergency Tipes Counted")
-        plt.show()
+        #
+        # list_of_camps=pd.read_excel("camplist.xlsx")
+        # print("See camp list: \n",list_of_camps)
+        # print("Number of camps: ",len(list_of_camps.index))
+        # print("Number of volunteers per camp: \n",list_of_camps[list_of_camps.columns[7:9]])
+        # print("Number of refugees per camp: \n", list_of_camps[list_of_camps.columns[6:8]])
+        # column_headers = list(list_of_camps.columns.values)
+        # print("Capacity by camp: \n",list_of_camps[[column_headers[7], column_headers[9]]])
+        # print("Camps in each area: ")
+        # print(list_of_camps[column_headers[3]].value_counts())
+        #
+        #
+        # print("Active Camps: ",list_of_camps[column_headers[5]].isna().sum())
+        # print("Closed Camps: ", list_of_camps[column_headers[5]].notna().sum())
+        #
+        # list_of_camps[column_headers[1]].value_counts().plot(kind='bar')
+        # plt.title("Emergency Tipes Counted")
+        # plt.show()
 
 
 
