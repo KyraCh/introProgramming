@@ -4,6 +4,8 @@ class test():
     def __init__(self):
         self.user_data = None
         self.current_user = None
+        self.vol_data = None
+        self.camp_of_user = None
         
     def users_login(self):
         '''
@@ -28,24 +30,47 @@ class test():
             df.to_csv('user_database.csv')
             self.user_data = df
         except:
-            print("System couldn'd read your user data base file.")
+            print("System couldn't read your user database file.")
+        pass
+        
+        try:
+            df = pd.read_csv('VolounteersData.csv').set_index('Username')
+            #df['First name '] = df['First name '].astype(str)
+            vol_dict = df.to_dict(orient='index')
+            self.vol_data = df
+        except FileNotFoundError:
+            vol_dict = {'Username':[''],'First name':[''],'Second name':[''],'Camp ID':[''],'Avability':[''],'Status':['']}
+            df = pd.DataFrame(vol_dict)
+            df.set_index('Username', inplace=True)
+            df.to_csv('VolounteersData.csv')
+            self.vol_data = df
+        except:
+            print("System couldn't read your volunteer database file.")
         pass
         
         # interactive part which checks credentials of the person attempting to login
         while True:
             username = input('Please input your username: ')
-            if username not in df.index:
+            if username not in self.user_data.index:
                 print('Please input valid username')
                 continue
-            
             while True:
                 password = input('Please input your password: ')
                 if password == users_dict[username]['password']:
-                    print(f'Welcome back {username}!')
                     if username == 'admin':
                         self.current_user = "adm"
                     else:
                         self.current_user = 'vol'
+                        
+                    if self.current_user == 'adm':
+                        print(f'Welcome back {username}!')
+                        self.camp_of_user = 'adm'
+                        break
+                    else:
+                        a = vol_dict[username]['First name ']
+                        print(f'Welcome back {a}!')
+                        
+                    self.camp_of_user = vol_dict[username]['Camp ID']
                     break
                 else:
                     print('You entered incorrect password')
