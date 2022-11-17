@@ -229,7 +229,7 @@ class CentralFunctions():
             users_dict = df.to_dict(orient='index')
             self.user_data = df
         except FileNotFoundError:
-            users_dict = {'username':['admin'],'password':['111'],'role':['admin'],'activated':['TRUE']}
+            users_dict = {'username':['admin'],'password':['111'],'role':['admin'],'activated': ['TRUE']}
             df = pd.DataFrame(users_dict)
             df.set_index('username', inplace=True)
             df['password'] = df['password'].astype(str)
@@ -237,8 +237,6 @@ class CentralFunctions():
             self.user_data = df
         except:
             print("System couldn't read your user database file.")
-        pass
-        
         try:
             df = pd.read_csv('VolounteersData.csv').set_index('Username')
             vol_dict = df.to_dict(orient='index')
@@ -251,7 +249,7 @@ class CentralFunctions():
             self.vol_data = df
         except:
             print("System couldn't read your volunteer database file.")
-        pass
+
         
         # interactive part which checks credentials of the person attempting to login
         while True:
@@ -433,3 +431,6 @@ def execute():
     # call login method and methods made to check if there exists an emergency, then use logic to determine how to treat the admin and volunteers
     # depending on who the user is call relevant interaction method
     pass
+
+c = CentralFunctions()
+c.users_login()
