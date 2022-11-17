@@ -185,6 +185,7 @@ class CentralFunctions():
             df.set_index('username', inplace=True)
             df['password'] = df['password'].astype(str)
             df.to_csv('user_database.csv')
+            users_dict = df.to_dict(orient='index')
             self.user_data = df
         except:
             print("System couldn't read your user database file.")
@@ -199,6 +200,7 @@ class CentralFunctions():
             df = pd.DataFrame(vol_dict)
             df.set_index('Username', inplace=True)
             df.to_csv('VolounteersData.csv')
+            vol_dict = df.to_dict(orient='index')
             self.vol_data = df
         except:
             print("System couldn't read your volunteer database file.")
