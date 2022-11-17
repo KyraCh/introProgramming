@@ -155,7 +155,56 @@ class CentralFunctions():
         So we can use this method in the future for activating and deactivating volunteers in a curtailed form.
         It would be convinient to look at the list of volunteers when you type out a deletion command)
         '''
-        pass
+        on = True
+        camp_dict = {
+            '1': 'A1',
+            '2': 'A2',
+            '3': 'A3'
+        }
+        choose_action = input('''
+        Enter [1] to view all volunteer data
+        Enter [2] to see volunteer data by camp
+        Enter [3] to see total number of volunteers
+        Enter [4] to see number of volunteers by camp
+        Enter [5] to check if the volunteer exists
+        Enter here: ''')
+        data = pandas.read_csv('VolunteersData.csv')
+
+        if choose_action == '1':
+            print(f"\n{data}")
+        elif choose_action == '2':
+            while on:
+                choose_camp = input('Choose camp. [1] A1 [2] A2 [3] A3 : ')
+                try:
+                    print(data[data['CampID'] == camp_dict[choose_camp].title()])
+                    on = False
+                except KeyError:
+                    print('Invalid Camp. Try again. ')
+        elif choose_action == '3':
+            print(f"There are {len(data)} volunteers")
+        elif choose_action == '4':
+            while on:
+                choose_camp = input('Choose camp. [1] A1 [2] A2 [3] A3 : ')
+                try:
+                    lst1 = [item for item in data['CampID'] if item == camp_dict[choose_camp].title()]
+                    print(len(lst1))
+                    on = False
+                except KeyError:
+                    print('Invalid Camp. Try again. ')
+        elif choose_action == '5':
+            while on:
+                first_name = input('Enter First Name: ')
+                last_name = input('Enter Last Name: ')
+                if first_name in data['First Name']:
+                    print(data[(data['First Name'] == first_name.title()) & (data['Last Name'] == last_name.title())])
+                    on = False
+                else:
+                    print(f'There is no volunteer with the name {first_name} {last_name}')
+                    try_again = input('Would you like to try again? y/n : ')
+                    if try_again == 'y':
+                        on = True
+                    else:
+                        on = False
 
     def users_login(self):
         '''
