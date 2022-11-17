@@ -58,53 +58,56 @@ class CentralFunctions():
 
         # pd.set_option('display.max_columns', 15)
         list_of_refugee = pd.read_csv('RefugeeList.csv')
-        print(list_of_refugee)
+
         list_of_camps= pd.read_csv('camplist.csv')
         countries_camps = list_of_camps["Emergency ID"]
 
-        print(countries_camps)
+        print(*countries_camps,sep='\n')
 
         choose_emergency = input("Choose emergency for which you want to see the summary:")
         choose_emergency= choose_emergency.upper()
 
-        print("Choose 1 if you want to see the list of all refugees")
-        print("Choose 2 if you want to see the total number of refugees")
+        print("Choose 1 if you want to see the list of all refugees for all camps")
+        print("Choose 2 if you want to see the total number of refugees in chosen camp")
         print("Choose 3 if you want to see the number of families in each camp")
-        print("Choose 4 if you want to see the summary of mental state of refugees")
-        print("Choose 5 if you want to see the summary of physical state of refugees")
-        print("Choose 6 if you want to see the summary for each camp")
+        print("Choose 4 if you want to see the summary of mental state of refugees in chosen camp")
+        print("Choose 5 if you want to see the summary of physical state of refugees in chosen camp")
+        print("Choose 6 if you want to see the total summary for each camp")
         print("Choose Quit if you want exit this summary")
+        refugee_summary = True
 
-        user_input = input("Choose interaction: ")
-        if user_input == '1':
-            country_refugees = list_of_camps[list_of_camps["Emergency ID"] == choose_emergency]
-            print(country_refugees)
-        elif user_input == "2":
-            number_of_refugee = list_of_camps[list_of_camps["Emergency ID"] == choose_emergency]['Number of refugees']
-            # number_of_refugee = len(list_of_refugee)
-            print("Number or refugee: ", number_of_refugee)
-        elif user_input == "3":
-            count_camps = list_of_refugee['Camp ID'].value_counts()
-            print("Number of families in each camp:")
-            print(count_camps)
-                # count_camps.plot.bar()
-                # plt.title(" Bar chart representing the number of families in each camp")
-                # plt.xlabel("Camp name")
-                # plt.ylabel("No.of families per camp")
-                # plt.show()
-        elif user_input == "4":
-            mental_state_count = list_of_refugee['Mental State'].value_counts()
-            print("Number of families for each mental state group:")
-            print(mental_state_count)
-        elif user_input == "5":
-            physical_state_count = list_of_refugee['Physical State'].value_counts()
-            print("Number of families for each physical state group:")
-            print(physical_state_count)
-        elif user_input == "6":
-            group_camps = list_of_refugee.groupby('Camp ID')
-            for name, camp in group_camps:
-                print("Camp " + name + "->" + str(len(camp)) + " family/families")
-                print(camp)
+        while refugee_summary:
+
+            user_input = input("Choose interaction: ")
+            if user_input == '1':
+                country_refugees = list_of_camps[list_of_camps["Emergency ID"] == choose_emergency]
+                print(country_refugees)
+            elif user_input == "2":
+                number_of_refugee = list_of_camps[list_of_camps["Emergency ID"] == choose_emergency]['Number of refugees']
+                print("Number of refugee in {}: ".format(choose_emergency), *number_of_refugee, sep='\n')
+            elif user_input == "3":
+                camp_id = list_of_camps[list_of_camps["Emergency ID"] == choose_emergency]['Camp ID'].values[0]
+                count_camps = list_of_refugee[list_of_refugee["Camp ID"] ==camp_id]['Camp ID'].value_counts()
+                print("Number of families for camp{}:".format(choose_emergency))
+                print(*count_camps, sep='\n')
+            elif user_input == "4":
+                camp_id = list_of_camps[list_of_camps["Emergency ID"] == choose_emergency]['Camp ID'].values[0]
+                mental = list_of_refugee[list_of_refugee["Camp ID"] ==camp_id]["Mental State"].value_counts()
+                print("Number of families for each mental state group in camp {}:".format(choose_emergency))
+                print(mental.to_string())
+            elif user_input == "5":
+                camp_id = list_of_camps[list_of_camps["Emergency ID"] == choose_emergency]['Camp ID'].values[0]
+                physical_state_count = list_of_refugee[list_of_refugee["Camp ID"] ==camp_id]["Physical State"].value_counts()
+                print("Number of families for each physical state group in camp {}:".format(choose_emergency))
+                print(physical_state_count.to_string())
+            elif user_input == "6":
+                camp_id = list_of_camps[list_of_camps["Emergency ID"] == choose_emergency]['Camp ID'].values[0]
+                group_camps = list_of_refugee[list_of_refugee["Camp ID"] ==camp_id].groupby("Camp ID")
+                for name, camp in group_camps:
+                    print("Camp " + name + "->" + str(len(camp)) + " family/families")
+                    print(camp)
+            else:
+                break
 
 
     def call_camps(self):
