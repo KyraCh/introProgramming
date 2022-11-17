@@ -4,7 +4,6 @@
 # Docstring aren't serious docstrings but rough estimates of what certain method/class is all about
 # Comments set my immediate ideas on how to implement
 import pandas as pd
-import openpyxl
 import matplotlib.pyplot as plt
 import numpy as np
 
@@ -85,6 +84,7 @@ class CentralFunctions():
             print("Camp "+name + "->" + str(len(camp)) + " family/families")
             print(camp)
             print()
+        
     def call_camps(self):
         '''
         Sounds fucking evil, we might need to change the name of the method XD
@@ -116,8 +116,6 @@ class CentralFunctions():
         list_of_camps[column_headers[1]].value_counts().plot(kind='bar')
         plt.title("Emergency Tipes Counted")
         plt.show()
-
-
 
     def call_volunteers(self):
         '''
@@ -301,7 +299,3 @@ def execute():
     # call login method and methods made to check if there exists an emergency, then use logic to determine how to treat the admin and volunteers
     # depending on who the user is call relevant interaction method
     pass
-
-c = CentralFunctions()
-c.call_no_of_refugees()
-c.call_camps()
