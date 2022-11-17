@@ -28,7 +28,6 @@ class CentralFunctions():
         self.vol_data = None
         self.camp_of_user = None
         self.read_all_data()
-        self.functions()
         self.list_of_refugee = pd.read_csv('RefugeeList.csv')
         pass
     
@@ -168,10 +167,10 @@ class CentralFunctions():
         Enter [4] to see number of volunteers by camp
         Enter [5] to check if the volunteer exists
         Enter here: ''')
-        data = pandas.read_csv('VolunteersData.csv')
+        data = pd.read_csv('VolunteersData.csv')
 
         if choose_action == '1':
-            print(f"\n{data}")
+            print(f"\n{self.vol_data}")
         elif choose_action == '2':
             while on:
                 choose_camp = input('Choose camp. [1] A1 [2] A2 [3] A3 : ')
@@ -433,4 +432,5 @@ def execute():
     pass
 
 c = CentralFunctions()
-c.users_login()
+# c.users_login()
+c = c.call_volunteers()
