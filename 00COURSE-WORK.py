@@ -159,10 +159,17 @@ class CentralFunctions():
 
     def users_login(self):
         '''
-        Reads (or if first time logging in creates) users_dataframe.csv.
+        Reads (or, if first time logging-in, creates) users_dataframe.csv.
+        Reads (or, if first time logging-in, creates) VolounteersData.csv.
+        
         Creates self.user_data DataFrame. # when admin wants to call all details of all users they'd use this
+        Creates self.vol_data DataFrame which contains info on all volunteers.
+        
         Asks the user to input the login and password credentials.
+        
         Upon successful login will set global parameter self.current_user as either 'adm' or 'vol'.
+        Upon successful login will set global parameter self.camp_of_user to either the camp of user in case
+        a volunteer logged in or 'adm' in case admin logged in.
         
         (IMPORTANT: considers existence of only one admin username)
         '''
@@ -185,7 +192,6 @@ class CentralFunctions():
         
         try:
             df = pd.read_csv('VolounteersData.csv').set_index('Username')
-            #df['First name '] = df['First name '].astype(str)
             vol_dict = df.to_dict(orient='index')
             self.vol_data = df
         except FileNotFoundError:
