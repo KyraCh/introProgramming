@@ -28,6 +28,7 @@ class test():
             df.set_index('username', inplace=True)
             df['password'] = df['password'].astype(str)
             df.to_csv('user_database.csv')
+            users_dict = df.to_dict(orient='index')
             self.user_data = df
         except:
             print("System couldn't read your user database file.")
