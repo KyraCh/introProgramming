@@ -27,6 +27,7 @@ class CentralFunctions():
         self.current_user = None
         self.read_all_data()
         self.functions()
+        self.list_of_refugee = pd.read_csv('RefugeeList.csv')
         pass
     
     def read_all_data(self):
@@ -57,7 +58,7 @@ class CentralFunctions():
         state per each camp and gives information about each family that is assigned to certain camp'''
 
         # pd.set_option('display.max_columns', 15)
-        list_of_refugee = pd.read_csv('RefugeeList.csv')
+
 
         list_of_camps= pd.read_csv('camplist.csv')
         countries_camps = list_of_camps["Emergency ID"]
@@ -87,22 +88,22 @@ class CentralFunctions():
                 print("Number of refugee in {}: ".format(choose_emergency), *number_of_refugee, sep='\n')
             elif user_input == "3":
                 camp_id = list_of_camps[list_of_camps["Emergency ID"] == choose_emergency]['Camp ID'].values[0]
-                count_camps = list_of_refugee[list_of_refugee["Camp ID"] ==camp_id]['Camp ID'].value_counts()
-                print("Number of families for camp{}:".format(choose_emergency))
+                count_camps = self.list_of_refugee[self.list_of_refugee["Camp ID"] ==camp_id]['Camp ID'].value_counts()
+                print("Number of families for camp {}:".format(choose_emergency))
                 print(*count_camps, sep='\n')
             elif user_input == "4":
                 camp_id = list_of_camps[list_of_camps["Emergency ID"] == choose_emergency]['Camp ID'].values[0]
-                mental = list_of_refugee[list_of_refugee["Camp ID"] ==camp_id]["Mental State"].value_counts()
+                mental = self.list_of_refugee[self.list_of_refugee["Camp ID"] ==camp_id]["Mental State"].value_counts()
                 print("Number of families for each mental state group in camp {}:".format(choose_emergency))
                 print(mental.to_string())
             elif user_input == "5":
                 camp_id = list_of_camps[list_of_camps["Emergency ID"] == choose_emergency]['Camp ID'].values[0]
-                physical_state_count = list_of_refugee[list_of_refugee["Camp ID"] ==camp_id]["Physical State"].value_counts()
+                physical_state_count = self.list_of_refugee[self.list_of_refugee["Camp ID"] ==camp_id]["Physical State"].value_counts()
                 print("Number of families for each physical state group in camp {}:".format(choose_emergency))
                 print(physical_state_count.to_string())
             elif user_input == "6":
                 camp_id = list_of_camps[list_of_camps["Emergency ID"] == choose_emergency]['Camp ID'].values[0]
-                group_camps = list_of_refugee[list_of_refugee["Camp ID"] ==camp_id].groupby("Camp ID")
+                group_camps = self.list_of_refugee[self.list_of_refugee["Camp ID"] ==camp_id].groupby("Camp ID")
                 for name, camp in group_camps:
                     print("Camp " + name + "->" + str(len(camp)) + " family/families")
                     print(camp)
