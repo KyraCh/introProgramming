@@ -116,33 +116,58 @@ class CentralFunctions():
         '''
         Sounds fucking evil, we might need to change the name of the method XD
         Reads the .csv file with camps and returns relevant data.
+            > camp list
             > How many camps
+            > How many volunteers in each camp
             > How many refugees in each
             > Each camp's capacity
-            > How many volunteers in each camp
-            >bar plot emergency type
             >count camps in each area
             >active camps (not closed)
             >closed camps
+            >bar plot emergency type
         # '''
 
-        list_of_camps=pd.read_excel("camplist.xlsx")
-        print("See camp list: \n",list_of_camps)
-        print("Number of camps: ",len(list_of_camps.index))
-        print("Number of volunteers per camp: \n",list_of_camps[list_of_camps.columns[7:9]])
-        print("Number of refugees per camp: \n", list_of_camps[list_of_camps.columns[6:8]])
+        list_of_camps=pd.read_csv("camplist.csv")
         column_headers = list(list_of_camps.columns.values)
-        print("Capacity by camp: \n",list_of_camps[[column_headers[7], column_headers[9]]])
-        print("Camps in each area: ")
-        print(list_of_camps[column_headers[3]].value_counts())
 
+        print("Choose 1 if you want to see the list of all camps")
+        print("Choose 2 if you want to see the total number of camps")
+        print("Choose 3 if you want to see the number of volunteers in each camp")
+        print("Choose 4 if you want to see the number of refugees in each camp")
+        print("Choose 5 if you want to see the capacity by camp")
+        print("Choose 6 if you want to see the number of camps in each area")
+        print("Choose 7 if you want to see the number of active camps")
+        print("Choose 8 if you want to see the number of inactive camps")
+        print("Choose 9 if you want to see the number of camps by emergency type")
+        print("Choose Quit if you want exit this summary")
+        camp_summary = True
 
-        print("Active Camps: ",list_of_camps[column_headers[5]].isna().sum())
-        print("Closed Camps: ", list_of_camps[column_headers[5]].notna().sum())
+        while camp_summary:
 
-        list_of_camps[column_headers[1]].value_counts().plot(kind='bar')
-        plt.title("Emergency Tipes Counted")
-        plt.show()
+            user_input = input("Choose interaction: ")
+            if user_input == '1':
+                print("See camp list: \n", list_of_camps)
+            elif user_input == "2":
+                print("Number of camps: ", len(list_of_camps.index))
+            elif user_input == "3":
+                print("Number of volunteers per camp: \n", list_of_camps[list_of_camps.columns[7:9]])
+            elif user_input == "4":
+                print("Number of refugees per camp: \n", list_of_camps[list_of_camps.columns[6:8]])
+            elif user_input == "5":
+                print("Capacity by camp: \n", list_of_camps[[column_headers[7], column_headers[9]]])
+            elif user_input == "6":
+                print("Camps in each area: ")
+                print(list_of_camps[column_headers[3]].value_counts())
+            elif user_input=="7":
+                print("Active Camps: ", list_of_camps[column_headers[5]].isna().sum())
+            elif user_input=="8":
+                print("Closed Camps: ", list_of_camps[column_headers[5]].notna().sum())
+            elif user_input=="9":
+                list_of_camps[column_headers[1]].value_counts().plot(kind='bar')
+                plt.title("Emergency Tipes Counted")
+                plt.show()
+            else:
+                break
 
     def call_volunteers(self):
         '''
@@ -385,4 +410,3 @@ def execute():
     # employ a while loop to keep the program running
     # call login method and methods made to check if there exists an emergency, then use logic to determine how to treat the admin and volunteers
     # depending on who the user is call relevant interaction method
-    pass
