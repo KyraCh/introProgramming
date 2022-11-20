@@ -7,6 +7,13 @@ import pandas as pd
 import matplotlib.pyplot as plt
 import numpy as np
 
+# define Python user-defined exceptions
+class Error(Exception):
+    """Base class for other exceptions"""
+    pass
+class CapacityTooSmall(Error):
+    """Raised when the capacity input value is smaller than ref+vol"""
+    pass
 
 class CentralFunctions():
     
@@ -38,7 +45,7 @@ class CentralFunctions():
         Reads all .csv files into local pandas dataframes upon the start of the program, so we don't have to read and write on the files
         directly a million times.
         '''
-        pass
+
     
     def save(self, file=None):
         '''
@@ -127,7 +134,8 @@ class CentralFunctions():
             >bar plot emergency type
         # '''
 
-        list_of_camps=pd.read_csv("camplist.csv")
+        list_of_camps = pd.read_csv("camplist.csv")
+
         column_headers = list(list_of_camps.columns.values)
 
         print("Choose 1 if you want to see the list of all camps")
@@ -168,6 +176,57 @@ class CentralFunctions():
                 plt.show()
             else:
                 break
+    def amend_camps(self):
+        '''
+        >choose camp
+        >add capacity
+        >delete capacity
+        >
+        '''
+        list_of_camps = pd.read_csv("camplist.csv")
+        camps = list_of_camps["Emergency ID"]
+
+        print(*camps, sep='\n')
+
+        choose_emergency = input("Choose emergency for which you want to edit:")
+        choose_emergency = choose_emergency.upper()
+
+        print(list_of_camps[list_of_camps["Emergency ID"] == choose_emergency])
+
+        camp_amend = True
+
+        while camp_amend:
+            print("Choose 1 if you want to modify capacity")
+            print("Choose BACK if you want to change camp")
+            print("Choose Quit if you want exit")
+
+            user_input = input("Choose interaction: ")
+            if user_input == '1':
+                while True:
+                    try:
+                        cap=int(input("State new capacity: "))
+                        ind = list_of_camps[list_of_camps["Emergency ID"] == choose_emergency].index.values
+                        if cap < int(list_of_camps[list_of_camps["Emergency ID"] == choose_emergency]["Number of refugees"]):
+                            raise CapacityTooSmall
+                        break
+                    except CapacityTooSmall:
+                        print("Capacity is smaller than the number of refugees, try again!")
+
+                ind = list_of_camps[list_of_camps["Emergency ID"] == choose_emergency].index.values
+                list_of_camps.loc[ind[0], ['Capacity']] =cap
+                print(list_of_camps[list_of_camps["Emergency ID"] == choose_emergency])
+                # writing into the file
+                list_of_camps.to_csv("camplist.csv", index=False)
+            elif user_input=="BACK":
+                print(*camps, sep='\n')
+
+                choose_emergency = input("Choose emergency for which you want to edit:")
+                choose_emergency = choose_emergency.upper()
+                print(list_of_camps[list_of_camps["Emergency ID"] == choose_emergency])
+            else:
+                break
+
+
 
     def call_volunteers(self):
         '''
