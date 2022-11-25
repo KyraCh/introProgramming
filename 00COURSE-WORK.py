@@ -530,9 +530,54 @@ class volunteer(CentralFunctions):
 
     def create_profile(self, name, no_of_relatives, medical_needs, camp): # no interaction
         '''
-        Write into the refugee dataframe to add refugees family
+        Interactive method which allows to add new family to the list
         '''
-        pass
+
+        try:
+            df = pd.read_csv('RefugeeList.csv')
+            list_of_refugee = df.to_dict(orient='index')
+            self.list_of_refugee = df
+        except FileNotFoundError:
+                family_data = [['name','surname',f'{self.camp_of_user}', 'mental_state', 'physical_state','no_of_members']]
+                df = pd.DataFrame(family_data, columns= ['Lead Family Member Name', 'Lead Family Member Surname','Camp ID','Mental State','Physical State','No. Of Family Members'])
+                df.to_csv('RefugeeList.csv')
+        except:
+            print("System couldn't read your refugee database file.")
+            pass
+
+        while True:
+            name = input("State name of family's lead member: ")
+            surname = input("State surname of the family: ")
+            if name.isdigit() or surname.isdigit():
+                print("You can't use number for this input. Try again ")
+            else:
+                break
+
+        mental_state = input("Describe the mental state of the family: ")
+        physical_state = input("Describe the physical state of the family: ")
+
+        while True:
+            try:
+                no_of_members = int(input("Type the number of family members: "))
+                break
+            except ValueError:
+                print("It has to be an integer")
+        campID = self.camp_of_user
+        count_camps = self.list_of_refugee[self.list_of_refugee["Camp ID"] == campID]['Camp ID'].value_counts().values[0]
+        family_id = str(count_camps + 1)+campID
+        family_data = {
+                    'Family ID': [family_id],
+                    'Lead Family Member Name': [name],
+                    'Lead Family Member Surname': [surname],
+                    'Camp ID': [campID],
+                    'Mental State': [mental_state],
+                    'Physical State': [physical_state],
+                    'No. Of Family Members': [no_of_members]
+        }
+        df = pd.DataFrame(family_data)
+        df.to_csv('RefugeeList.csv', mode='a', index = False, header = False)
+        print(df.tail())
+
 
     def vol_interaction(self):
         '''
