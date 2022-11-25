@@ -36,7 +36,7 @@ class CentralFunctions():
         self.camp_of_user = None
         self.read_all_data()
         self.functions()
-        self.list_of_refugee = pd.read_csv('RefugeeList.csv')
+        self.list_of_refugee = None
         pass
     
     def read_all_data(self):
@@ -68,50 +68,70 @@ class CentralFunctions():
 
         # pd.set_option('display.max_columns', 15)
 
-
-        list_of_camps= pd.read_csv('camplist.csv')
-        countries_camps = list_of_camps["Emergency ID"]
-
-        print(*countries_camps,sep='\n')
+  # pd.set_option('display.max_columns', 15)
+        try:
+            df = pd.read_csv('RefugeeList.csv')
+            list_of_refugee = df.to_dict(orient='index')
+            self.list_of_refugee = df
+            # list_of_camps= pd.read_csv('camplist.csv')
+            # countries_camps = list_of_camps["Emergency ID"]
+            # print(*countries_camps,sep='\n')
+        except FileNotFoundError:
+            list_of_refugee = {'Family ID':[''],'Lead Family Member Name':[''],'Lead Family Member Surname':[''],'Camp ID':[''],'Mental State':[''],'Physical State':[''],'No. Of Family Members':['']}
+            df = pd.DataFrame(list_of_refugee)
+            df.set_index('Family ID', inplace=True)
+            df.to_csv('RefugeeList.csv')
+            list_of_refugee = df.to_dict(orient='index')
+            self.list_of_refugee = df
+        try:
+            df = pd.read_csv('camplist.csv')
+            # list_of_camps = df.to_dict(orient='index')
+            self.list_of_camps = df
+            countries_camps = self.list_of_camps["Emergency ID"]
+            print(*countries_camps,sep='\n')
+        except FileNotFoundError:
+            list_of_camps = {'Emergency ID':[''],'Type of emergency':[''],'Description':[''],'Location':[''],'Start date':[''],'Close date':[''],'Number of refugees':[''],'Camp ID':[''],'No Of Volounteers':[''],'Capacity':['']}
+            df = pd.DataFrame(list_of_camps)
+            df.set_index('Emergency ID', inplace=True)
+            df.to_csv('camplist.csv')
+            list_of_camps = df.to_dict(orient='index')
+            self.list_of_camps = df
 
         choose_emergency = input("Choose emergency for which you want to see the summary:")
         choose_emergency= choose_emergency.upper()
 
-        print("Choose 1 if you want to see the list of all refugees for all camps")
-        print("Choose 2 if you want to see the total number of refugees in chosen camp")
-        print("Choose 3 if you want to see the number of families in each camp")
-        print("Choose 4 if you want to see the summary of mental state of refugees in chosen camp")
-        print("Choose 5 if you want to see the summary of physical state of refugees in chosen camp")
-        print("Choose 6 if you want to see the total summary for each camp")
-        print("Choose Quit if you want exit this summary")
-        refugee_summary = True
-
-        while refugee_summary:
-
+        while True:
+            print("Choose 1 if you want to see the list of all refugees for all camps")
+            print("Choose 2 if you want to see the total number of refugees in chosen camp")
+            print("Choose 3 if you want to see the number of families in each camp")
+            print("Choose 4 if you want to see the summary of mental state of refugees in chosen camp")
+            print("Choose 5 if you want to see the summary of physical state of refugees in chosen camp")
+            print("Choose 6 if you want to see the total summary for each camp")
+            print("Choose Quit if you want exit this summary")
             user_input = input("Choose interaction: ")
             if user_input == '1':
-                country_refugees = list_of_camps[list_of_camps["Emergency ID"] == choose_emergency]
+                country_refugees = self.list_of_camps[self.list_of_camps["Emergency ID"] == choose_emergency]
                 print(country_refugees)
             elif user_input == "2":
-                number_of_refugee = list_of_camps[list_of_camps["Emergency ID"] == choose_emergency]['Number of refugees']
+                number_of_refugee = self.list_of_camps[self.list_of_camps["Emergency ID"] == choose_emergency]['Number of refugees']
                 print("Number of refugee in {}: ".format(choose_emergency), *number_of_refugee, sep='\n')
             elif user_input == "3":
-                camp_id = list_of_camps[list_of_camps["Emergency ID"] == choose_emergency]['Camp ID'].values[0]
+                camp_id = self.list_of_camps[self.list_of_camps["Emergency ID"] == choose_emergency]['Camp ID'].values[0]
                 count_camps = self.list_of_refugee[self.list_of_refugee["Camp ID"] ==camp_id]['Camp ID'].value_counts()
                 print("Number of families for camp {}:".format(choose_emergency))
                 print(*count_camps, sep='\n')
             elif user_input == "4":
-                camp_id = list_of_camps[list_of_camps["Emergency ID"] == choose_emergency]['Camp ID'].values[0]
+                camp_id = self.list_of_camps[self.list_of_camps["Emergency ID"] == choose_emergency]['Camp ID'].values[0]
                 mental = self.list_of_refugee[self.list_of_refugee["Camp ID"] ==camp_id]["Mental State"].value_counts()
                 print("Number of families for each mental state group in camp {}:".format(choose_emergency))
                 print(mental.to_string())
             elif user_input == "5":
-                camp_id = list_of_camps[list_of_camps["Emergency ID"] == choose_emergency]['Camp ID'].values[0]
+                camp_id = self.list_of_camps[self.list_of_camps["Emergency ID"] == choose_emergency]['Camp ID'].values[0]
                 physical_state_count = self.list_of_refugee[self.list_of_refugee["Camp ID"] ==camp_id]["Physical State"].value_counts()
                 print("Number of families for each physical state group in camp {}:".format(choose_emergency))
                 print(physical_state_count.to_string())
             elif user_input == "6":
-                camp_id = list_of_camps[list_of_camps["Emergency ID"] == choose_emergency]['Camp ID'].values[0]
+                camp_id = self.list_of_camps[self.list_of_camps["Emergency ID"] == choose_emergency]['Camp ID'].values[0]
                 group_camps = self.list_of_refugee[self.list_of_refugee["Camp ID"] ==camp_id].groupby("Camp ID")
                 for name, camp in group_camps:
                     print("Camp " + name + "->" + str(len(camp)) + " family/families")
