@@ -6,13 +6,18 @@ class test():
     
     def __init__(self):
         self.list_of_refugee = pd.read_csv('RefugeeList.csv')
+        self.current_user = 'vol'
+        self.camp_of_user = 'A1'
+
+        self.vol_data = pd.read_csv('VolounteersData.csv').set_index('Username')
         
     def amend_refugee_profile(self):
         '''
         Interactive method which allows one to amend information about a refugee.
         '''
         list_of_refugees = self.list_of_refugee.copy()
-        
+        vol_dict = self.vol_data.to_dict(orient='index')
+
         print('AMEND REFUGEE PROFILE')
         print('-'*25)
         print("Type 'q' to quit the process at any moment (progress won't be saved)")
@@ -24,6 +29,10 @@ class test():
             if iD not in list(list_of_refugees['Family ID']):
                 print('Please enter valid Family ID')
                 continue
+            if self.current_user == 'vol':
+                if iD[-2:] != self.camp_of_user:
+                    print('Please choose a refugee from your camp')
+                    continue     
             print('\n')
             print('-'*25)
             print(f'Please Choose which values you would like to ammend for family {iD}.')
@@ -67,6 +76,7 @@ class test():
                     else:
                         list_of_refugees.at[list_of_refugees.index[list_of_refugees['Family ID'] == iD][0],'Family ID'] = '1' + change
                         iD = '1' + change
+                            
                 list_of_refugees.at[list_of_refugees.index[list_of_refugees['Family ID'] == iD][0],list_of_refugees.columns[i]]=change
             
             if change == 'q':
@@ -77,6 +87,8 @@ class test():
             
             if input('\nCommit changes? y/n ') == 'n':
                 continue
+            else:
+                list_of_refugees.to_csv('RefugeeList.csv')
             
             self.list_of_refugee = list_of_refugees
             break

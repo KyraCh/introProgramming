@@ -69,7 +69,10 @@ class test():
                         break
                     else:
                         a = vol_dict[username]['First name ']
-                        print(f'Welcome back {a}!')
+                        if a == '':
+                            print('Welcome to the volunteer manu! Please ensure to add your name to our records!')
+                        else:
+                            print(f'Welcome back {a}!')
                         
                     self.camp_of_user = vol_dict[username]['Camp ID']
                     break
