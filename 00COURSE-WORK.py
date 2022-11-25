@@ -7,6 +7,13 @@ import pandas as pd
 import matplotlib.pyplot as plt
 import numpy as np
 
+# define Python user-defined exceptions
+class Error(Exception):
+    """Base class for other exceptions"""
+    pass
+class CapacityTooSmall(Error):
+    """Raised when the capacity input value is smaller than ref+vol"""
+    pass
 
 class CentralFunctions():
     
@@ -39,7 +46,7 @@ class CentralFunctions():
         Reads all .csv files into local pandas dataframes upon the start of the program, so we don't have to read and write on the files
         directly a million times.
         '''
-        pass
+
     
     def save(self, file=None):
         '''
@@ -135,15 +142,109 @@ class CentralFunctions():
         '''
         Sounds fucking evil, we might need to change the name of the method XD
         Reads the .csv file with camps and returns relevant data.
+            > camp list
             > How many camps
+            > How many volunteers in each camp
             > How many refugees in each
             > Each camp's capacity
-            > How many volunteers in each camp
-            >bar plot emergency type
             >count camps in each area
             >active camps (not closed)
             >closed camps
+            >bar plot emergency type
         # '''
+        list_of_camps = pd.read_csv("camplist.csv")
+
+        column_headers = list(list_of_camps.columns.values)
+
+        print("Choose 1 if you want to see the list of all camps")
+        print("Choose 2 if you want to see the total number of camps")
+        print("Choose 3 if you want to see the number of volunteers in each camp")
+        print("Choose 4 if you want to see the number of refugees in each camp")
+        print("Choose 5 if you want to see the capacity by camp")
+        print("Choose 6 if you want to see the number of camps in each area")
+        print("Choose 7 if you want to see the number of active camps")
+        print("Choose 8 if you want to see the number of inactive camps")
+        print("Choose 9 if you want to see the number of camps by emergency type")
+        print("Choose Quit if you want exit this summary")
+        camp_summary = True
+
+        while camp_summary:
+
+            user_input = input("Choose interaction: ")
+            if user_input == '1':
+                print("See camp list: \n", list_of_camps)
+            elif user_input == "2":
+                print("Number of camps: ", len(list_of_camps.index))
+            elif user_input == "3":
+                print("Number of volunteers per camp: \n", list_of_camps[list_of_camps.columns[7:9]])
+            elif user_input == "4":
+                print("Number of refugees per camp: \n", list_of_camps[list_of_camps.columns[6:8]])
+            elif user_input == "5":
+                print("Capacity by camp: \n", list_of_camps[[column_headers[7], column_headers[9]]])
+            elif user_input == "6":
+                print("Camps in each area: ")
+                print(list_of_camps[column_headers[3]].value_counts())
+            elif user_input=="7":
+                print("Active Camps: ", list_of_camps[column_headers[5]].isna().sum())
+            elif user_input=="8":
+                print("Closed Camps: ", list_of_camps[column_headers[5]].notna().sum())
+            elif user_input=="9":
+                list_of_camps[column_headers[1]].value_counts().plot(kind='bar')
+                plt.title("Emergency Tipes Counted")
+                plt.show()
+            else:
+                break
+    def amend_camps(self):
+        '''
+        >choose camp
+        >add capacity
+        >delete capacity
+        >
+        '''
+        list_of_camps = pd.read_csv("camplist.csv")
+        camps = list_of_camps["Emergency ID"]
+
+        print(*camps, sep='\n')
+
+        choose_emergency = input("Choose emergency for which you want to edit:")
+        choose_emergency = choose_emergency.upper()
+
+        print(list_of_camps[list_of_camps["Emergency ID"] == choose_emergency])
+
+        camp_amend = True
+
+        while camp_amend:
+            print("Choose 1 if you want to modify capacity")
+            print("Choose BACK if you want to change camp")
+            print("Choose Quit if you want exit")
+
+            user_input = input("Choose interaction: ")
+            if user_input == '1':
+                while True:
+                    try:
+                        cap=int(input("State new capacity: "))
+                        ind = list_of_camps[list_of_camps["Emergency ID"] == choose_emergency].index.values
+                        if cap < int(list_of_camps[list_of_camps["Emergency ID"] == choose_emergency]["Number of refugees"]):
+                            raise CapacityTooSmall
+                        break
+                    except CapacityTooSmall:
+                        print("Capacity is smaller than the number of refugees, try again!")
+
+                ind = list_of_camps[list_of_camps["Emergency ID"] == choose_emergency].index.values
+                list_of_camps.loc[ind[0], ['Capacity']] =cap
+                print(list_of_camps[list_of_camps["Emergency ID"] == choose_emergency])
+                # writing into the file
+                list_of_camps.to_csv("camplist.csv", index=False)
+            elif user_input=="BACK":
+                print(*camps, sep='\n')
+
+                choose_emergency = input("Choose emergency for which you want to edit:")
+                choose_emergency = choose_emergency.upper()
+                print(list_of_camps[list_of_camps["Emergency ID"] == choose_emergency])
+            else:
+                break
+
+
 
         # list_of_camps=pd.read_excel("camplist.xlsx")
         # print("See camp list: \n",list_of_camps)
@@ -162,6 +263,7 @@ class CentralFunctions():
         # list_of_camps[column_headers[1]].value_counts().plot(kind='bar')
         # plt.title("Emergency Tipes Counted")
         # plt.show()
+
 
     def call_volunteers(self):
         '''
@@ -452,6 +554,8 @@ def execute():
     '''
     # employ a while loop to keep the program running
     # call login method and methods made to check if there exists an emergency, then use logic to determine how to treat the admin and volunteers
+
+    # depending on who the user is call relevant interaction method
     # depending on who the user is call relevant interaction method
     pass
 c = CentralFunctions()
@@ -461,3 +565,4 @@ v = volunteer()
 # volunteer.create_profile(input("State name of family's lead member: "),input("State surname of the family: "),input("Choose from 'bad' and 'good' to describe the mental state of the family: "),input("Choose from 'bad' and 'good' to describe the physical state of the family: "))
 v.users_login()
 v.create_profile()
+
