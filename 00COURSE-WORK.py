@@ -385,7 +385,7 @@ class volunteer(CentralFunctions):
 
     def create_profile(self): # no interaction
         '''
-        Write into the refugee dataframe to add refugees family
+        Interactive method which allows to add new family to the list
         '''
 
         try:
@@ -407,18 +407,10 @@ class volunteer(CentralFunctions):
                 print("You can't use number for this input. Try again ")
             else:
                 break
-        while True:
-            mental_state = input("Choose from 'bad' and 'good' to describe the mental state of the family: ")
-            if mental_state != 'Good' and mental_state != 'Bad':
-                print("Invalid description for mental state")
-            else:
-                break
-        while True:
-            physical_state = input("Choose from 'bad' and 'good' to describe the physical state of the family: ")
-            if physical_state != 'Good' and physical_state != 'Bad':
-                print("Invalid description for physical state")
-            else:
-                break
+
+        mental_state = input("Describe the mental state of the family: ")
+        physical_state = input("Describe the physical state of the family: ")
+
         while True:
             try:
                 no_of_members = int(input("Type the number of family members: "))
@@ -438,11 +430,12 @@ class volunteer(CentralFunctions):
                     'No. Of Family Members': [no_of_members]
         }
         df = pd.DataFrame(family_data)
+        df.to_csv('RefugeeList.csv', mode='a', index = False, header = False)
         print(df.tail())
 
 
 
-        # df.to_csv('RefugeeList.csv', mode='a', index = False, header = False)
+
 
     def vol_interaction(self):
         '''
