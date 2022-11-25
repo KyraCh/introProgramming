@@ -36,7 +36,8 @@ class CentralFunctions():
         self.camp_of_user = None
         self.read_all_data()
         self.functions()
-        self.list_of_refugee = pd.read_csv('RefugeeList.csv')
+        self.list_of_refugee = None
+        self.list_of_camps = None
         pass
     
     def read_all_data(self):
@@ -67,51 +68,69 @@ class CentralFunctions():
         state per each camp and gives information about each family that is assigned to certain camp'''
 
         # pd.set_option('display.max_columns', 15)
-
-
-        list_of_camps= pd.read_csv('camplist.csv')
-        countries_camps = list_of_camps["Emergency ID"]
-
-        print(*countries_camps,sep='\n')
+        try:
+            df = pd.read_csv('RefugeeList.csv')
+            list_of_refugee = df.to_dict(orient='index')
+            self.list_of_refugee = df
+            # list_of_camps= pd.read_csv('camplist.csv')
+            # countries_camps = list_of_camps["Emergency ID"]
+            # print(*countries_camps,sep='\n')
+        except FileNotFoundError:
+            list_of_refugee = {'Family ID':[''],'Lead Family Member Name':[''],'Lead Family Member Surname':[''],'Camp ID':[''],'Mental State':[''],'Physical State':[''],'No. Of Family Members':['']}
+            df = pd.DataFrame(list_of_refugee)
+            df.set_index('Family ID', inplace=True)
+            df.to_csv('RefugeeList.csv')
+            list_of_refugee = df.to_dict(orient='index')
+            self.list_of_refugee = df
+        try:
+            df = pd.read_csv('camplist.csv')
+            # list_of_camps = df.to_dict(orient='index')
+            self.list_of_camps = df
+            countries_camps = self.list_of_camps["Emergency ID"]
+            print(*countries_camps,sep='\n')
+        except FileNotFoundError:
+            list_of_camps = {'Emergency ID':[''],'Type of emergency':[''],'Description':[''],'Location':[''],'Start date':[''],'Close date':[''],'Number of refugees':[''],'Camp ID':[''],'No Of Volounteers':[''],'Capacity':['']}
+            df = pd.DataFrame(list_of_camps)
+            df.set_index('Emergency ID', inplace=True)
+            df.to_csv('camplist.csv')
+            list_of_camps = df.to_dict(orient='index')
+            self.list_of_camps = df
 
         choose_emergency = input("Choose emergency for which you want to see the summary:")
         choose_emergency= choose_emergency.upper()
 
-        print("Choose 1 if you want to see the list of all refugees for all camps")
-        print("Choose 2 if you want to see the total number of refugees in chosen camp")
-        print("Choose 3 if you want to see the number of families in each camp")
-        print("Choose 4 if you want to see the summary of mental state of refugees in chosen camp")
-        print("Choose 5 if you want to see the summary of physical state of refugees in chosen camp")
-        print("Choose 6 if you want to see the total summary for each camp")
-        print("Choose Quit if you want exit this summary")
-        refugee_summary = True
-
-        while refugee_summary:
-
+        while True:
+            print("Choose 1 if you want to see the list of all refugees for all camps")
+            print("Choose 2 if you want to see the total number of refugees in chosen camp")
+            print("Choose 3 if you want to see the number of families in each camp")
+            print("Choose 4 if you want to see the summary of mental state of refugees in chosen camp")
+            print("Choose 5 if you want to see the summary of physical state of refugees in chosen camp")
+            print("Choose 6 if you want to see the total summary for each camp")
+            print("Choose Quit if you want exit this summary")
             user_input = input("Choose interaction: ")
             if user_input == '1':
-                country_refugees = list_of_camps[list_of_camps["Emergency ID"] == choose_emergency]
+                country_refugees = self.list_of_camps[self.list_of_camps["Emergency ID"] == choose_emergency]
                 print(country_refugees)
             elif user_input == "2":
-                number_of_refugee = list_of_camps[list_of_camps["Emergency ID"] == choose_emergency]['Number of refugees']
+                number_of_refugee = self.list_of_camps[self.list_of_camps["Emergency ID"] == choose_emergency]['Number of refugees']
                 print("Number of refugee in {}: ".format(choose_emergency), *number_of_refugee, sep='\n')
             elif user_input == "3":
-                camp_id = list_of_camps[list_of_camps["Emergency ID"] == choose_emergency]['Camp ID'].values[0]
+                camp_id = self.list_of_camps[self.list_of_camps["Emergency ID"] == choose_emergency]['Camp ID'].values[0]
                 count_camps = self.list_of_refugee[self.list_of_refugee["Camp ID"] ==camp_id]['Camp ID'].value_counts()
                 print("Number of families for camp {}:".format(choose_emergency))
                 print(*count_camps, sep='\n')
             elif user_input == "4":
-                camp_id = list_of_camps[list_of_camps["Emergency ID"] == choose_emergency]['Camp ID'].values[0]
+                camp_id = self.list_of_camps[self.list_of_camps["Emergency ID"] == choose_emergency]['Camp ID'].values[0]
                 mental = self.list_of_refugee[self.list_of_refugee["Camp ID"] ==camp_id]["Mental State"].value_counts()
                 print("Number of families for each mental state group in camp {}:".format(choose_emergency))
                 print(mental.to_string())
             elif user_input == "5":
-                camp_id = list_of_camps[list_of_camps["Emergency ID"] == choose_emergency]['Camp ID'].values[0]
+                camp_id = self.list_of_camps[self.list_of_camps["Emergency ID"] == choose_emergency]['Camp ID'].values[0]
                 physical_state_count = self.list_of_refugee[self.list_of_refugee["Camp ID"] ==camp_id]["Physical State"].value_counts()
                 print("Number of families for each physical state group in camp {}:".format(choose_emergency))
                 print(physical_state_count.to_string())
             elif user_input == "6":
-                camp_id = list_of_camps[list_of_camps["Emergency ID"] == choose_emergency]['Camp ID'].values[0]
+                camp_id = self.list_of_camps[self.list_of_camps["Emergency ID"] == choose_emergency]['Camp ID'].values[0]
                 group_camps = self.list_of_refugee[self.list_of_refugee["Camp ID"] ==camp_id].groupby("Camp ID")
                 for name, camp in group_camps:
                     print("Camp " + name + "->" + str(len(camp)) + " family/families")
@@ -133,7 +152,6 @@ class CentralFunctions():
             >closed camps
             >bar plot emergency type
         # '''
-
         list_of_camps = pd.read_csv("camplist.csv")
 
         column_headers = list(list_of_camps.columns.values)
@@ -228,6 +246,25 @@ class CentralFunctions():
 
 
 
+        # list_of_camps=pd.read_excel("camplist.xlsx")
+        # print("See camp list: \n",list_of_camps)
+        # print("Number of camps: ",len(list_of_camps.index))
+        # print("Number of volunteers per camp: \n",list_of_camps[list_of_camps.columns[7:9]])
+        # print("Number of refugees per camp: \n", list_of_camps[list_of_camps.columns[6:8]])
+        # column_headers = list(list_of_camps.columns.values)
+        # print("Capacity by camp: \n",list_of_camps[[column_headers[7], column_headers[9]]])
+        # print("Camps in each area: ")
+        # print(list_of_camps[column_headers[3]].value_counts())
+        #
+        #
+        # print("Active Camps: ",list_of_camps[column_headers[5]].isna().sum())
+        # print("Closed Camps: ", list_of_camps[column_headers[5]].notna().sum())
+        #
+        # list_of_camps[column_headers[1]].value_counts().plot(kind='bar')
+        # plt.title("Emergency Tipes Counted")
+        # plt.show()
+
+
     def call_volunteers(self):
         '''
         Reads the .csv file with volunteers and returns relevant info
@@ -311,8 +348,9 @@ class CentralFunctions():
                     else:
                         a = vol_dict[username]['First name ']
                         print(f'Welcome back {a}!')
-                        
+
                     self.camp_of_user = vol_dict[username]['Camp ID']
+
                     break
                 else:
                     print('You entered incorrect password')
@@ -433,7 +471,7 @@ class volunteer(CentralFunctions):
 
     def __init__(self):
         CentralFunctions.__init__(self)
-        pass
+
 
     def vol_functions(self): # no interaction
         '''
@@ -447,11 +485,66 @@ class volunteer(CentralFunctions):
         '''
         pass
 
-    def create_profile(self, name, no_of_relatives, medical_needs, camp): # no interaction
+    def create_profile(self): # no interaction
         '''
         Write into the refugee dataframe to add refugees family
         '''
-        pass
+
+        try:
+            df = pd.read_csv('RefugeeList.csv')
+            list_of_refugee = df.to_dict(orient='index')
+            self.list_of_refugee = df
+        except FileNotFoundError:
+                family_data = [['name','surname',f'{self.camp_of_user}', 'mental_state', 'physical_state','no_of_members']]
+                df = pd.DataFrame(family_data, columns= ['Lead Family Member Name', 'Lead Family Member Surname','Camp ID','Mental State','Physical State','No. Of Family Members'])
+                df.to_csv('RefugeeList.csv')
+        except:
+            print("System couldn't read your refugee database file.")
+            pass
+
+        while True:
+            name = input("State name of family's lead member: ")
+            surname = input("State surname of the family: ")
+            if name.isdigit() or surname.isdigit():
+                print("You can't use number for this input. Try again ")
+            else:
+                break
+        while True:
+            mental_state = input("Choose from 'bad' and 'good' to describe the mental state of the family: ")
+            if mental_state != 'Good' and mental_state != 'Bad':
+                print("Invalid description for mental state")
+            else:
+                break
+        while True:
+            physical_state = input("Choose from 'bad' and 'good' to describe the physical state of the family: ")
+            if physical_state != 'Good' and physical_state != 'Bad':
+                print("Invalid description for physical state")
+            else:
+                break
+        while True:
+            try:
+                no_of_members = int(input("Type the number of family members: "))
+                break
+            except ValueError:
+                print("It has to be an integer")
+        campID = self.camp_of_user
+        count_camps = self.list_of_refugee[self.list_of_refugee["Camp ID"] == campID]['Camp ID'].value_counts().values[0]
+        family_id = str(count_camps + 1)+campID
+        family_data = {
+                    'Family ID': [family_id],
+                    'Lead Family Member Name': [name],
+                    'Lead Family Member Surname': [surname],
+                    'Camp ID': [campID],
+                    'Mental State': [mental_state],
+                    'Physical State': [physical_state],
+                    'No. Of Family Members': [no_of_members]
+        }
+        df = pd.DataFrame(family_data)
+        print(df.tail())
+
+
+
+        # df.to_csv('RefugeeList.csv', mode='a', index = False, header = False)
 
     def vol_interaction(self):
         '''
@@ -468,4 +561,15 @@ def execute():
     '''
     # employ a while loop to keep the program running
     # call login method and methods made to check if there exists an emergency, then use logic to determine how to treat the admin and volunteers
+
     # depending on who the user is call relevant interaction method
+    # depending on who the user is call relevant interaction method
+    pass
+c = CentralFunctions()
+# c.call_no_of_refugees()
+v = volunteer()
+# c.users_login()
+# volunteer.create_profile(input("State name of family's lead member: "),input("State surname of the family: "),input("Choose from 'bad' and 'good' to describe the mental state of the family: "),input("Choose from 'bad' and 'good' to describe the physical state of the family: "))
+v.users_login()
+v.create_profile()
+
