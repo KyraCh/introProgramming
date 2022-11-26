@@ -1,5 +1,5 @@
 Emergency ID,Type of emergency,Description,Location,Start date,Close date,Number of refugees,Camp ID,No Of Volounteers,Capacity
-AU1,Bushfire,"Burned Area - approx. 24,300, 000 hectares Builduings destroyed: 9,352 Deaths : 479",Australia,01/09/2019,01/03/2020,100,A1,30,400
+AU1,Bushfire,"Burned Area - approx. 24,300, 000 hectares Builduings destroyed: 9,352 Deaths : 479",Australia,01/09/2019,01/03/2020,104,A1,30,400
 PK2,Flooding,"Caused by heavier than usual monsoon rains and melting glaciers that followed a severe heat wave. It is the world's deadliest flood since the 2020 South Asian floods. Death: 1, 717",Pakistan,01/06/2022,,250,A2,50,600
 LBN3,Flooding,"Caused by heavier than usual monsoon rains and melting glaciers that followed a severe heat wave. It is the world's deadliest flood since the 2020 South Asian floods. Death: 1, 717",Lebanon,01/10/2019,02/01/2020,50,A3,10,800
 PK4,Bushfire,"Burned Area - approx. 24,300, 000 hectares Builduings destroyed: 9,352 Deaths : 479",Pakistan,10/09/2019,20/10/2019,30,A4,5,200

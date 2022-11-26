@@ -1,7 +1,13 @@
-﻿Family ID,Lead Family Member Name,Lead Family Member Surname,Camp ID,Mental State,Physical State,No. Of Family Members
-1A1,Mary,Collins,A1,good,bad,3
-1A2,Khan,Samuel,A2,good,bad,4
-2A1,Mark,Brown,A1,bad,bad,2
-3A1,Michael,Smith,A1,good,good,3
-2A2,Sam,Roberts,A2,bad,good,5
-3A2,Sophie,Jones,A2,bad,bad,2
+Family ID,Lead Family Member Name,Lead Family Member Surname,Camp ID,Mental State,Physical State,No. Of Family Members
+1A1,Mary,Collins,A1,good,bad,3.0
+1A2,Khan,Samuel,A2,good,bad,4.0
+2A1,Mark,Brown,A1,bad,bad,2.0
+3A1,Michael,Smith,A1,good,good,3.0
+2A2,Sam,Roberts,A2,bad,good,5.0
+3A2,Sophie,Jones,A2,bad,bad,4.0
+4A1,Will,Smith,A1,Fine,No medical help needed,3.0
+5A1,Karen,Collin,A1,Horrible,Needs hospitalization,2.0
+6A1,bob,smith,A1,Fine,ok,1.0
+7A1,daphne,cool,A1,good,good,2.0
+8A1,bob,smith,A1,good,bad,2.0
+9A1,bob,smith,A1,good,good,4.0
