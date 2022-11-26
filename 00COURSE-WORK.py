@@ -56,15 +56,12 @@ class CentralFunctions():
         pass
     
     def call_no_of_refugees(self):
-        '''
-        Reads the .csv file with refugees and returns the number of refugees + no of refugees broken down across camps
-        (Potentially can be conditionally configured to also return their quantitative needs upon further request, such as food,
-        water and shelter demands and how much we got in the "central hub" + graphs(!) which can be done with pandas but better done with matplotlib)
-        '''
 
         '''Reads the file and prints out the general list of families in a system with 
         some summary about them by sating the number of refugees, their mental and physical 
-        state per each camp and gives information about each family that is assigned to certain camp'''
+        state per each camp and gives information about each family that is assigned to certain camp.
+        Secondly, the method call no of refugees now will only show you camp details of only the one that you are assigned to. 
+        Unless you are admin then you can see evrything '''
 
         # pd.set_option('display.max_columns', 15)
 
@@ -73,9 +70,7 @@ class CentralFunctions():
             df = pd.read_csv('RefugeeList.csv')
             list_of_refugee = df.to_dict(orient='index')
             self.list_of_refugee = df
-            # list_of_camps= pd.read_csv('camplist.csv')
-            # countries_camps = list_of_camps["Emergency ID"]
-            # print(*countries_camps,sep='\n')
+
         except FileNotFoundError:
             list_of_refugee = {'Family ID':[''],'Lead Family Member Name':[''],'Lead Family Member Surname':[''],'Camp ID':[''],'Mental State':[''],'Physical State':[''],'No. Of Family Members':['']}
             df = pd.DataFrame(list_of_refugee)
@@ -85,10 +80,8 @@ class CentralFunctions():
             self.list_of_refugee = df
         try:
             df = pd.read_csv('camplist.csv')
-            # list_of_camps = df.to_dict(orient='index')
             self.list_of_camps = df
-            countries_camps = self.list_of_camps["Emergency ID"]
-            print(*countries_camps,sep='\n')
+
         except FileNotFoundError:
             list_of_camps = {'Emergency ID':[''],'Type of emergency':[''],'Description':[''],'Location':[''],'Start date':[''],'Close date':[''],'Number of refugees':[''],'Camp ID':[''],'No Of Volounteers':[''],'Capacity':['']}
             df = pd.DataFrame(list_of_camps)
@@ -97,16 +90,19 @@ class CentralFunctions():
             list_of_camps = df.to_dict(orient='index')
             self.list_of_camps = df
 
-        choose_emergency = input("Choose emergency for which you want to see the summary:")
-        choose_emergency= choose_emergency.upper()
-
+        if self.current_user == "adm":
+            countries_camps = self.list_of_camps["Emergency ID"]
+            print(*countries_camps,sep='\n')
+            choose_emergency = input("Choose emergency for which you want to see the summary:")
+            choose_emergency= choose_emergency.upper()
+        else:
+            volunteer_campID = self.camp_of_user
+            choose_emergency = self.list_of_camps[self.list_of_camps["Camp ID"] == volunteer_campID]["Emergency ID"].values[0]
         while True:
             print("Choose 1 if you want to see the list of all refugees for all camps")
             print("Choose 2 if you want to see the total number of refugees in chosen camp")
             print("Choose 3 if you want to see the number of families in each camp")
-            print("Choose 4 if you want to see the summary of mental state of refugees in chosen camp")
-            print("Choose 5 if you want to see the summary of physical state of refugees in chosen camp")
-            print("Choose 6 if you want to see the total summary for each camp")
+            print("Choose 4 if you want to see the total summary for each camp")
             print("Choose Quit if you want exit this summary")
             user_input = input("Choose interaction: ")
             if user_input == '1':
@@ -121,16 +117,6 @@ class CentralFunctions():
                 print("Number of families for camp {}:".format(choose_emergency))
                 print(*count_camps, sep='\n')
             elif user_input == "4":
-                camp_id = self.list_of_camps[self.list_of_camps["Emergency ID"] == choose_emergency]['Camp ID'].values[0]
-                mental = self.list_of_refugee[self.list_of_refugee["Camp ID"] ==camp_id]["Mental State"].value_counts()
-                print("Number of families for each mental state group in camp {}:".format(choose_emergency))
-                print(mental.to_string())
-            elif user_input == "5":
-                camp_id = self.list_of_camps[self.list_of_camps["Emergency ID"] == choose_emergency]['Camp ID'].values[0]
-                physical_state_count = self.list_of_refugee[self.list_of_refugee["Camp ID"] ==camp_id]["Physical State"].value_counts()
-                print("Number of families for each physical state group in camp {}:".format(choose_emergency))
-                print(physical_state_count.to_string())
-            elif user_input == "6":
                 camp_id = self.list_of_camps[self.list_of_camps["Emergency ID"] == choose_emergency]['Camp ID'].values[0]
                 group_camps = self.list_of_refugee[self.list_of_refugee["Camp ID"] ==camp_id].groupby("Camp ID")
                 for name, camp in group_camps:
@@ -741,9 +727,9 @@ class volunteer(CentralFunctions):
             list_of_refugee = df.to_dict(orient='index')
             self.list_of_refugee = df
         except FileNotFoundError:
-                family_data = [['name','surname',f'{self.camp_of_user}', 'mental_state', 'physical_state','no_of_members']]
-                df = pd.DataFrame(family_data, columns= ['Lead Family Member Name', 'Lead Family Member Surname','Camp ID','Mental State','Physical State','No. Of Family Members'])
-                df.to_csv('RefugeeList.csv')
+            family_data = [['name','surname',f'{self.camp_of_user}', 'mental_state', 'physical_state','no_of_members']]
+            df = pd.DataFrame(family_data, columns= ['Lead Family Member Name', 'Lead Family Member Surname','Camp ID','Mental State','Physical State','No. Of Family Members'])
+            df.to_csv('RefugeeList.csv')
         except:
             print("System couldn't read your refugee database file.")
             pass
@@ -761,25 +747,23 @@ class volunteer(CentralFunctions):
 
         while True:
             try:
-                no_of_members = int(input("Type the number of family members: "))
+                no_of_members = input("Type the number of family members: ")
                 break
             except ValueError:
                 print("It has to be an integer")
         campID = self.camp_of_user
         count_camps = self.list_of_refugee[self.list_of_refugee["Camp ID"] == campID]['Camp ID'].value_counts().values[0]
         family_id = str(count_camps + 1)+campID
-        family_data = {
-                    'Family ID': [family_id],
-                    'Lead Family Member Name': [name],
-                    'Lead Family Member Surname': [surname],
-                    'Camp ID': [campID],
-                    'Mental State': [mental_state],
-                    'Physical State': [physical_state],
-                    'No. Of Family Members': [no_of_members]
-        }
-        df = pd.DataFrame(family_data)
-        df.to_csv('RefugeeList.csv', mode='a', index = False, header = False)
-        print(df.tail())
+
+        new_family_data = pd.DataFrame({'Family ID': [family_id],'Lead Family Member Name': [name], 'Lead Family Member Surname': [surname],'Camp ID': [campID],'Mental State': [mental_state],'Physical State': [physical_state],'No. Of Family Members': [int(no_of_members)]})
+        self.list_of_refugee = pd.concat([self.list_of_refugee,new_family_data])
+        self.list_of_refugee.to_csv("RefugeeList.csv",index = False)
+        refugee_number = self.list_of_camps[self.list_of_camps["Camp ID"] == campID]["Number of refugees"].values[0]
+        new_refugee_number = refugee_number + int(no_of_members)
+        index = self.list_of_camps.index[self.list_of_camps["Camp ID"] == campID].tolist()[0]
+        self.list_of_camps.at[index, 'Number of refugees'] = new_refugee_number
+        self.list_of_camps.to_csv("camplist.csv", index=False)
+        print('Registration complete! A new family has been added to the list.')
 
 
     def vol_interaction(self):
