@@ -37,9 +37,9 @@ class CentralFunctions():
         self.countries = None
         self.download_all_data()
 
-        self.active_emergency = 'A1'
-        self.current_user = 'vol'
-        self.camp_of_user = 'A1'
+        self.active_emergency = None
+        self.current_user = None
+        self.camp_of_user = None
         self.functions()
         pass
     
