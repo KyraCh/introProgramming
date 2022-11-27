@@ -29,22 +29,84 @@ class CentralFunctions():
     # most likely from the local pandas dataframes formed by read_all_data()
     
     def __init__(self):
-        self.active_emergency = None
         self.user_data = None
-        self.current_user = None
         self.vol_data = None
-        self.camp_of_user = None
-        self.read_all_data()
-        self.functions()
         self.list_of_refugee = None
+        self.list_of_camps = None
+        self.camps_df = None
+        self.download_all_data()
+
+        self.active_emergency = None
+        self.current_user = None
+        self.camp_of_user = None
+        self.functions()
         pass
     
-    def read_all_data(self):
-        '''
-        Essential method for smooth runnning of the software.
-        Reads all .csv files into local pandas dataframes upon the start of the program, so we don't have to read and write on the files
-        directly a million times.
-        '''
+    def download_all_data(self):
+
+        try: 
+            df = pd.read_csv('user_database.csv').set_index('username')
+            df['password'] = df['password'].astype(str)
+            self.user_data = df
+        except FileNotFoundError:
+            users_dict = {'username':['admin'],'password':['111'],'role':['admin'],'activated':['TRUE']}
+            df = pd.DataFrame(users_dict)
+            df.set_index('username', inplace=True)
+            df['password'] = df['password'].astype(str)
+            df.to_csv('user_database.csv')
+            self.user_data = df
+        except:
+            print("System couldn't read your user database file.")
+
+        try:
+            df = pd.read_csv('VolounteersData.csv').set_index('Username')
+            self.vol_data = df
+        except FileNotFoundError:
+            vol_dict = {'Username':[''],'First name':[''],'Second name':[''],'Camp ID':[''],'Avability':[''],'Status':['']}
+            df = pd.DataFrame(vol_dict)
+            df.set_index('Username', inplace=True)
+            df.to_csv('VolounteersData.csv')
+            self.vol_data = df
+        except:
+            print("System couldn't read your volunteer database file.")
+
+        try:
+            df = pd.read_csv('RefugeeList.csv')
+            self.list_of_refugee = df
+        except FileNotFoundError:
+            list_of_refugee = {'Family ID':[''],'Lead Family Member Name':[''],'Lead Family Member Surname':[''],'Camp ID':[''],'Mental State':[''],'Physical State':[''],'No. Of Family Members':['']}
+            df = pd.DataFrame(list_of_refugee)
+            df.set_index('Family ID', inplace=True)
+            df.to_csv('RefugeeList.csv')
+            self.list_of_refugee = df
+        except:
+            print("System couldn't read your refugees database file.")
+
+        try:
+            df = pd.read_csv('camplist.csv')
+            self.list_of_camps = df
+        except FileNotFoundError:
+            list_of_camps = {'Emergency ID':[''],'Type of emergency':[''],'Description':[''],'Location':[''],'Start date':[''],'Close date':[''],'Number of refugees':[''],'Camp ID':[''],'No Of Volounteers':[''],'Capacity':['']}
+            df = pd.DataFrame(list_of_camps)
+            df.set_index('Emergency ID', inplace=True)
+            df.to_csv('camplist.csv')
+            self.list_of_camps = df
+        except:
+            print("System couldn't read your camplist database file.")
+
+        try:
+            df = pd.read_csv("camp_database.csv", index_col = 'Camp ID')
+            self.camps_df = df
+            #camps_exist = list(self.camps_df.index)
+        except FileNotFoundError:
+            camps_df = {'Camp ID':[''],'Location':[''],'Number of volunteers':[''],'Capacity':[''],'Current Emergency':[''],'Number of refugees':['']}
+            df = pd.DataFrame(camps_df)
+            df.set_index('Camp ID', inplace=True)
+            df.to_csv('camplist.csv')
+            #camps_df = df.to_dict(orient='index')
+            self.camps_df = df
+        except:
+            print("System couldn't read your camp database file.")
 
     
     def save(self, file=None):
@@ -66,30 +128,7 @@ class CentralFunctions():
         # pd.set_option('display.max_columns', 15)
 
   # pd.set_option('display.max_columns', 15)
-        try:
-            df = pd.read_csv('RefugeeList.csv')
-            list_of_refugee = df.to_dict(orient='index')
-            self.list_of_refugee = df
-
-        except FileNotFoundError:
-            list_of_refugee = {'Family ID':[''],'Lead Family Member Name':[''],'Lead Family Member Surname':[''],'Camp ID':[''],'Mental State':[''],'Physical State':[''],'No. Of Family Members':['']}
-            df = pd.DataFrame(list_of_refugee)
-            df.set_index('Family ID', inplace=True)
-            df.to_csv('RefugeeList.csv')
-            list_of_refugee = df.to_dict(orient='index')
-            self.list_of_refugee = df
-        try:
-            df = pd.read_csv('camplist.csv')
-            self.list_of_camps = df
-
-        except FileNotFoundError:
-            list_of_camps = {'Emergency ID':[''],'Type of emergency':[''],'Description':[''],'Location':[''],'Start date':[''],'Close date':[''],'Number of refugees':[''],'Camp ID':[''],'No Of Volounteers':[''],'Capacity':['']}
-            df = pd.DataFrame(list_of_camps)
-            df.set_index('Emergency ID', inplace=True)
-            df.to_csv('camplist.csv')
-            list_of_camps = df.to_dict(orient='index')
-            self.list_of_camps = df
-
+        
         if self.current_user == "adm":
             countries_camps = self.list_of_camps["Emergency ID"]
             print(*countries_camps,sep='\n')
@@ -221,9 +260,7 @@ class CentralFunctions():
             >bar plot emergency type
         # '''
 
-        list_of_camps = pd.read_csv("camplist.csv")
-
-        column_headers = list(list_of_camps.columns.values)
+        column_headers = list(self.list_of_camps.columns.values)
 
         print("Choose 1 if you want to see the list of all camps")
         print("Choose 2 if you want to see the total number of camps")
@@ -241,24 +278,24 @@ class CentralFunctions():
 
             user_input = input("Choose interaction: ")
             if user_input == '1':
-                print("See camp list: \n", list_of_camps)
+                print("See camp list: \n", self.list_of_camps)
             elif user_input == "2":
-                print("Number of camps: ", len(list_of_camps.index))
+                print("Number of camps: ", len(self.list_of_camps.index))
             elif user_input == "3":
-                print("Number of volunteers per camp: \n", list_of_camps[list_of_camps.columns[7:9]])
+                print("Number of volunteers per camp: \n", self.list_of_camps[self.list_of_camps.columns[7:9]])
             elif user_input == "4":
-                print("Number of refugees per camp: \n", list_of_camps[list_of_camps.columns[6:8]])
+                print("Number of refugees per camp: \n", self.list_of_camps[self.list_of_camps.columns[6:8]])
             elif user_input == "5":
-                print("Capacity by camp: \n", list_of_camps[[column_headers[7], column_headers[9]]])
+                print("Capacity by camp: \n", self.list_of_camps[[column_headers[7], column_headers[9]]])
             elif user_input == "6":
                 print("Camps in each area: ")
-                print(list_of_camps[column_headers[3]].value_counts())
+                print(self.list_of_camps[column_headers[3]].value_counts())
             elif user_input=="7":
-                print("Active Camps: ", list_of_camps[column_headers[5]].isna().sum())
+                print("Active Camps: ", self.list_of_camps[column_headers[5]].isna().sum())
             elif user_input=="8":
-                print("Closed Camps: ", list_of_camps[column_headers[5]].notna().sum())
+                print("Closed Camps: ", self.list_of_camps[column_headers[5]].notna().sum())
             elif user_input=="9":
-                list_of_camps[column_headers[1]].value_counts().plot(kind='bar')
+                self.list_of_camps[column_headers[1]].value_counts().plot(kind='bar')
                 plt.title("Emergency Tipes Counted")
                 plt.show()
             else:
@@ -270,7 +307,7 @@ class CentralFunctions():
         >delete capacity
         >
         '''
-        list_of_camps = pd.read_csv("camplist.csv")
+        list_of_camps = self.list_of_camps.copy()
         camps = list_of_camps["Emergency ID"]
 
         print(*camps, sep='\n')
@@ -313,7 +350,7 @@ class CentralFunctions():
             else:
                 break
 
-
+        self.list_of_camps = list_of_camps
 
     def call_volunteers(self):
         '''
@@ -344,38 +381,9 @@ class CentralFunctions():
         
         (IMPORTANT: considers existence of only one admin username)
         '''
-        # part which reads/creates the user_database file
-        try: 
-            df = pd.read_csv('user_database.csv').set_index('username')
-            df['password'] = df['password'].astype(str)
-            users_dict = df.to_dict(orient='index')
-            self.user_data = df
-        except FileNotFoundError:
-            users_dict = {'username':['admin'],'password':['111'],'role':['admin'],'activated':['TRUE']}
-            df = pd.DataFrame(users_dict)
-            df.set_index('username', inplace=True)
-            df['password'] = df['password'].astype(str)
-            df.to_csv('user_database.csv')
-            users_dict = df.to_dict(orient='index')
-            self.user_data = df
-        except:
-            print("System couldn't read your user database file.")
-        pass
-        
-        try:
-            df = pd.read_csv('VolounteersData.csv').set_index('Username')
-            vol_dict = df.to_dict(orient='index')
-            self.vol_data = df
-        except FileNotFoundError:
-            vol_dict = {'Username':[''],'First name':[''],'Second name':[''],'Camp ID':[''],'Avability':[''],'Status':['']}
-            df = pd.DataFrame(vol_dict)
-            df.set_index('Username', inplace=True)
-            df.to_csv('VolounteersData.csv')
-            vol_dict = df.to_dict(orient='index')
-            self.vol_data = df
-        except:
-            print("System couldn't read your volunteer database file.")
-        pass
+
+        users_dict = self.user_data.to_dict(orient='index')
+        vol_dict = self.vol_data.to_dict(orient='index')
         
         # interactive part which checks credentials of the person attempting to login
         while True:
@@ -472,32 +480,16 @@ class admin(CentralFunctions):
         # In the case of delete simply delete the record.
         pass
 
-    def write_volunteer():
-        try:
-            #read user database file
-            users_df = pd.read_csv("user_database.csv")
-            #read list of existing usernames
-            users_exist = list(users_df['username'])
-        except FileNotFoundError:
-            print('System could not read your user database file.')
-        except:
-            print('An error occured.')
-        try:
-            #read volunteer database file
-            vol_df = pd.read_csv("volunteer_database.csv", dtype = str)
-        except FileNotFoundError:
-            print('System could not read your volunteer database file.')
-        except:
-            print('An error occured.')
-        try:
-            #read camp summary information
-            camps_df = pd.read_csv("camp_database.csv", index_col = 'Camp ID')
-            #read list of existing camps
-            camps_exist = list(camps_df.index)
-        except FileNotFoundError:
-            print('System could not read your camp database file.')
-        except:
-            print('An error occured.')
+    def write_volunteer(self):
+
+        vol_df = self.vol_data
+
+        users_exist = list(self.user_data['username'])
+        users_df = self.user_data
+
+        camps_df = self.camps_df
+        camps_exist = list(camps_df.index)
+        
         # allows user to choose a username and password
         username = input('Enter a new username:')
         while username in users_exist:
@@ -540,8 +532,9 @@ class admin(CentralFunctions):
             print('An error occured.')
 
     def write_camp(self):
+        camps_df = self.camps_df
+        
         try:    
-            camps_df = pd.read_csv("camp_database.csv", index_col='Camp ID')
             #read camp id last created
             last_camp_id = camps_df.index[-1]
             # generate new camp ID (increments A1, A2,...,A99, B1, B2,...,Z99)
@@ -616,9 +609,9 @@ class volunteer(CentralFunctions):
         '''
         pass
 
-    def edit_self_info():
+    def edit_self_info(self):
         try:
-            vol_df = pd.read_csv("volunteer_database.csv", index_col = "Username")
+            vol_df = self.vol_data
             current_user = 'Volunteer1'
             while True:
                 print("Enter [1] to edit first name.\n"
@@ -721,18 +714,6 @@ class volunteer(CentralFunctions):
         '''
         Interactive method which allows to add new family to the list
         '''
-
-        try:
-            df = pd.read_csv('RefugeeList.csv')
-            list_of_refugee = df.to_dict(orient='index')
-            self.list_of_refugee = df
-        except FileNotFoundError:
-            family_data = [['name','surname',f'{self.camp_of_user}', 'mental_state', 'physical_state','no_of_members']]
-            df = pd.DataFrame(family_data, columns= ['Lead Family Member Name', 'Lead Family Member Surname','Camp ID','Mental State','Physical State','No. Of Family Members'])
-            df.to_csv('RefugeeList.csv')
-        except:
-            print("System couldn't read your refugee database file.")
-            pass
 
         while True:
             name = input("State name of family's lead member: ")
