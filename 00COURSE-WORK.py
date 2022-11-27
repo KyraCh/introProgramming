@@ -34,6 +34,7 @@ class CentralFunctions():
         self.list_of_refugee = None
         self.list_of_camps = None
         self.camps_df = None
+        self.countries = None
         self.download_all_data()
 
         self.active_emergency = 'A1'
@@ -97,16 +98,20 @@ class CentralFunctions():
         try:
             df = pd.read_csv("camp_database.csv", index_col = 'Camp ID')
             self.camps_df = df
-            #camps_exist = list(self.camps_df.index)
         except FileNotFoundError:
             camps_df = {'Camp ID':[''],'Location':[''],'Number of volunteers':[''],'Capacity':[''],'Current Emergency':[''],'Number of refugees':['']}
             df = pd.DataFrame(camps_df)
             df.set_index('Camp ID', inplace=True)
             df.to_csv('camplist.csv')
-            #camps_df = df.to_dict(orient='index')
             self.camps_df = df
         except:
             print("System couldn't read your camp database file.")
+
+        try:
+            df = list(pd.read_csv("countries.csv", index_col = 'Country name').index)
+            self.countries = df
+        except:
+            print("System couldn't read the countries database file.")
 
     
     def save(self, file=None):
@@ -549,22 +554,20 @@ class admin(CentralFunctions):
             print('Please enter an integer.')
             capacity = input("Enter maximum camp capacity:")
         # asks user to enter location
+        print(self.countries)
         country = input("Enter country name:")
-        try:
-            countries = list(pd.read_csv("country_codes.csv")["Country"])
-            while country not in countries:
-                print("Please enter a valid country name.")
-                country = input("Enter country name:")
-            new_camp = pd.DataFrame({'Camp ID': [new_camp_id], "Location": [country], "Number of refugees": [0],
-                                        "Number of volunteers": [0], "Capacity": [capacity],
-                                        "Current Emergency ": [0]}).set_index(['Camp ID'])
-            camps_df = pd.concat([camps_df, new_camp])
-            camps_df.to_csv("camp_database.csv")
-            print("Registration complete! A new camp has been created.")
-        except FileNotFoundError:
-            print("System could not read your country code file.")
-        except:
-            print('An error occured.')
+        countries = self.countries
+        
+        while country not in countries:
+            print("Please enter a valid country name.")
+            country = input("Enter country name:")
+        new_camp = pd.DataFrame({'Camp ID': [new_camp_id], "Location": [country], "Number of refugees": [0],
+                                    "Number of volunteers": [0], "Capacity": [capacity],
+                                    "Current Emergency ": [0]}).set_index(['Camp ID'])
+        camps_df = pd.concat([camps_df, new_camp])
+        camps_df.to_csv("camp_database.csv")
+        print("Registration complete! A new camp has been created.")
+        
         
     def admin_interaction(self):
         '''
