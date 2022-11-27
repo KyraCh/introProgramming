@@ -36,9 +36,9 @@ class CentralFunctions():
         self.camps_df = None
         self.download_all_data()
 
-        self.active_emergency = None
-        self.current_user = None
-        self.camp_of_user = None
+        self.active_emergency = 'A1'
+        self.current_user = 'vol'
+        self.camp_of_user = 'A1'
         self.functions()
         pass
     
@@ -240,7 +240,7 @@ class CentralFunctions():
             if input('\nCommit changes? y/n ') == 'n':
                 continue
             else:
-                list_of_refugees.to_csv('RefugeeList.csv')
+                list_of_refugees.to_csv('RefugeeList.csv',index=False)
             
             self.list_of_refugee = list_of_refugees
             break
@@ -352,7 +352,7 @@ class CentralFunctions():
 
         self.list_of_camps = list_of_camps
 
-    def call_volunteers(self):
+    #def call_volunteers(self):
         '''
         Reads the .csv file with volunteers and returns relevant info
             > How many volunteers
@@ -363,7 +363,7 @@ class CentralFunctions():
         So we can use this method in the future for activating and deactivating volunteers in a curtailed form.
         It would be convinient to look at the list of volunteers when you type out a deletion command)
         '''
-        pass
+        #pass
 
     def users_login(self):
         '''
@@ -483,8 +483,10 @@ class admin(CentralFunctions):
     def write_volunteer(self):
 
         vol_df = self.vol_data
-
-        users_exist = list(self.user_data['username'])
+        #print(self.user_data)
+        #print(self.user_data.index)
+        #print(list(self.user_data.index))
+        users_exist = list(self.user_data.index)
         users_df = self.user_data
 
         camps_df = self.camps_df
@@ -534,38 +536,33 @@ class admin(CentralFunctions):
     def write_camp(self):
         camps_df = self.camps_df
 
-        try:    
-            #read camp id last created
-            last_camp_id = camps_df.index[-1]
-            # generate new camp ID (increments A1, A2,...,A99, B1, B2,...,Z99)
-            if '99' not in last_camp_id:
-                new_camp_id = last_camp_id[0] + str((int(last_camp_id[1]) + 1))
-            else:
-                new_camp_id = chr(ord(last_camp_id[0]) + 1) + '1'
-            # asks user to enter camp capacity
+        #read camp id last created
+        last_camp_id = camps_df.index[-1]
+        # generate new camp ID (increments A1, A2,...,A99, B1, B2,...,Z99)
+        if '99' not in last_camp_id:
+            new_camp_id = last_camp_id[0] + str((int(last_camp_id[1]) + 1))
+        else:
+            new_camp_id = chr(ord(last_camp_id[0]) + 1) + '1'
+        # asks user to enter camp capacity
+        capacity = input("Enter maximum camp capacity:")
+        while capacity.isdigit()==False:
+            print('Please enter an integer.')
             capacity = input("Enter maximum camp capacity:")
-            while capacity.isdigit()==False:
-                print('Please enter an integer.')
-                capacity = input("Enter maximum camp capacity:")
-            # asks user to enter location
-            country = input("Enter country name:")
-            try:
-                countries = list(pd.read_csv("country_codes.csv")["Country"])
-                while country not in countries:
-                    print("Please enter a valid country name.")
-                    country = input("Enter country name:")
-                new_camp = pd.DataFrame({'Camp ID': [new_camp_id], "Location": [country], "Number of refugees": [0],
-                                         "Number of volunteers": [0], "Capacity": [capacity],
-                                         "Current Emergency ": [0]}).set_index(['Camp ID'])
-                camps_df = pd.concat([camps_df, new_camp])
-                camps_df.to_csv("camp_database.csv")
-                print("Registration complete! A new camp has been created.")
-            except FileNotFoundError:
-                print("System could not read your country code file.")
-            except:
-                print('An error occured.')
+        # asks user to enter location
+        country = input("Enter country name:")
+        try:
+            countries = list(pd.read_csv("country_codes.csv")["Country"])
+            while country not in countries:
+                print("Please enter a valid country name.")
+                country = input("Enter country name:")
+            new_camp = pd.DataFrame({'Camp ID': [new_camp_id], "Location": [country], "Number of refugees": [0],
+                                        "Number of volunteers": [0], "Capacity": [capacity],
+                                        "Current Emergency ": [0]}).set_index(['Camp ID'])
+            camps_df = pd.concat([camps_df, new_camp])
+            camps_df.to_csv("camp_database.csv")
+            print("Registration complete! A new camp has been created.")
         except FileNotFoundError:
-            print(('System could not read your camp database file.'))
+            print("System could not read your country code file.")
         except:
             print('An error occured.')
         
@@ -610,107 +607,102 @@ class volunteer(CentralFunctions):
         pass
 
     def edit_self_info(self):
-        try:
-            vol_df = self.vol_data
-            current_user = 'Volunteer1'
-            while True:
-                print("Enter [1] to edit first name.\n"
-                    "Enter [2] to edit second name.\n"
-                    "Enter [3] to edit phone number.\n"
-                    "Enter [4] to edit availability.\n"
-                    "Enter [5] to exit.")
-                user_input = input("Choose interaction:")
-                if user_input == '1':
-                    current_name = vol_df.at[current_user,"First name "]
-                    print(f"Currently, your first name is set to {current_name}.")
-                    while True:
-                        new_name = input("Enter new first name:")
-                        new_name = new_name.capitalize()
-                        if not new_name.isalpha():
-                            print("Please enter a valid name.")
-                        else:
-                            break
-                    while True:
-                        user_input = input("To confirm change of data, enter [y]:")
-                        if user_input == "y":
-                            vol_df.at[current_user, "First name "] = new_name
-                            vol_df.to_csv("volunteer_database.csv")
-                            print(f"First name has been set to {new_name}.")
-                            break
-                        else:
-                            print("Invalid input.")
-                elif user_input == '2':
-                    current_second_name = vol_df.at[current_user, "Second name "]
-                    print(f"Currently, your second name is set to {current_second_name}.")
-                    while True:
-                        new_second_name = input("Enter new second name:")
-                        new_second_name = new_second_name.capitalize()
-                        if not new_second_name.isalpha():
-                            print("Please enter a valid name.")
-                        else:
-                            break
-                    while True:
-                        user_input = input("To confirm change of data, enter [y]:")
-                        if user_input == "y":
-                            vol_df.at[current_user, "Second name "] = new_second_name
-                            vol_df.to_csv("volunteer_database.csv")
-                            print(f"Second name has been set to {new_second_name}.")
-                            break
-                        else:
-                            print("Invalid input.")
-                elif user_input == '3':
-                    current_phone = vol_df.at[current_user, "Phone "]
-                    print(f"Currently, your phone number is set to {current_phone}.")
-                    while True:
-                        new_phone = input("Enter new phone number in the format [44_______]:")
-                        if not new_phone.isnumeric():
-                            print("Please enter a valid phone number.")
-                        elif len(new_phone)!= 9:
-                            print("Invalid format.")
-                        elif new_phone[:2]!="44":
-                            print("Invalid format.")
-                        else:
-                            break
-                    while True:
-                        user_input = input("To confirm change of data, enter [y]:")
-                        if user_input == "y":
-                            vol_df.at[current_user, "Phone "] = new_phone
-                            vol_df.to_csv("volunteer_database.csv")
-                            print(f"Phone number has been set to {new_phone}.")
-                            break
-                        else:
-                            print("Invalid input.")
-                elif user_input == '4':
-                    current_availability = vol_df.at[current_user, "Availability "]
-                    print(f"Currently, your availability is set to {current_availability}.")
-                    while True:
-                        new_availability = input("Enter new availability:")
-                        if not new_availability.isnumeric():
-                            print("Invalid input.")
-                        elif int(new_availability)>48:
-                            print("Availability exceeds maximum weekly working hours (48h).")
-                        else:
-                            break
-                    while True:
-                        user_input = input("To confirm change of data, enter [y]:")
-                        if user_input == "y":
-                            vol_df.at[current_user, "Availability "] = f"{new_availability}h"
-                            vol_df.to_csv("volunteer_database.csv")
-                            print(f"Availability has been set to {new_availability}.")
-                            break
-                        else:
-                            print("Invalid input.")
-                elif user_input=="5":
-                    quit()
-                else:
-                    print("Invalid input. Please select from the following options.")
-        except FileNotFoundError:
-            print("System could not read your volunteer database file.")
-        except:
-            print("An error occured.")
+
+        vol_df = self.vol_data
+        current_user = 'Volunteer1'
+        while True:
+            print("Enter [1] to edit first name.\n"
+                "Enter [2] to edit second name.\n"
+                "Enter [3] to edit phone number.\n"
+                "Enter [4] to edit availability.\n"
+                "Enter [5] to exit.")
+            user_input = input("Choose interaction:")
+            if user_input == '1':
+                current_name = vol_df.at[current_user,"First name "]
+                print(f"Currently, your first name is set to {current_name}.")
+                while True:
+                    new_name = input("Enter new first name:")
+                    new_name = new_name.capitalize()
+                    if not new_name.isalpha():
+                        print("Please enter a valid name.")
+                    else:
+                        break
+                while True:
+                    user_input = input("To confirm change of data, enter [y]:")
+                    if user_input == "y":
+                        vol_df.at[current_user, "First name "] = new_name
+                        vol_df.to_csv("volunteer_database.csv")
+                        print(f"First name has been set to {new_name}.")
+                        break
+                    else:
+                        print("Invalid input.")
+            elif user_input == '2':
+                current_second_name = vol_df.at[current_user, "Second name "]
+                print(f"Currently, your second name is set to {current_second_name}.")
+                while True:
+                    new_second_name = input("Enter new second name:")
+                    new_second_name = new_second_name.capitalize()
+                    if not new_second_name.isalpha():
+                        print("Please enter a valid name.")
+                    else:
+                        break
+                while True:
+                    user_input = input("To confirm change of data, enter [y]:")
+                    if user_input == "y":
+                        vol_df.at[current_user, "Second name "] = new_second_name
+                        vol_df.to_csv("volunteer_database.csv")
+                        print(f"Second name has been set to {new_second_name}.")
+                        break
+                    else:
+                        print("Invalid input.")
+            elif user_input == '3':
+                current_phone = vol_df.at[current_user, "Phone "]
+                print(f"Currently, your phone number is set to {current_phone}.")
+                while True:
+                    new_phone = input("Enter new phone number in the format [44_______]:")
+                    if not new_phone.isnumeric():
+                        print("Please enter a valid phone number.")
+                    elif len(new_phone)!= 9:
+                        print("Invalid format.")
+                    elif new_phone[:2]!="44":
+                        print("Invalid format.")
+                    else:
+                        break
+                while True:
+                    user_input = input("To confirm change of data, enter [y]:")
+                    if user_input == "y":
+                        vol_df.at[current_user, "Phone "] = new_phone
+                        vol_df.to_csv("volunteer_database.csv")
+                        print(f"Phone number has been set to {new_phone}.")
+                        break
+                    else:
+                        print("Invalid input.")
+            elif user_input == '4':
+                current_availability = vol_df.at[current_user, "Availability "]
+                print(f"Currently, your availability is set to {current_availability}.")
+                while True:
+                    new_availability = input("Enter new availability:")
+                    if not new_availability.isnumeric():
+                        print("Invalid input.")
+                    elif int(new_availability)>48:
+                        print("Availability exceeds maximum weekly working hours (48h).")
+                    else:
+                        break
+                while True:
+                    user_input = input("To confirm change of data, enter [y]:")
+                    if user_input == "y":
+                        vol_df.at[current_user, "Availability "] = f"{new_availability}h"
+                        vol_df.to_csv("volunteer_database.csv")
+                        print(f"Availability has been set to {new_availability}.")
+                        break
+                    else:
+                        print("Invalid input.")
+            elif user_input=="5":
+                quit()
+            else:
+                print("Invalid input. Please select from the following options.")                      
                       
-                      
-    def create_profile(self, name, no_of_relatives, medical_needs, camp): # no interaction
+    def create_profile(self): # no interaction
         '''
         Interactive method which allows to add new family to the list
         '''
@@ -763,13 +755,3 @@ def execute():
     # employ a while loop to keep the program running
     # call login method and methods made to check if there exists an emergency, then use logic to determine how to treat the admin and volunteers
     # depending on who the user is call relevant interaction method
-
-if __name__ == '__main__':
-    v = volunteer()
-    v.call_camps()
-    v.amend_refugee_profile()
-    v.amend_camps()
-    v.call_no_of_refugees()
-    v.call_volunteers()
-    v.create_profile()
-    v.edit_self_info()
