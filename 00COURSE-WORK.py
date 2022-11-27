@@ -533,7 +533,7 @@ class admin(CentralFunctions):
 
     def write_camp(self):
         camps_df = self.camps_df
-        
+
         try:    
             #read camp id last created
             last_camp_id = camps_df.index[-1]
@@ -763,3 +763,13 @@ def execute():
     # employ a while loop to keep the program running
     # call login method and methods made to check if there exists an emergency, then use logic to determine how to treat the admin and volunteers
     # depending on who the user is call relevant interaction method
+
+if __name__ == '__main__':
+    v = volunteer()
+    v.call_camps()
+    v.amend_refugee_profile()
+    v.amend_camps()
+    v.call_no_of_refugees()
+    v.call_volunteers()
+    v.create_profile()
+    v.edit_self_info()
