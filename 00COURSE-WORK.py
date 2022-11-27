@@ -7,6 +7,13 @@ import pandas as pd
 import matplotlib.pyplot as plt
 import numpy as np
 
+# define Python user-defined exceptions
+class Error(Exception):
+    """Base class for other exceptions"""
+    pass
+class CapacityTooSmall(Error):
+    """Raised when the capacity input value is smaller than ref+vol"""
+    pass
 
 class CentralFunctions():
     
@@ -22,23 +29,90 @@ class CentralFunctions():
     # most likely from the local pandas dataframes formed by read_all_data()
     
     def __init__(self):
-        self.active_emergency = None
         self.user_data = None
-        self.current_user = None
         self.vol_data = None
+        self.list_of_refugee = None
+        self.list_of_camps = None
+        self.camps_df = None
+        self.countries = None
+        self.download_all_data()
+
+        self.active_emergency = None
+        self.current_user = None
         self.camp_of_user = None
-        self.read_all_data()
         self.functions()
-        self.list_of_refugee = pd.read_csv('RefugeeList.csv')
         pass
     
-    def read_all_data(self):
-        '''
-        Essential method for smooth runnning of the software.
-        Reads all .csv files into local pandas dataframes upon the start of the program, so we don't have to read and write on the files
-        directly a million times.
-        '''
-        pass
+    def download_all_data(self):
+
+        try: 
+            df = pd.read_csv('user_database.csv').set_index('username')
+            df['password'] = df['password'].astype(str)
+            self.user_data = df
+        except FileNotFoundError:
+            users_dict = {'username':['admin'],'password':['111'],'role':['admin'],'activated':['TRUE']}
+            df = pd.DataFrame(users_dict)
+            df.set_index('username', inplace=True)
+            df['password'] = df['password'].astype(str)
+            df.to_csv('user_database.csv')
+            self.user_data = df
+        except:
+            print("System couldn't read your user database file.")
+
+        try:
+            df = pd.read_csv('VolounteersData.csv').set_index('Username')
+            self.vol_data = df
+        except FileNotFoundError:
+            vol_dict = {'Username':[''],'First name':[''],'Second name':[''],'Camp ID':[''],'Avability':[''],'Status':['']}
+            df = pd.DataFrame(vol_dict)
+            df.set_index('Username', inplace=True)
+            df.to_csv('VolounteersData.csv')
+            self.vol_data = df
+        except:
+            print("System couldn't read your volunteer database file.")
+
+        try:
+            df = pd.read_csv('RefugeeList.csv')
+            self.list_of_refugee = df
+        except FileNotFoundError:
+            list_of_refugee = {'Family ID':[''],'Lead Family Member Name':[''],'Lead Family Member Surname':[''],'Camp ID':[''],'Mental State':[''],'Physical State':[''],'No. Of Family Members':['']}
+            df = pd.DataFrame(list_of_refugee)
+            df.set_index('Family ID', inplace=True)
+            df.to_csv('RefugeeList.csv')
+            self.list_of_refugee = df
+        except:
+            print("System couldn't read your refugees database file.")
+
+        try:
+            df = pd.read_csv('camplist.csv')
+            self.list_of_camps = df
+        except FileNotFoundError:
+            list_of_camps = {'Emergency ID':[''],'Type of emergency':[''],'Description':[''],'Location':[''],'Start date':[''],'Close date':[''],'Number of refugees':[''],'Camp ID':[''],'No Of Volounteers':[''],'Capacity':['']}
+            df = pd.DataFrame(list_of_camps)
+            df.set_index('Emergency ID', inplace=True)
+            df.to_csv('camplist.csv')
+            self.list_of_camps = df
+        except:
+            print("System couldn't read your camplist database file.")
+
+        try:
+            df = pd.read_csv("camp_database.csv", index_col = 'Camp ID')
+            self.camps_df = df
+        except FileNotFoundError:
+            camps_df = {'Camp ID':[''],'Location':[''],'Number of volunteers':[''],'Capacity':[''],'Current Emergency':[''],'Number of refugees':['']}
+            df = pd.DataFrame(camps_df)
+            df.set_index('Camp ID', inplace=True)
+            df.to_csv('camplist.csv')
+            self.camps_df = df
+        except:
+            print("System couldn't read your camp database file.")
+
+        try:
+            df = list(pd.read_csv("countries.csv", index_col = 'Country name').index)
+            self.countries = df
+        except:
+            print("System couldn't read the countries database file.")
+
     
     def save(self, file=None):
         '''
@@ -49,62 +123,45 @@ class CentralFunctions():
         pass
     
     def call_no_of_refugees(self):
-        '''
-        Reads the .csv file with refugees and returns the number of refugees + no of refugees broken down across camps
-        (Potentially can be conditionally configured to also return their quantitative needs upon further request, such as food,
-        water and shelter demands and how much we got in the "central hub" + graphs(!) which can be done with pandas but better done with matplotlib)
-        '''
 
         '''Reads the file and prints out the general list of families in a system with 
         some summary about them by sating the number of refugees, their mental and physical 
-        state per each camp and gives information about each family that is assigned to certain camp'''
+        state per each camp and gives information about each family that is assigned to certain camp.
+        Secondly, the method call no of refugees now will only show you camp details of only the one that you are assigned to. 
+        Unless you are admin then you can see evrything '''
 
         # pd.set_option('display.max_columns', 15)
 
-
-        list_of_camps= pd.read_csv('camplist.csv')
-        countries_camps = list_of_camps["Emergency ID"]
-
-        print(*countries_camps,sep='\n')
-
-        choose_emergency = input("Choose emergency for which you want to see the summary:")
-        choose_emergency= choose_emergency.upper()
-
-        print("Choose 1 if you want to see the list of all refugees for all camps")
-        print("Choose 2 if you want to see the total number of refugees in chosen camp")
-        print("Choose 3 if you want to see the number of families in each camp")
-        print("Choose 4 if you want to see the summary of mental state of refugees in chosen camp")
-        print("Choose 5 if you want to see the summary of physical state of refugees in chosen camp")
-        print("Choose 6 if you want to see the total summary for each camp")
-        print("Choose Quit if you want exit this summary")
-        refugee_summary = True
-
-        while refugee_summary:
-
+  # pd.set_option('display.max_columns', 15)
+        
+        if self.current_user == "adm":
+            countries_camps = self.list_of_camps["Emergency ID"]
+            print(*countries_camps,sep='\n')
+            choose_emergency = input("Choose emergency for which you want to see the summary:")
+            choose_emergency= choose_emergency.upper()
+        else:
+            volunteer_campID = self.camp_of_user
+            choose_emergency = self.list_of_camps[self.list_of_camps["Camp ID"] == volunteer_campID]["Emergency ID"].values[0]
+        while True:
+            print("Choose 1 if you want to see the list of all refugees for all camps")
+            print("Choose 2 if you want to see the total number of refugees in chosen camp")
+            print("Choose 3 if you want to see the number of families in each camp")
+            print("Choose 4 if you want to see the total summary for each camp")
+            print("Choose Quit if you want exit this summary")
             user_input = input("Choose interaction: ")
             if user_input == '1':
-                country_refugees = list_of_camps[list_of_camps["Emergency ID"] == choose_emergency]
+                country_refugees = self.list_of_camps[self.list_of_camps["Emergency ID"] == choose_emergency]
                 print(country_refugees)
             elif user_input == "2":
-                number_of_refugee = list_of_camps[list_of_camps["Emergency ID"] == choose_emergency]['Number of refugees']
+                number_of_refugee = self.list_of_camps[self.list_of_camps["Emergency ID"] == choose_emergency]['Number of refugees']
                 print("Number of refugee in {}: ".format(choose_emergency), *number_of_refugee, sep='\n')
             elif user_input == "3":
-                camp_id = list_of_camps[list_of_camps["Emergency ID"] == choose_emergency]['Camp ID'].values[0]
+                camp_id = self.list_of_camps[self.list_of_camps["Emergency ID"] == choose_emergency]['Camp ID'].values[0]
                 count_camps = self.list_of_refugee[self.list_of_refugee["Camp ID"] ==camp_id]['Camp ID'].value_counts()
                 print("Number of families for camp {}:".format(choose_emergency))
                 print(*count_camps, sep='\n')
             elif user_input == "4":
-                camp_id = list_of_camps[list_of_camps["Emergency ID"] == choose_emergency]['Camp ID'].values[0]
-                mental = self.list_of_refugee[self.list_of_refugee["Camp ID"] ==camp_id]["Mental State"].value_counts()
-                print("Number of families for each mental state group in camp {}:".format(choose_emergency))
-                print(mental.to_string())
-            elif user_input == "5":
-                camp_id = list_of_camps[list_of_camps["Emergency ID"] == choose_emergency]['Camp ID'].values[0]
-                physical_state_count = self.list_of_refugee[self.list_of_refugee["Camp ID"] ==camp_id]["Physical State"].value_counts()
-                print("Number of families for each physical state group in camp {}:".format(choose_emergency))
-                print(physical_state_count.to_string())
-            elif user_input == "6":
-                camp_id = list_of_camps[list_of_camps["Emergency ID"] == choose_emergency]['Camp ID'].values[0]
+                camp_id = self.list_of_camps[self.list_of_camps["Emergency ID"] == choose_emergency]['Camp ID'].values[0]
                 group_camps = self.list_of_refugee[self.list_of_refugee["Camp ID"] ==camp_id].groupby("Camp ID")
                 for name, camp in group_camps:
                     print("Camp " + name + "->" + str(len(camp)) + " family/families")
@@ -112,39 +169,195 @@ class CentralFunctions():
             else:
                 break
 
+    def amend_refugee_profile(self):
+        '''
+        Interactive method which allows one to amend information about a refugee.
+        '''
+        list_of_refugees = self.list_of_refugee.copy()
+
+        print('AMEND REFUGEE PROFILE')
+        print('-'*25)
+        print("Type 'q' to quit the process at any moment (progress won't be saved)")
+        
+        while True:
+            iD = input('\nPlease choose Family ID you would like to ammend: ')
+            if iD == 'q':
+                break
+            if iD not in list(list_of_refugees['Family ID']):
+                print('Please enter valid Family ID')
+                continue
+            if self.current_user == 'vol':
+                if iD[-2:] != self.camp_of_user:
+                    print('Please choose a refugee from your camp')
+                    continue     
+            print('\n')
+            print('-'*25)
+            print(f'Please Choose which values you would like to ammend for family {iD}.')
+            print('Input indices corresponding to value you wish to ammend separated by commas ",".')
+            print('eg: "1,2" for amending "Lead Family Member Name" and "Lead Family Member Surname".\n')
+            print('[1] - "Lead Family Member Name"')
+            print('[2] - "Lead Family Member Surname"')
+            print('[3] - "Camp ID"')
+            print('[4] - "Mental State"')
+            print('[5] - "Physical State"')
+            print('[6] - "No. Of Family Members"\n')
+
+            while True:
+                ops = input('Indices: ')
+                if ops == 'q':
+                    break
+                try:
+                    ops = [int(i) for i in ops.split(',')]
+                except:
+                    print('Please input valid indices\n')
+                    continue
+                check = [not (i<1 or i>6) for i in ops]
+                if any(i is False for i in check):
+                    print('Please input valid indices\n')
+                    continue
+                break
+
+            if ops == 'q':
+                break
+            
+            for i in ops:
+                change = input(f'\nPlease select new value for {list_of_refugees.columns[i]}: ')
+                if change == 'q':
+                    list_of_refugees = self.list_of_refugee
+                    break
+                if i == 3:
+                    if change in [i[1:] for i in list(list_of_refugees['Family ID'])]:
+                        new_index = str(max([int(i[0]) for i in list(list_of_refugees['Family ID']) if change in i])+1)
+                        list_of_refugees.at[list_of_refugees.index[list_of_refugees['Family ID'] == iD][0],'Family ID'] = new_index + change
+                        iD = new_index + change
+                    else:
+                        list_of_refugees.at[list_of_refugees.index[list_of_refugees['Family ID'] == iD][0],'Family ID'] = '1' + change
+                        iD = '1' + change
+                            
+                list_of_refugees.at[list_of_refugees.index[list_of_refugees['Family ID'] == iD][0],list_of_refugees.columns[i]]=change
+            
+            if change == 'q':
+                break
+            
+            print('\n')
+            print(list_of_refugees.loc[list_of_refugees['Family ID'] == iD])
+            
+            if input('\nCommit changes? y/n ') == 'n':
+                continue
+            else:
+                list_of_refugees.to_csv('RefugeeList.csv',index=False)
+            
+            self.list_of_refugee = list_of_refugees
+            break
+
     def call_camps(self):
         '''
         Sounds fucking evil, we might need to change the name of the method XD
         Reads the .csv file with camps and returns relevant data.
+            > camp list
             > How many camps
+            > How many volunteers in each camp
             > How many refugees in each
             > Each camp's capacity
-            > How many volunteers in each camp
-            >bar plot emergency type
             >count camps in each area
             >active camps (not closed)
             >closed camps
+            >bar plot emergency type
         # '''
 
-        list_of_camps=pd.read_excel("camplist.xlsx")
-        print("See camp list: \n",list_of_camps)
-        print("Number of camps: ",len(list_of_camps.index))
-        print("Number of volunteers per camp: \n",list_of_camps[list_of_camps.columns[7:9]])
-        print("Number of refugees per camp: \n", list_of_camps[list_of_camps.columns[6:8]])
-        column_headers = list(list_of_camps.columns.values)
-        print("Capacity by camp: \n",list_of_camps[[column_headers[7], column_headers[9]]])
-        print("Camps in each area: ")
-        print(list_of_camps[column_headers[3]].value_counts())
+        column_headers = list(self.list_of_camps.columns.values)
 
+        print("Choose 1 if you want to see the list of all camps")
+        print("Choose 2 if you want to see the total number of camps")
+        print("Choose 3 if you want to see the number of volunteers in each camp")
+        print("Choose 4 if you want to see the number of refugees in each camp")
+        print("Choose 5 if you want to see the capacity by camp")
+        print("Choose 6 if you want to see the number of camps in each area")
+        print("Choose 7 if you want to see the number of active camps")
+        print("Choose 8 if you want to see the number of inactive camps")
+        print("Choose 9 if you want to see the number of camps by emergency type")
+        print("Choose Quit if you want exit this summary")
+        camp_summary = True
 
-        print("Active Camps: ",list_of_camps[column_headers[5]].isna().sum())
-        print("Closed Camps: ", list_of_camps[column_headers[5]].notna().sum())
+        while camp_summary:
 
-        list_of_camps[column_headers[1]].value_counts().plot(kind='bar')
-        plt.title("Emergency Tipes Counted")
-        plt.show()
+            user_input = input("Choose interaction: ")
+            if user_input == '1':
+                print("See camp list: \n", self.list_of_camps)
+            elif user_input == "2":
+                print("Number of camps: ", len(self.list_of_camps.index))
+            elif user_input == "3":
+                print("Number of volunteers per camp: \n", self.list_of_camps[self.list_of_camps.columns[7:9]])
+            elif user_input == "4":
+                print("Number of refugees per camp: \n", self.list_of_camps[self.list_of_camps.columns[6:8]])
+            elif user_input == "5":
+                print("Capacity by camp: \n", self.list_of_camps[[column_headers[7], column_headers[9]]])
+            elif user_input == "6":
+                print("Camps in each area: ")
+                print(self.list_of_camps[column_headers[3]].value_counts())
+            elif user_input=="7":
+                print("Active Camps: ", self.list_of_camps[column_headers[5]].isna().sum())
+            elif user_input=="8":
+                print("Closed Camps: ", self.list_of_camps[column_headers[5]].notna().sum())
+            elif user_input=="9":
+                self.list_of_camps[column_headers[1]].value_counts().plot(kind='bar')
+                plt.title("Emergency Tipes Counted")
+                plt.show()
+            else:
+                break
+    def amend_camps(self):
+        '''
+        >choose camp
+        >add capacity
+        >delete capacity
+        >
+        '''
+        list_of_camps = self.list_of_camps.copy()
+        camps = list_of_camps["Emergency ID"]
 
-    def call_volunteers(self):
+        print(*camps, sep='\n')
+
+        choose_emergency = input("Choose emergency for which you want to edit:")
+        choose_emergency = choose_emergency.upper()
+
+        print(list_of_camps[list_of_camps["Emergency ID"] == choose_emergency])
+
+        camp_amend = True
+
+        while camp_amend:
+            print("Choose 1 if you want to modify capacity")
+            print("Choose BACK if you want to change camp")
+            print("Choose Quit if you want exit")
+
+            user_input = input("Choose interaction: ")
+            if user_input == '1':
+                while True:
+                    try:
+                        cap=int(input("State new capacity: "))
+                        ind = list_of_camps[list_of_camps["Emergency ID"] == choose_emergency].index.values
+                        if cap < int(list_of_camps[list_of_camps["Emergency ID"] == choose_emergency]["Number of refugees"]):
+                            raise CapacityTooSmall
+                        break
+                    except CapacityTooSmall:
+                        print("Capacity is smaller than the number of refugees, try again!")
+
+                ind = list_of_camps[list_of_camps["Emergency ID"] == choose_emergency].index.values
+                list_of_camps.loc[ind[0], ['Capacity']] =cap
+                print(list_of_camps[list_of_camps["Emergency ID"] == choose_emergency])
+                # writing into the file
+                list_of_camps.to_csv("camplist.csv", index=False)
+            elif user_input=="BACK":
+                print(*camps, sep='\n')
+
+                choose_emergency = input("Choose emergency for which you want to edit:")
+                choose_emergency = choose_emergency.upper()
+                print(list_of_camps[list_of_camps["Emergency ID"] == choose_emergency])
+            else:
+                break
+
+        self.list_of_camps = list_of_camps
+
+    #def call_volunteers(self):
         '''
         Reads the .csv file with volunteers and returns relevant info
             > How many volunteers
@@ -155,7 +368,7 @@ class CentralFunctions():
         So we can use this method in the future for activating and deactivating volunteers in a curtailed form.
         It would be convinient to look at the list of volunteers when you type out a deletion command)
         '''
-        pass
+        #pass
 
     def users_login(self):
         '''
@@ -173,38 +386,9 @@ class CentralFunctions():
         
         (IMPORTANT: considers existence of only one admin username)
         '''
-        # part which reads/creates the user_database file
-        try: 
-            df = pd.read_csv('user_database.csv').set_index('username')
-            df['password'] = df['password'].astype(str)
-            users_dict = df.to_dict(orient='index')
-            self.user_data = df
-        except FileNotFoundError:
-            users_dict = {'username':['admin'],'password':['111'],'role':['admin'],'activated':['TRUE']}
-            df = pd.DataFrame(users_dict)
-            df.set_index('username', inplace=True)
-            df['password'] = df['password'].astype(str)
-            df.to_csv('user_database.csv')
-            users_dict = df.to_dict(orient='index')
-            self.user_data = df
-        except:
-            print("System couldn't read your user database file.")
-        pass
-        
-        try:
-            df = pd.read_csv('VolounteersData.csv').set_index('Username')
-            vol_dict = df.to_dict(orient='index')
-            self.vol_data = df
-        except FileNotFoundError:
-            vol_dict = {'Username':[''],'First name':[''],'Second name':[''],'Camp ID':[''],'Avability':[''],'Status':['']}
-            df = pd.DataFrame(vol_dict)
-            df.set_index('Username', inplace=True)
-            df.to_csv('VolounteersData.csv')
-            vol_dict = df.to_dict(orient='index')
-            self.vol_data = df
-        except:
-            print("System couldn't read your volunteer database file.")
-        pass
+
+        users_dict = self.user_data.to_dict(orient='index')
+        vol_dict = self.vol_data.to_dict(orient='index')
         
         # interactive part which checks credentials of the person attempting to login
         while True:
@@ -369,22 +553,90 @@ class admin(CentralFunctions):
         # In the case of delete simply delete the record.
         pass
 
-    def write_volunteer(self, username, password, camp): # no interaction
-        '''
-        Method that will write into the volunteer dataframe adding new volunteers but only with their username and password and camp assigned to.
-        Make sure to have a method that will update the users dictionary (either by rerunning the users() method or manually adding a new entry into the
-        existing dictionary)
+    def write_volunteer(self):
 
-        (When run maybe show the names of exisiting camps for user friendliness)
-        '''
-        pass
+        vol_df = self.vol_data
+        #print(self.user_data)
+        #print(self.user_data.index)
+        #print(list(self.user_data.index))
+        users_exist = list(self.user_data.index)
+        users_df = self.user_data
 
-    def write_camp(self, name, population_capacity, resource_capacity): # no interaction
-        '''
-        Write into the camps dataframe adding the camps relevant to the emergency and their properties.
-        '''
-        pass
+        camps_df = self.camps_df
+        camps_exist = list(camps_df.index)
+        
+        # allows user to choose a username and password
+        username = input('Enter a new username:')
+        while username in users_exist:
+            print('Username taken. Try another.')
+            username = input('Enter a new username:')
+        password = input('Set a password:')
+        camp_choice = True
+        while camp_choice:
+        #option to view statistics about existing camps before assigning new volunteer to a camp
+            print('Enter [1] to first view camp summary information.\n'
+              'Enter [2] to assign camp.')
+            user_input = input('Choose interaction:')
+            if user_input == '1':
+                print("Camp summary information: \n", camps_df)
+                camp = input('Enter camp ID:')
+                break
+            elif user_input == '2':
+                camp = input('Enter camp ID:')
+                break
+            else:
+                print('Invalid input.')
+            #checks that camp chosen by the user exists
+        while camp not in camps_exist:
+            print('Invalid Camp ID.')
+            camp = input('Enter camp ID:')
+            #add new volunteer to list of volunteers and save updated file
+        try:
+            new_vol = pd.DataFrame({'Username': username, 'Camp ID': camp}, index=[0])
+            vol_df = pd.concat([vol_df, new_vol]).fillna(' ')
+            vol_df.to_csv("volunteer_database.csv", index=False)
+        #add new volunteer to list of users and save updated file
+            new_account = pd.DataFrame({'username': [username], 'password': [password], 'role': ['volunteer'], 'activated': ['TRUE']}, index=[0])
+            users_df = pd.concat([users_df, new_account])
+            users_df.to_csv("user_database.csv", index=False)
+        #change number of volunteers in camp database
+            camps_df.at[camp, "Number of volunteers"] +=1
+            camps_df.to_csv("camp_database.csv")
+            print('Registration complete! A volunteer account has been created.')
+        except:
+            print('An error occured.')
 
+    def write_camp(self):
+        camps_df = self.camps_df
+
+        #read camp id last created
+        last_camp_id = camps_df.index[-1]
+        # generate new camp ID (increments A1, A2,...,A99, B1, B2,...,Z99)
+        if '99' not in last_camp_id:
+            new_camp_id = last_camp_id[0] + str((int(last_camp_id[1]) + 1))
+        else:
+            new_camp_id = chr(ord(last_camp_id[0]) + 1) + '1'
+        # asks user to enter camp capacity
+        capacity = input("Enter maximum camp capacity:")
+        while capacity.isdigit()==False:
+            print('Please enter an integer.')
+            capacity = input("Enter maximum camp capacity:")
+        # asks user to enter location
+        print(self.countries)
+        country = input("Enter country name:")
+        countries = self.countries
+        
+        while country not in countries:
+            print("Please enter a valid country name.")
+            country = input("Enter country name:")
+        new_camp = pd.DataFrame({'Camp ID': [new_camp_id], "Location": [country], "Number of refugees": [0],
+                                    "Number of volunteers": [0], "Capacity": [capacity],
+                                    "Current Emergency ": [0]}).set_index(['Camp ID'])
+        camps_df = pd.concat([camps_df, new_camp])
+        camps_df.to_csv("camp_database.csv")
+        print("Registration complete! A new camp has been created.")
+        
+        
     def admin_interaction(self):
         '''
         method that will require user input and then interpret it as an executable method. This one will be tricky to design because the following functions must be
@@ -425,17 +677,138 @@ class volunteer(CentralFunctions):
         '''
         pass
 
-    def edit_self_info(self, name, phone, age, gender): # no interaction
-        '''
-        Write into the volunteer dataframe to update info on a particular volunteer
-        '''
-        pass
+    def edit_self_info(self):
 
-    def create_profile(self, name, no_of_relatives, medical_needs, camp): # no interaction
+        vol_df = self.vol_data
+        current_user = 'Volunteer1'
+        while True:
+            print("Enter [1] to edit first name.\n"
+                "Enter [2] to edit second name.\n"
+                "Enter [3] to edit phone number.\n"
+                "Enter [4] to edit availability.\n"
+                "Enter [5] to exit.")
+            user_input = input("Choose interaction:")
+            if user_input == '1':
+                current_name = vol_df.at[current_user,"First name "]
+                print(f"Currently, your first name is set to {current_name}.")
+                while True:
+                    new_name = input("Enter new first name:")
+                    new_name = new_name.capitalize()
+                    if not new_name.isalpha():
+                        print("Please enter a valid name.")
+                    else:
+                        break
+                while True:
+                    user_input = input("To confirm change of data, enter [y]:")
+                    if user_input == "y":
+                        vol_df.at[current_user, "First name "] = new_name
+                        vol_df.to_csv("volunteer_database.csv")
+                        print(f"First name has been set to {new_name}.")
+                        break
+                    else:
+                        print("Invalid input.")
+            elif user_input == '2':
+                current_second_name = vol_df.at[current_user, "Second name "]
+                print(f"Currently, your second name is set to {current_second_name}.")
+                while True:
+                    new_second_name = input("Enter new second name:")
+                    new_second_name = new_second_name.capitalize()
+                    if not new_second_name.isalpha():
+                        print("Please enter a valid name.")
+                    else:
+                        break
+                while True:
+                    user_input = input("To confirm change of data, enter [y]:")
+                    if user_input == "y":
+                        vol_df.at[current_user, "Second name "] = new_second_name
+                        vol_df.to_csv("volunteer_database.csv")
+                        print(f"Second name has been set to {new_second_name}.")
+                        break
+                    else:
+                        print("Invalid input.")
+            elif user_input == '3':
+                current_phone = vol_df.at[current_user, "Phone "]
+                print(f"Currently, your phone number is set to {current_phone}.")
+                while True:
+                    new_phone = input("Enter new phone number in the format [44_______]:")
+                    if not new_phone.isnumeric():
+                        print("Please enter a valid phone number.")
+                    elif len(new_phone)!= 9:
+                        print("Invalid format.")
+                    elif new_phone[:2]!="44":
+                        print("Invalid format.")
+                    else:
+                        break
+                while True:
+                    user_input = input("To confirm change of data, enter [y]:")
+                    if user_input == "y":
+                        vol_df.at[current_user, "Phone "] = new_phone
+                        vol_df.to_csv("volunteer_database.csv")
+                        print(f"Phone number has been set to {new_phone}.")
+                        break
+                    else:
+                        print("Invalid input.")
+            elif user_input == '4':
+                current_availability = vol_df.at[current_user, "Availability "]
+                print(f"Currently, your availability is set to {current_availability}.")
+                while True:
+                    new_availability = input("Enter new availability:")
+                    if not new_availability.isnumeric():
+                        print("Invalid input.")
+                    elif int(new_availability)>48:
+                        print("Availability exceeds maximum weekly working hours (48h).")
+                    else:
+                        break
+                while True:
+                    user_input = input("To confirm change of data, enter [y]:")
+                    if user_input == "y":
+                        vol_df.at[current_user, "Availability "] = f"{new_availability}h"
+                        vol_df.to_csv("volunteer_database.csv")
+                        print(f"Availability has been set to {new_availability}.")
+                        break
+                    else:
+                        print("Invalid input.")
+            elif user_input=="5":
+                quit()
+            else:
+                print("Invalid input. Please select from the following options.")                      
+                      
+    def create_profile(self): # no interaction
         '''
-        Write into the refugee dataframe to add refugees family
+        Interactive method which allows to add new family to the list
         '''
-        pass
+
+        while True:
+            name = input("State name of family's lead member: ")
+            surname = input("State surname of the family: ")
+            if name.isdigit() or surname.isdigit():
+                print("You can't use number for this input. Try again ")
+            else:
+                break
+
+        mental_state = input("Describe the mental state of the family: ")
+        physical_state = input("Describe the physical state of the family: ")
+
+        while True:
+            try:
+                no_of_members = input("Type the number of family members: ")
+                break
+            except ValueError:
+                print("It has to be an integer")
+        campID = self.camp_of_user
+        count_camps = self.list_of_refugee[self.list_of_refugee["Camp ID"] == campID]['Camp ID'].value_counts().values[0]
+        family_id = str(count_camps + 1)+campID
+
+        new_family_data = pd.DataFrame({'Family ID': [family_id],'Lead Family Member Name': [name], 'Lead Family Member Surname': [surname],'Camp ID': [campID],'Mental State': [mental_state],'Physical State': [physical_state],'No. Of Family Members': [int(no_of_members)]})
+        self.list_of_refugee = pd.concat([self.list_of_refugee,new_family_data])
+        self.list_of_refugee.to_csv("RefugeeList.csv",index = False)
+        refugee_number = self.list_of_camps[self.list_of_camps["Camp ID"] == campID]["Number of refugees"].values[0]
+        new_refugee_number = refugee_number + int(no_of_members)
+        index = self.list_of_camps.index[self.list_of_camps["Camp ID"] == campID].tolist()[0]
+        self.list_of_camps.at[index, 'Number of refugees'] = new_refugee_number
+        self.list_of_camps.to_csv("camplist.csv", index=False)
+        print('Registration complete! A new family has been added to the list.')
+
 
     def vol_interaction(self):
         '''
@@ -453,4 +826,3 @@ def execute():
     # employ a while loop to keep the program running
     # call login method and methods made to check if there exists an emergency, then use logic to determine how to treat the admin and volunteers
     # depending on who the user is call relevant interaction method
-    pass
