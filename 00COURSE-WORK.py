@@ -149,7 +149,69 @@ class CentralFunctions():
         what file we are saving should be specified
         '''
         pass
-    
+                  
+    def call_no_refugees(self):
+    '''Updated method'''              
+                  
+    if self.current_user == 'adm':
+        #prints list of emergency IDs + emergency description
+        print(self.emergency_df['Description'])
+        #list of emergency IDs
+        list_emID = list(self.emergency_df.index)
+        #list of camp IDs
+        list_campID = list(self.camps_df.index)
+        #list of family IDs
+        list_famID = list(self.list_of_refugee.index)
+        choose_emergency = input('Choose emergency by entering the associated emergency ID:')
+        while choose_emergency not in list_emID:
+            print('Invalid emergency ID.')
+            choose_emergency = input('Choose emergency by entering the associated emergency ID:')
+        choose_emergency = choose_emergency.upper()
+        campID = input('Choose camp by entering the associated emergency ID:')
+        while campID not in list_campID:
+            print('Invalid camp ID.')
+            campID = input('Choose camp by entering the associated emergency ID:')
+    else:
+        campID = self.camp_of_user
+        choose_emergency = self.camps_df[self.camps_df.index == campID]["Current Emergency "].values[0]
+    while True:
+        print('Enter [1] to view current total number of refugees.')
+        print('Enter [2] to view the number of refugees allocated per camp.')
+        print('Enter [3] to view the number of families allocated per camp.')
+        print(f'Enter [4] to view list of families allocated to your camp.')
+        print('Enter [5] to view information about a specific family.')
+        print('Enter [Quit] to exit.')
+        user_input = input('Choose interaction:')
+        if user_input == '1':
+            total_ref = sum(self.camps_df[self.camps_df['Current Emergency ']==choose_emergency]['Number of refugees'])
+            print(f'Current total number of refugees from {choose_emergency} is {total_ref}.')
+        elif user_input == '2':
+            ref_per_camp = self.camps_df[self.camps_df['Current Emergency ']==choose_emergency]['Number of refugees']
+        elif user_input == '3':
+            count_families = self.list_of_refugee['Camp ID'].value_counts()
+            print(count_families)
+        elif user_input == '4':
+            if self.current_user == 'adm':
+                camp_ID = input('Enter camp ID:')
+                while camp_ID not in list_campID:
+                    print('Invalid camp ID.')
+                    camp_ID = input('Enter camp ID:')
+            list_of_families = self.list_of_refugee[self.list_of_refugee['Camp ID']==camp_ID]
+            print(list_of_families)
+        elif user_input == '5':
+            family = input('Enter family ID:')
+            while family not in list_famID:
+                print('Invalid family ID.')
+                family = input('Enter family ID:')
+            family_sum = self.list_of_refugee[self.list_of_refugee.index == family]
+            while str(family_sum['Camp ID'].values[0])!= campID:
+                print('Access denied.')
+                family = input('Enter family ID:')
+                family_sum = self.list_of_refugee[self.list_of_refugee.index == family]
+            print(family_sum)
+        else:
+            break
+
     def call_no_of_refugees(self):
 
         '''Reads the file and prints out the general list of families in a system with 
@@ -277,6 +339,48 @@ class CentralFunctions():
             
             self.list_of_refugee = list_of_refugees
             break
+                  
+    def call_camps(self):
+                  
+            '''Updated method'''      
+                  
+        print("Choose 1 if you want to see the list of all camps")
+        print("Choose 2 if you want to see the total number of camps")
+        print("Choose 3 if you want to see the number of volunteers in each camp")
+        print("Choose 4 if you want to see the number of refugees in each camp")
+        print("Choose 5 if you want to see the capacity by camp")
+        print("Choose 6 if you want to see the number of camps in each area")
+        print("Choose 7 if you want to see the number of active camps")
+        print("Choose 8 if you want to see the number of inactive camps")
+        print("Choose 9 if you want to see the number of camps by location")
+        print("Choose Quit if you want exit this summary")
+        camp_summary = True
+        while camp_summary:
+            user_input = input('Choose interaction:')
+            if user_input == '1':
+                print('See camp list: \n', self.camps_df)
+            elif user_input == '2':
+                print("Number of camps:", len(self.camps_df.index))
+            elif user_input == '3':
+                print("Number of volunteers per camp: \n", self.camps_df[['Number of volunteers']].to_string())
+            elif user_input == '4':
+                print('Number of refugees per camp: \n', self.camps_df[['Number of refugees']].to_string())
+            elif user_input=='5':
+                print('Capacity per camp:\n', self.camps_df[['Capacity']].to_string())
+            elif user_input == '6':
+                print('Camp in each area:\n',self.camps_df['Location'].value_counts())
+            elif user_input == '7':
+                print('Active Camps:\n', self.camps_df[self.camps_df['Current Emergency ']!='None'].index)
+            elif user_input == '8':
+                print('Closed Camps:\n', self.camps_df[self.camps_df['Current Emergency ']=='None'].index)
+            elif user_input == '9':
+                self.camps_df['Location'].value_counts().plot(kind='bar')
+                plt.title('Camps by location')
+                plt.yticks(np.arange(0, 10, 1))
+                plt.show()
+            else:
+                break
+
 
     def call_camps(self):
         '''
