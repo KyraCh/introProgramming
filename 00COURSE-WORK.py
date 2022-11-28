@@ -130,7 +130,7 @@ class CentralFunctions():
             camps_df = {'Camp ID':[''],'Location':[''],'Number of volunteers':[''],'Capacity':[''],'Current Emergency':[''],'Number of refugees':['']}
             df = pd.DataFrame(camps_df)
             df.set_index('Camp ID', inplace=True)
-            df.to_csv('camplist.csv')
+            df.to_csv('camp_database.csv')
             self.camps_df = df
         except:
             print("System couldn't read your camp database file.")
