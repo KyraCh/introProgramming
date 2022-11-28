@@ -31,6 +31,8 @@ class CentralFunctions():
     def __init__(self):
         self.user_data = None
         self.vol_data = None
+        self.volunteer_data = None
+        self.emergency_data = None
         self.list_of_refugee = None
         self.list_of_camps = None
         self.camps_df = None
@@ -58,7 +60,33 @@ class CentralFunctions():
             self.user_data = df
         except:
             print("System couldn't read your user database file.")
-
+            
+        try:
+            df = pd.read_csv('emergency_database.csv').set_index('Emergency ID')
+            self.emergency_data = df
+        except FileNotFoundError:
+            emergency_dict = {'Emergency ID': [''], 'Location': [''], 'Description':[''],
+                              'Start date': [''], 'Close date':['']}
+            df = pd.DataFrame(emergency_dict)
+            df.set_index('Emergency ID', inplace= True)
+            df.to_csv('emergency_database.csv')
+            self.emergency_data = df
+        except:
+            print("System couldn't read your emergency database file." 
+        
+        try:
+            df = pd.read_csv('volunteer_database.csv').set_index('Username')
+            self.volunteer_data = df
+        except FileNotFoundError:
+            vol_dict = {'Username': [''], 'First name': [''], 'Second name': [''], 'Camp ID': [''],
+                        'Availability': ['']}
+            df = pd.DataFrame(vol_dict)
+            df.set_index('Username', inplace=True)
+            df.to_csv('volunteer_database.csv')
+            self.volunteer_data = df
+        except:
+            print("System couldn't read your volunteer database file.")
+    
         try:
             df = pd.read_csv('VolounteersData.csv').set_index('Username')
             self.vol_data = df
