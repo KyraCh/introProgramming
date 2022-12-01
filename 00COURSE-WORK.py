@@ -7,13 +7,7 @@ import pandas as pd
 import matplotlib.pyplot as plt
 import numpy as np
 
-# define Python user-defined exceptions
-class Error(Exception):
-    """Base class for other exceptions"""
-    pass
-class CapacityTooSmall(Error):
-    """Raised when the capacity input value is smaller than ref+vol"""
-    pass
+
 
 class CentralFunctions():
     
@@ -29,92 +23,93 @@ class CentralFunctions():
     # most likely from the local pandas dataframes formed by read_all_data()
     
     def __init__(self):
-        self.user_data = None
-        self.vol_data = None
-        self.list_of_refugee = None
-        self.list_of_camps = None
-        self.camps_df = None
-        self.countries = None
-        self.download_all_data()
+        self.user_db = None
+        self.vol_db = None
+        self.refugee_db = None
+        self.camps_db = None
+        self.countries_db = None
+        self.emergencies_db = None 
 
-        self.active_emergency = None
+        fileCheckError =  self.download_all_data()
+        
+        if fileCheckError:
+            exit()
+
+        self.active_emergency = self.emergencies_db.loc[self.emergencies_db['Close date'].isnull()]
         self.current_user = None
         self.camp_of_user = None
         self.functions()
+        
         pass
     
     def download_all_data(self):
+        
+        dataFailure = False
 
         try: 
             df = pd.read_csv('user_database.csv').set_index('username')
             df['password'] = df['password'].astype(str)
-            self.user_data = df
+            self.user_db = df
         except FileNotFoundError:
-            users_dict = {'username':['admin'],'password':['111'],'role':['admin'],'activated':['TRUE']}
-            df = pd.DataFrame(users_dict)
+            user_db = {'username':['admin'],'password':['111'],'role':['admin'],'activated':['TRUE']}
+            df = pd.DataFrame(user_db)
             df.set_index('username', inplace=True)
             df['password'] = df['password'].astype(str)
             df.to_csv('user_database.csv')
-            self.user_data = df
+            self.user_db = df
         except:
             print("System couldn't read your user database file.")
+            dataFailure = True 
 
         try:
-            df = pd.read_csv('VolounteersData.csv').set_index('Username')
-            self.vol_data = df
+            df = pd.read_csv('volunteer_database.csv').set_index('Username')
+            self.vol_db = df
         except FileNotFoundError:
-            vol_dict = {'Username':[''],'First name':[''],'Second name':[''],'Camp ID':[''],'Avability':[''],'Status':['']}
-            df = pd.DataFrame(vol_dict)
+            vol_db = {'Username':[''],'First name':[''],'Second name':[''],'Camp ID':[''],'Avability':[''],'Status':['']}
+            df = pd.DataFrame(vol_db)
             df.set_index('Username', inplace=True)
-            df.to_csv('VolounteersData.csv')
-            self.vol_data = df
+            df.to_csv('volunteer_database.csv')
+            self.vol_db = df
         except:
             print("System couldn't read your volunteer database file.")
+            dataFailure = True
 
         try:
-            df = pd.read_csv('RefugeeList.csv')
-            self.list_of_refugee = df
+            df = pd.read_csv('refugee_database.csv')
+            self.refugee_db = df
         except FileNotFoundError:
-            list_of_refugee = {'Family ID':[''],'Lead Family Member Name':[''],'Lead Family Member Surname':[''],'Camp ID':[''],'Mental State':[''],'Physical State':[''],'No. Of Family Members':['']}
-            df = pd.DataFrame(list_of_refugee)
+            refugee_db = {'Family ID':[''],'Lead Family Member Name':[''],'Lead Family Member Surname':[''],'Camp ID':[''],'Mental State':[''],'Physical State':[''],'No. Of Family Members':['']}
+            df = pd.DataFrame(refugee_db)
             df.set_index('Family ID', inplace=True)
-            df.to_csv('RefugeeList.csv')
-            self.list_of_refugee = df
+            df.to_csv('refugee_database.csv')
+            self.refugee_db = df
         except:
             print("System couldn't read your refugees database file.")
+            dataFailure = True
 
         try:
-            df = pd.read_csv('camplist.csv')
-            self.list_of_camps = df
+            df = pd.read_csv('camp_database.csv')
+            self.camps_db = df
         except FileNotFoundError:
-            list_of_camps = {'Emergency ID':[''],'Type of emergency':[''],'Description':[''],'Location':[''],'Start date':[''],'Close date':[''],'Number of refugees':[''],'Camp ID':[''],'No Of Volounteers':[''],'Capacity':['']}
-            df = pd.DataFrame(list_of_camps)
+            camps_db = {'Emergency ID':[''],'Type of emergency':[''],'Description':[''],'Location':[''],'Start date':[''],'Close date':[''],'Number of refugees':[''],'Camp ID':[''],'No Of Volounteers':[''],'Capacity':['']}
+            df = pd.DataFrame(camps_db)
             df.set_index('Emergency ID', inplace=True)
-            df.to_csv('camplist.csv')
-            self.list_of_camps = df
+            df.to_csv('camp_database.csv')
+            self.camps_db = df
         except:
             print("System couldn't read your camplist database file.")
-
-        try:
-            df = pd.read_csv("camp_database.csv", index_col = 'Camp ID')
-            self.camps_df = df
-        except FileNotFoundError:
-            camps_df = {'Camp ID':[''],'Location':[''],'Number of volunteers':[''],'Capacity':[''],'Current Emergency':[''],'Number of refugees':['']}
-            df = pd.DataFrame(camps_df)
-            df.set_index('Camp ID', inplace=True)
-            df.to_csv('camplist.csv')
-            self.camps_df = df
-        except:
-            print("System couldn't read your camp database file.")
+            dataFailure = True
 
         try:
             df = list(pd.read_csv("countries.csv", index_col = 'Country name').index)
-            self.countries = df
+            self.countries_db = df
         except:
             print("System couldn't read the countries database file.")
-
-    
-    def save(self, file=None):
+            dataFailure = True
+        
+        return dataFailure
+        
+    def save(self, **kwargs):
         '''
         Saves a relvant file when we are done inputting new data.
         I put default value as None so we have a quick trigger to save every file together. If you manage a particular file at a time then 
@@ -130,9 +125,7 @@ class CentralFunctions():
         Secondly, the method call no of refugees now will only show you camp details of only the one that you are assigned to. 
         Unless you are admin then you can see evrything '''
 
-        # pd.set_option('display.max_columns', 15)
 
-  # pd.set_option('display.max_columns', 15)
         
         if self.current_user == "adm":
             countries_camps = self.list_of_camps["Emergency ID"]
@@ -305,6 +298,125 @@ class CentralFunctions():
                 plt.show()
             else:
                 break
+
+    def users_login(self):
+        '''
+        Reads (or, if first time logging-in, creates) users_dataframe.csv.
+        Reads (or, if first time logging-in, creates) VolounteersData.csv.
+        
+        Creates self.user_data DataFrame. # when admin wants to call all details of all users they'd use this
+        Creates self.vol_data DataFrame which contains info on all volunteers.
+        
+        Asks the user to input the login and password credentials.
+        
+        Upon successful login will set global parameter self.current_user as either 'adm' or 'vol'.
+        Upon successful login will set global parameter self.camp_of_user to either the camp of user in case
+        a volunteer logged in or 'adm' in case admin logged in.
+        
+        (IMPORTANT: considers existence of only one admin username)
+        '''
+
+        users_dict = self.user_data.to_dict(orient='index')
+        vol_dict = self.vol_data.to_dict(orient='index')
+        
+        # interactive part which checks credentials of the person attempting to login
+        while True:
+            username = input('Please input your username: ')
+            if username not in self.user_data.index:
+                print('Please input valid username')
+                continue
+            while True:
+                password = input('Please input your password: ')
+                if password == users_dict[username]['password']:
+                    if username == 'admin':
+                        self.current_user = "adm"
+                    else:
+                        self.current_user = 'vol'
+                        
+                    if self.current_user == 'adm':
+                        print(f'Welcome back {username}!')
+                        self.camp_of_user = 'adm'
+                        break
+                    else:
+                        a = vol_dict[username]['First name ']
+                        print(f'Welcome back {a}!')
+                        
+                    self.camp_of_user = vol_dict[username]['Camp ID']
+                    break
+                else:
+                    print('You entered incorrect password')
+            break
+
+    def create_profile(self): # no interaction
+        '''
+        Interactive method which allows to add new family to the list
+        '''
+
+        while True:
+            name = input("State name of family's lead member: ")
+            surname = input("State surname of the family: ")
+            if name.isdigit() or surname.isdigit():
+                print("You can't use number for this input. Try again ")
+            else:
+                break
+
+        mental_state = input("Describe the mental state of the family: ")
+        physical_state = input("Describe the physical state of the family: ")
+
+        while True:
+            try:
+                no_of_members = input("Type the number of family members: ")
+                break
+            except ValueError:
+                print("It has to be an integer")
+        campID = self.camp_of_user
+        count_camps = self.list_of_refugee[self.list_of_refugee["Camp ID"] == campID]['Camp ID'].value_counts().values[0]
+        family_id = str(count_camps + 1)+campID
+
+        new_family_data = pd.DataFrame({'Family ID': [family_id],'Lead Family Member Name': [name], 'Lead Family Member Surname': [surname],'Camp ID': [campID],'Mental State': [mental_state],'Physical State': [physical_state],'No. Of Family Members': [int(no_of_members)]})
+        self.list_of_refugee = pd.concat([self.list_of_refugee,new_family_data])
+        self.list_of_refugee.to_csv("RefugeeList.csv",index = False)
+        refugee_number = self.list_of_camps[self.list_of_camps["Camp ID"] == campID]["Number of refugees"].values[0]
+        new_refugee_number = refugee_number + int(no_of_members)
+        index = self.list_of_camps.index[self.list_of_camps["Camp ID"] == campID].tolist()[0]
+        self.list_of_camps.at[index, 'Number of refugees'] = new_refugee_number
+        self.list_of_camps.to_csv("camplist.csv", index=False)
+        print('Registration complete! A new family has been added to the list.')
+
+class Admin(CentralFunctions):
+    '''
+    Functions relevant to admin user type. Have both dry no-interaction methods and interactive methods to call them for ease of readability.
+    '''
+
+    def __init__(self):
+        CentralFunctions.__init__(self)
+        pass
+
+    def create_emergency(self, name_of_emergency, type, description, location, start_date, close_date): # no interaction
+        '''
+        Inputs will all be strings (except maybe dates if we will be allowed to use datetime module)
+        Creates a FOLDER with a number of .csv files, all with relevant names.
+        self.active_emergency = 'name_of_emergency' <-- this is done so when we close the emergency it would get archieved and all
+                                                        relevant data would be saved with relevant name for ease of use.
+        .csv files: <-- .csv files provide PERSISTENCE
+            > dataframe with emergency properties outlined in the argument
+            > dataframe with all relevant camps (at this stage empty, but only with columns)
+            > dataframe with volunteers (at this stage empty, but only with columns)
+            > dataframe with refugees (at this stage empty, but only with columns)
+        '''
+        pass
+
+    def close_emergency(self): # no interaction
+        '''
+        Take the folder and all the data we accumulated in the .csv files and save under a relevant name like "closed emergency XXX"
+        Clear all global and local self.variables.
+        Stop the entire program (I'm not even sure how to do that from a method tbh, but we'll figure it out)
+
+        Advantage of saving all the data under a new name is it won't possibly ever be interacted with by the rest of the program and
+        we get to archive the data which is real-life-useful thing to do.
+        '''
+        pass
+
     def amend_camps(self):
         '''
         >choose camp
@@ -368,190 +480,6 @@ class CentralFunctions():
         So we can use this method in the future for activating and deactivating volunteers in a curtailed form.
         It would be convinient to look at the list of volunteers when you type out a deletion command)
         '''
-        #pass
-
-    def users_login(self):
-        '''
-        Reads (or, if first time logging-in, creates) users_dataframe.csv.
-        Reads (or, if first time logging-in, creates) VolounteersData.csv.
-        
-        Creates self.user_data DataFrame. # when admin wants to call all details of all users they'd use this
-        Creates self.vol_data DataFrame which contains info on all volunteers.
-        
-        Asks the user to input the login and password credentials.
-        
-        Upon successful login will set global parameter self.current_user as either 'adm' or 'vol'.
-        Upon successful login will set global parameter self.camp_of_user to either the camp of user in case
-        a volunteer logged in or 'adm' in case admin logged in.
-        
-        (IMPORTANT: considers existence of only one admin username)
-        '''
-
-        users_dict = self.user_data.to_dict(orient='index')
-        vol_dict = self.vol_data.to_dict(orient='index')
-        
-        # interactive part which checks credentials of the person attempting to login
-        while True:
-            username = input('Please input your username: ')
-            if username not in self.user_data.index:
-                print('Please input valid username')
-                continue
-            while True:
-                password = input('Please input your password: ')
-                if password == users_dict[username]['password']:
-                    if username == 'admin':
-                        self.current_user = "adm"
-                    else:
-                        self.current_user = 'vol'
-                        
-                    if self.current_user == 'adm':
-                        print(f'Welcome back {username}!')
-                        self.camp_of_user = 'adm'
-                        break
-                    else:
-                        a = vol_dict[username]['First name ']
-                        print(f'Welcome back {a}!')
-                        
-                    self.camp_of_user = vol_dict[username]['Camp ID']
-                    break
-                else:
-                    print('You entered incorrect password')
-            break
-
-    def amend_refugee_profile(self):
-        '''
-        Interactive method which allows one to amend information about a refugee.
-        '''
-        list_of_refugees = self.list_of_refugee.copy()
-        
-        print('AMEND REFUGEE PROFILE')
-        print('-'*25)
-        print("Type 'q' to quit the process at any moment (progress won't be saved)")
-        
-        while True:
-            iD = input('\nPlease choose Family ID you would like to ammend: ')
-            if iD == 'q':
-                break
-            if iD not in list(list_of_refugees['Family ID']):
-                print('Please enter valid Family ID')
-                continue
-            print('\n')
-            print('-'*25)
-            print(f'Please Choose which values you would like to ammend for family {iD}.')
-            print('Input indices corresponding to value you wish to ammend separated by commas ",".')
-            print('eg: "1,2" for amending "Lead Family Member Name" and "Lead Family Member Surname".\n')
-            print('[1] - "Lead Family Member Name"')
-            print('[2] - "Lead Family Member Surname"')
-            print('[3] - "Camp ID"')
-            print('[4] - "Mental State"')
-            print('[5] - "Physical State"')
-            print('[6] - "No. Of Family Members"\n')
-
-            while True:
-                ops = input('Indices: ')
-                if ops == 'q':
-                    break
-                try:
-                    ops = [int(i) for i in ops.split(',')]
-                except:
-                    print('Please input valid indices\n')
-                    continue
-                check = [not (i<1 or i>6) for i in ops]
-                if any(i is False for i in check):
-                    print('Please input valid indices\n')
-                    continue
-                break
-
-            if ops == 'q':
-                break
-            
-            for i in ops:
-                change = input(f'\nPlease select new value for {list_of_refugees.columns[i]}: ')
-                if change == 'q':
-                    list_of_refugees = self.list_of_refugee
-                    break
-                if i == 3:
-                    if change in [i[1:] for i in list(list_of_refugees['Family ID'])]:
-                        new_index = str(max([int(i[0]) for i in list(list_of_refugees['Family ID']) if change in i])+1)
-                        list_of_refugees.at[list_of_refugees.index[list_of_refugees['Family ID'] == iD][0],'Family ID'] = new_index + change
-                        iD = new_index + change
-                    else:
-                        list_of_refugees.at[list_of_refugees.index[list_of_refugees['Family ID'] == iD][0],'Family ID'] = '1' + change
-                        iD = '1' + change
-                list_of_refugees.at[list_of_refugees.index[list_of_refugees['Family ID'] == iD][0],list_of_refugees.columns[i]]=change
-            
-            if change == 'q':
-                break
-            
-            print('\n')
-            print(list_of_refugees.loc[list_of_refugees['Family ID'] == iD])
-            
-            if input('\nCommit changes? y/n ') == 'n':
-                continue
-            
-            self.list_of_refugee = list_of_refugees
-            break
-
-    def functions(self):
-        '''
-        creates a dictionary of all central functions to be used by admin and volunteer classes
-        '''
-        pass
-
-class admin(CentralFunctions):
-    '''
-    Functions relevant to admin user type. Have both dry no-interaction methods and interactive methods to call them for ease of readability.
-    '''
-
-    def __init__(self):
-        CentralFunctions.__init__(self)
-        pass
-
-    def admin_functions(self): # no interaction
-        '''
-        creates dictionary of all no-interaction methods used by admin for later interpretation by user-input methods
-        '''
-        pass
-
-    def create_emergency(self, name_of_emergency, type, description, location, start_date, close_date): # no interaction
-        '''
-        Inputs will all be strings (except maybe dates if we will be allowed to use datetime module)
-        Creates a FOLDER with a number of .csv files, all with relevant names.
-        self.active_emergency = 'name_of_emergency' <-- this is done so when we close the emergency it would get archieved and all
-                                                        relevant data would be saved with relevant name for ease of use.
-        .csv files: <-- .csv files provide PERSISTENCE
-            > dataframe with emergency properties outlined in the argument
-            > dataframe with all relevant camps (at this stage empty, but only with columns)
-            > dataframe with volunteers (at this stage empty, but only with columns)
-            > dataframe with refugees (at this stage empty, but only with columns)
-        '''
-        pass
-
-    def close_emergency(self): # no interaction
-        '''
-        Take the folder and all the data we accumulated in the .csv files and save under a relevant name like "closed emergency XXX"
-        Clear all global and local self.variables.
-        Stop the entire program (I'm not even sure how to do that from a method tbh, but we'll figure it out)
-
-        Advantage of saving all the data under a new name is it won't possibly ever be interacted with by the rest of the program and
-        we get to archive the data which is real-life-useful thing to do.
-        '''
-        pass
-
-    def admin_volunteer_commands(self, command): # no interaction
-        '''
-        Input will be a string which will dictate what command to apply. Why not use a dictionary? Because there will be only three available
-        manipulations so it would be less messy to create one big method than three small and a dictionary.
-        Commands available:
-            > DEACTIVATE
-            > REACTIVATE
-            > DELETE
-        Method will then apply these commands to the volunteer .csv file
-        '''
-        # have a "status" column in volunteer dataframe which would indicate the account status. The login method would check the status of volunteer
-        # before giving or not giving access. This method would simply change that status
-        # In the case of delete simply delete the record.
-        pass
 
     def write_volunteer(self):
 
@@ -635,46 +563,14 @@ class admin(CentralFunctions):
         camps_df = pd.concat([camps_df, new_camp])
         camps_df.to_csv("camp_database.csv")
         print("Registration complete! A new camp has been created.")
-        
-        
-    def admin_interaction(self):
-        '''
-        method that will require user input and then interpret it as an executable method. This one will be tricky to design because the following functions must be
-        implemented:
-            1 When logging in first time call methods in this order:
-                > login() <-- special procedures for admins
-                > create_emergency() <--  input each piece of data sequentially so it's userfriendly
-                > write_camps() <--  input each piece of data sequentially so it's userfriendly
-                > write_volunteers() <--  input each piece of data sequentially so it's userfriendly
-            2 When logging in subsequently any method should be run regardless of order
-            3 At any point the data logging should be cancelled
-            4 Every time data is logged we must be write it to .csv files to prevent it from disappearing in case of system failure
-            5 When a method is performed we must be able to perform another one and then do it indefinetly
-            6 Have a shut off button <-- maybe separate method?
-        '''
-        # 1 check if there are any files in directory that have something like "EMERGENCY" in the name, if none then you are logging in first time
-        #   this should lead to triggering a chain of methods to properly create an emergency
-        # 2 check if there are files in the directory with code name like "EMERGENCY" in the name, if there are then read them and basically get the system up to date
-        # 3 the entire thing should be in the while loop that should be engineered to loop/jump to any method when commanded. When inputting data, sequentilly, we
-        #   we should have an off button like just pressing enter to cancel input, ask user if they mean to stop and then send them back to the neutral method
-        #   selection menu
-        # 4 Once all data is logged in the local dataframe, show it to the user for confimation, ask if they are satisfied and then if they are save() it
-        # 5 smart use of while loops
-        pass
 
-class volunteer(CentralFunctions):
+class Volunteer(CentralFunctions):
     '''
     Functions relevant to volunteer user type. Have both dry no-interaction methods and interactive methods to call them for ease of readability
     '''
 
     def __init__(self):
         CentralFunctions.__init__(self)
-        pass
-
-    def vol_functions(self): # no interaction
-        '''
-        creates dictionary of all no-interaction methods used by volunteer for later interpretation by user-input methods
-        '''
         pass
 
     def edit_self_info(self):
@@ -773,56 +669,9 @@ class volunteer(CentralFunctions):
             else:
                 print("Invalid input. Please select from the following options.")                      
                       
-    def create_profile(self): # no interaction
-        '''
-        Interactive method which allows to add new family to the list
-        '''
-
-        while True:
-            name = input("State name of family's lead member: ")
-            surname = input("State surname of the family: ")
-            if name.isdigit() or surname.isdigit():
-                print("You can't use number for this input. Try again ")
-            else:
-                break
-
-        mental_state = input("Describe the mental state of the family: ")
-        physical_state = input("Describe the physical state of the family: ")
-
-        while True:
-            try:
-                no_of_members = input("Type the number of family members: ")
-                break
-            except ValueError:
-                print("It has to be an integer")
-        campID = self.camp_of_user
-        count_camps = self.list_of_refugee[self.list_of_refugee["Camp ID"] == campID]['Camp ID'].value_counts().values[0]
-        family_id = str(count_camps + 1)+campID
-
-        new_family_data = pd.DataFrame({'Family ID': [family_id],'Lead Family Member Name': [name], 'Lead Family Member Surname': [surname],'Camp ID': [campID],'Mental State': [mental_state],'Physical State': [physical_state],'No. Of Family Members': [int(no_of_members)]})
-        self.list_of_refugee = pd.concat([self.list_of_refugee,new_family_data])
-        self.list_of_refugee.to_csv("RefugeeList.csv",index = False)
-        refugee_number = self.list_of_camps[self.list_of_camps["Camp ID"] == campID]["Number of refugees"].values[0]
-        new_refugee_number = refugee_number + int(no_of_members)
-        index = self.list_of_camps.index[self.list_of_camps["Camp ID"] == campID].tolist()[0]
-        self.list_of_camps.at[index, 'Number of refugees'] = new_refugee_number
-        self.list_of_camps.to_csv("camplist.csv", index=False)
-        print('Registration complete! A new family has been added to the list.')
+a = CentralFunctions()
 
 
-    def vol_interaction(self):
-        '''
-        Puts the no interaction methods together to form an interaface that allows the volunteer to interact with the program. Largely similar to the admin analogue
-            > When first logged in make the volunteer fill up the data about them.
-            > Allow to call any method at any time
-            > Basically have the same capabilities to interact as the admin
-        '''
-        pass
-
-def execute():
-    '''
-    How does all of this shit work bruh
-    '''
     # employ a while loop to keep the program running
     # call login method and methods made to check if there exists an emergency, then use logic to determine how to treat the admin and volunteers
     # depending on who the user is call relevant interaction method
