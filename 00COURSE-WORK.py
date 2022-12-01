@@ -489,7 +489,7 @@ class CentralFunctions():
 
         self.list_of_camps = list_of_camps
 
-    #def call_volunteers(self):
+  def call_volunteers(self):
         '''
         Reads the .csv file with volunteers and returns relevant info
             > How many volunteers
@@ -500,7 +500,61 @@ class CentralFunctions():
         So we can use this method in the future for activating and deactivating volunteers in a curtailed form.
         It would be convinient to look at the list of volunteers when you type out a deletion command)
         '''
-        #pass
+        on = True
+        camp_dict = {
+            '1': 'A1',
+            '2': 'A2',
+            '3': 'A3'
+        }
+        while True:
+                print("\nEnter [1] to view all volunteer data\n"
+                      "Enter [2] to see volunteer data by camp\n"
+                      "Enter [3] to see total number of volunteers\n"
+                      "Enter [4] to see number of volunteers by camp\n"
+                      "Enter [5] to check if the volunteer exists\n"
+                      "Enter [6] to exit")
+                choose_action = input('Enter here: ')
+                data = pd.read_csv('VolunteersData.csv').set_index('Username')
+
+                if choose_action == '1':
+                    print(f"\n{data}")
+                elif choose_action == '2':
+                    while on:
+                        choose_camp = input('Choose camp. [1] A1 [2] A2 [3] A3 [4] Go back : ')
+                        if choose_camp == '4':
+                            break
+                        try:
+                            print(data[data['CampID'] == camp_dict[choose_camp].title()])
+                        except KeyError:
+                            print('Invalid Camp. Try again. ')
+                elif choose_action == '3':
+                    print(f"There are {len(data)} volunteers")
+                elif choose_action == '4':
+                    while on:
+                        choose_camp = input('Choose camp. [1] A1 [2] A2 [3] A3 [4] Go back: ')
+                        if choose_camp == '4':
+                            break
+                        try:
+                            lst1 = [item for item in data['CampID'] if item == camp_dict[choose_camp].title()]
+                            print(f"There are {len(lst1)} volunteers in {camp_dict[choose_camp]}.")
+                        except KeyError:
+                            print('Invalid Camp. Try again. ')
+                elif choose_action == '5':
+                    while on:
+                        first_name = input('Enter First Name: ')
+                        last_name = input('Enter Last Name: ')
+                        if first_name in data['First Name'].values and last_name in data['Last Name'].values:
+                            print(data[(data['First Name'] == first_name.title()) & (data['Last Name'] == last_name.title())])
+                            on = False
+                        else:
+                            print(f'There is no volunteer with the name {first_name} {last_name}')
+                            try_again = input('Would you like to try again? y/n : ')
+                            if try_again == 'y':
+                                continue
+                            else:
+                                on = False
+                else:
+                    break
 
     def users_login(self):
         '''
@@ -669,8 +723,8 @@ class admin(CentralFunctions):
         we get to archive the data which is real-life-useful thing to do.
         '''
         pass
-
-    def admin_volunteer_commands(self, command): # no interaction
+                  
+    def admin_volunteer_commands(self):
         '''
         Input will be a string which will dictate what command to apply. Why not use a dictionary? Because there will be only three available
         manipulations so it would be less messy to create one big method than three small and a dictionary.
@@ -680,10 +734,80 @@ class admin(CentralFunctions):
             > DELETE
         Method will then apply these commands to the volunteer .csv file
         '''
-        # have a "status" column in volunteer dataframe which would indicate the account status. The login method would check the status of volunteer
-        # before giving or not giving access. This method would simply change that status
-        # In the case of delete simply delete the record.
-        pass
+        try:
+            df = pd.read_csv('user_database.csv')
+            self.user_data = df
+        except FileNotFoundError:
+            print('There are no volunteers in our database.')
+        while True:
+            try:
+                action_and_volunteer = input('Type the word deactivate, reactivate or delete, '
+                                             'and the volunteer username '
+                                             'separated by space. If you want to go back enter quit: ')
+
+                # d, r , de
+                if action_and_volunteer == 'quit':
+                    break
+
+                action = action_and_volunteer.split(' ')[0].lower()
+                volunteer_username = action_and_volunteer.split(' ')[1]
+
+                if volunteer_username in df['username'].values:
+                    index = df.index[df['username'] == volunteer_username].tolist()[0]
+                    if action == 'deactivate':
+                        if df.at[index, 'status']:
+                            df.at[index, 'status'] = False
+                            df.to_csv('user_database.csv', index=False)
+                            break
+                        else:
+
+                            print('This user is not active.')
+                            try_again = input('Would you like to try again y/n? ')
+                            if try_again == 'y':
+                                continue
+                            else:
+                                break
+                    elif action == 'reactivate':
+                        if df.at[index, 'status']:
+                            print('This user is already active.')
+                            try_again = input('Would you like to try again y/n? ')
+                            if try_again == 'y':
+                                continue
+                            else:
+                                break
+                        else:
+                            df.at[index, 'status'] = True
+                            df.to_csv('user_database.csv', index=False)
+                            break
+                    elif action == 'delete':
+                        df = df.drop(index)
+                        df.to_csv('user_database.csv', index=False)
+                        break
+                        # delete from both file and
+                        # camp_list subtract by 1
+
+                    else:
+                        print('Invalid action')
+                        try_again = input('Would you like to try again y/n? ')
+                        if try_again == 'y':
+                            continue
+                        else:
+                            break
+                else:
+                    print('There is no volunteer with that username.')
+                    try_again = input('Would you like to try again y/n? ')
+                    if try_again == 'y':
+                        continue
+                    else:
+                        break
+            except IndexError:
+                print('Invalid input.')
+                try_again = input('Would you like to try again y/n? ')
+                if try_again == 'y':
+                    continue
+                else:
+                    break
+
 
     def write_volunteer(self):
 
