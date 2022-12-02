@@ -113,7 +113,14 @@ class test():
         return dataFailure
     
     def write_volunteer(self):
-        
+        '''
+        Allows admin to create one or more empty volunteer accounts.
+
+        Either manual input can be selected. 
+            INPUTS: username, password and camp of volunteer
+        Or automatic creation of multiple volunteer accounts from the same camp can be made which have automatically generated usernames in form "Volunteer"+index
+            INPUTS: number of volunteers desired, camp of volunteers
+        '''
         vol_df = self.vol_db.copy()
         users_df = self.user_db.copy()
         camps_df = self.camps_db.copy()
@@ -123,7 +130,7 @@ class test():
         
         print('Please select how would you like to create a new volunteer profile')
         print('[1] - manual input')
-        print('[2] - automatic creation\n')
+        print('[2] - automatic creation')
         print('[B] to go back')
         print('[Q] to quit')               
         
@@ -215,6 +222,7 @@ class test():
                     vol_df.to_csv('volunteer_database.csv', index=False)
                     users_df.to_csv('user_database.csv', index=False)
                 else:
+                    counter = 0 
                     continue
                 
                 while True:
@@ -227,6 +235,7 @@ class test():
                 if repeat == 'n':
                     break
                 else:
+                    counter = 0 
                     continue
         
         def automatic():
@@ -275,8 +284,7 @@ class test():
                     users_df.to_csv('user_database.csv', index=False)
                     break
                 else:
-                    continue
-                
+                    continue  
             
         while True:
             user_input = input('Choose interaction: ')
@@ -290,9 +298,6 @@ class test():
             manual()
         else:
             automatic()
-            
-                
-            
             
 tst = test()
 tst.write_volunteer()

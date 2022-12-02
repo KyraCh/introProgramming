@@ -122,82 +122,127 @@ class test():
             country_dict  = self.countries_db.to_dict(orient='index')
             counter = 0
                 
-            def country_select():
-                global country
-                while True:
-                    country = input('\nPlease select the country of emergency: ')
-                    if country in list(self.countries_db.index):
-                        break
-                    elif country == 'Q':
-                        self.quit = True
-                        break
-                    else:
-                        print('Please select valid country')
-                        continue
-                return 1
+            # def country_select():
+            #     global country
+            #     while True:
+            #         country = input('\nPlease select the country of emergency: ')
+            #         if country in list(self.countries_db.index):
+            #             break
+            #         elif country == 'Q':
+            #             self.quit = True
+            #             break
+            #         else:
+            #             print('Please select valid country')
+            #             continue
+            #     return 1
             
-            def type_select():
-                global type_emergency
-                inpt = input('\nPlease enter type of emergency: ')
-                type_emergency = inpt
-                if inpt == 'B':
-                    return -1
-                elif inpt == 'Q':
-                    self.quit = True
-                    return 0
-                else:
-                    return 1
+            # def type_select():
+            #     global type_emergency
+            #     inpt = input('\nPlease enter type of emergency: ')
+            #     type_emergency = inpt
+            #     if inpt == 'B':
+            #         return -1
+            #     elif inpt == 'Q':
+            #         self.quit = True
+            #         return 0
+            #     else:
+            #         return 1
                 
-            def descr_select():
-                global description
-                inpt = input('\nPlease briefly describe your emergency: ')
-                description = inpt
-                if inpt == 'B':
-                    return -1
-                elif inpt == 'Q':
-                    self.quit = True
-                    return 0
-                else:
-                    return 1
+            # def descr_select():
+            #     global description
+            #     inpt = input('\nPlease briefly describe your emergency: ')
+            #     description = inpt
+            #     if inpt == 'B':
+            #         return -1
+            #     elif inpt == 'Q':
+            #         self.quit = True
+            #         return 0
+            #     else:
+            #         return 1
 
-            def start_select():
-                global start_date
-                global startDate
+            # def start_select():
+            #     global start_date
+            #     global startDate
               
-                while True:
-                    inpt = input('\nPlease enter start date of the emergency [YYYY-MM-DD]: ')
-                    if inpt == 'B':
-                        return -1
-                    elif inpt == 'Q':
-                        self.quit = True
-                        return 0
-                    else:
-                        try:
-                            start_date = inpt
-                            datetime.date.fromisoformat(start_date)
-                            startDate = datetime.datetime.strptime(start_date, "%Y-%m-%d").strftime("%d/%m/%Y") 
-                        except:
-                            print('Please enter a day of valid format [YYYY-MM-DD]: ') 
-                            continue
-                        return 1
+            #     while True:
+            #         inpt = input('\nPlease enter start date of the emergency [YYYY-MM-DD]: ')
+            #         if inpt == 'B':
+            #             return -1
+            #         elif inpt == 'Q':
+            #             self.quit = True
+            #             return 0
+            #         else:
+            #             try:
+            #                 start_date = inpt
+            #                 datetime.date.fromisoformat(start_date)
+            #                 startDate = datetime.datetime.strptime(start_date, "%Y-%m-%d").strftime("%d/%m/%Y") 
+            #             except:
+            #                 print('Please enter a day of valid format [YYYY-MM-DD]: ') 
+            #                 continue
+            #             return 1
                 
-            inputs = [country_select, type_select, descr_select, start_select]
+            # inputs = [country_select, type_select, descr_select, start_select]
             
-            while counter < len(inputs):
-                counter += inputs[counter]()
-                if self.quit == True:
-                    break
-            if self.quit == True:
-                break
-            country_code = country_dict[country]['Country code']    
+            # while counter < len(inputs):
+            #     counter += inputs[counter]()
+            #     if self.quit == True:
+            #         break
+            # if self.quit == True:
+            #     break
             
+            
+            def go_back(questionStack):
+                i = 0
+                answerStack = []
+                while i < len(questionStack):
+                    
+                    if i == 0:
+                        while True:
+                            answer = input(questionStack[i])
+                            if answer in list(self.countries_db.index):
+                                break
+                            else:
+                                print('Please select valid country')
+                                continue
+                    elif i == 3:
+                        while True:
+                            answer = input(questionStack[i])
+                            try:
+                                datetime.date.fromisoformat(answer)
+                                answer = datetime.datetime.strptime(answer, "%Y-%m-%d").strftime("%d/%m/%Y") 
+                                break
+                            except:
+                                print('Please enter a day of valid format [YYYY-MM-DD]: ') 
+                                continue
+                    else:
+                        answer = input(questionStack[i])
+
+                    if answer == 'B':
+                        if i == 0:
+                            break
+                        answerStack.pop()
+                        i -= 1
+                        continue
+                    elif answer == 'Q':
+                        break
+
+                    answerStack.append(answer)
+                    i += 1
+
+                return answerStack
+
+            questions = ['\nPlease select the country of emergency: ', '\nPlease enter type of emergency: ', '\nPlease briefly describe your emergency: ',
+                 '\nPlease enter start date of the emergency [YYYY-MM-DD]: ']
+            answers = go_back(questions)
+            country_code = country_dict[answers[0]]['Country code']    
+
             if True in list(emergency_db['Emergency ID'].str.contains(country_code, case=False)):
                 new_no_index = int(emergency_db.loc[emergency_db['Emergency ID'].str.contains(country_code, case=False)].iloc[-1]['Emergency ID'][2:]) + 1
             else:
                 new_no_index = 1
             emergency_id = country_code + str(new_no_index)
             
-            emergency_db.loc[len(emergency_db.index)] = [emergency_id, country, type_emergency, description, startDate, None]
+            emergency_db.loc[len(emergency_db.index)] = [emergency_id, answers[0], answers[1], answers[2], answers[3], None]
             
             print('\n', emergency_db.iloc[-1])
             while True:
