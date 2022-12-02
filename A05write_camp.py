@@ -118,6 +118,7 @@ class test():
         '''
         self.quit = False
         counter = 0
+        self.count_ref_vol()
         print('Please provide details of the new camp')
         print('Expected Inputs:\n'+
               '\t>Country\n'+

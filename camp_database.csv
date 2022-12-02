@@ -1,6 +1,6 @@
 Camp ID,Location,Number of volunteers,Capacity,Current Emergency,Number of refugees
-AU1-1,Australia,100.0,1000,AU1,189.0
-AU1-2,Australia,50.0,250,AU1,131.0
-PK1-1,Pakistan,11.0,50,PK1,35.0
+AU1-1,Australia,29,1000,AU1,3
+AU1-2,Australia,13,250,AU1,3
+PK1-1,Pakistan,1,50,PK1,
 PK1-2,Pakistan,,1000,PK1,
 AU1-3,Australia,,500,AU1,
