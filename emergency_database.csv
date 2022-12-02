@@ -1,6 +1,6 @@
 Emergency ID,Location,Type,Description,Start date,Close date
 AU1,Australia,Bushfire,Description,01/09/2019,01/03/2020
-PK2,Pakistan,Flooding,Description ,01/06/2022,
-LBN3,Lebanon,Flooding,Description ,01/10/2019,02/01/2020
-PK4,Pakistan,Bushfire,Description,10/09/2019,20/10/2019
-AU5,Australia,Bushfire,Description,06/06/2022,
+PK1,Pakistan,Flooding,Description ,01/06/2022,
+LBN1,Lebanon,Flooding,Description ,01/10/2019,02/01/2020
+PK2,Pakistan,Bushfire,Description,10/09/2019,20/10/2019
+AU2,Australia,Bushfire,Description,06/06/2022,02/12/2022

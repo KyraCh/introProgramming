@@ -6,8 +6,8 @@
 import pandas as pd
 import matplotlib.pyplot as plt
 import numpy as np
-
-
+import datetime
+import os
 
 class CentralFunctions():
     
@@ -376,30 +376,119 @@ class Admin(CentralFunctions):
         CentralFunctions.__init__(self)
         pass
 
-    def create_emergency(self, name_of_emergency, type, description, location, start_date, close_date): # no interaction
-        '''
-        Inputs will all be strings (except maybe dates if we will be allowed to use datetime module)
-        Creates a FOLDER with a number of .csv files, all with relevant names.
-        self.active_emergency = 'name_of_emergency' <-- this is done so when we close the emergency it would get archieved and all
-                                                        relevant data would be saved with relevant name for ease of use.
-        .csv files: <-- .csv files provide PERSISTENCE
-            > dataframe with emergency properties outlined in the argument
-            > dataframe with all relevant camps (at this stage empty, but only with columns)
-            > dataframe with volunteers (at this stage empty, but only with columns)
-            > dataframe with refugees (at this stage empty, but only with columns)
-        '''
-        pass
+    def create_emergency(current_user, type_emergency, description, country, start_date):
+        #these are here if you want to define them with self.
+        current_user = current_user
+        start_date = start_date
+        #initialising empty variables.
+        country_code = ''
+        emergency_id = ''
+        #checking if the user is admin as is the only one who can create emergency.
+        if current_user != "adm":
+            return "Only admin has access to create emergency."
+        try:
+            #checks if the country exists in the csv file with all the country codes.
+            df1 = pd.read_csv('countries.csv', encoding='latin-1')
+            for index in df1.index:
+                if df1['Country name'][index] == country:
+                    country_code = df1['Country code'][index]
+                    break
+            #after searching, if country code is still empty means it's not in the csv file, so something wrong happened.
+            if country_code == '':
+                return "False country name"
+            else:
+                #modifying date to the appropriate format with as DD/MM/YYYY.
+                datetime.date.fromisoformat(start_date)
+                startDate = datetime.datetime.strptime(start_date, "%Y-%m-%d").strftime("%d/%m/%Y")
+                #getting the file.
+                file = 'camplist.csv'
+                #readind data inside csv file and turning them to a panda dataframe.
+                df2 = pd.read_csv(file, encoding='latin-1')
+                #checking that the file is in .csv form.
+                file_extension = os.path.splitext("camplist.csv")[-1].lower()
+                if file_extension == '.csv':
+                    #assigning emergency id, which is adding the country code with an auto-incremented number.
+                    for index in df2.index[::-1]:
+                        if (df2['Emergency ID'][index])[:2] == country_code:
+                            emergency_id = country_code + str(int((df2['Emergency ID'][index][2:]))+1)
+                            break
+                    if emergency_id == '':
+                        emergency_id = country_code + '1'
+                    #adding data to pandas and then saving them in the csv file.
+                    new_entry = {'Emergency ID': emergency_id, 'Type of emergency': type_emergency,
+                                'Description': description, 'Location': country, 'Start date': startDate}
+                    df3 = df2.append(new_entry, ignore_index=True)
+                    df3.to_csv('camplist.csv', index=False)
+                else:
+                    #procedure if the file exists with the same name but has a different format other than csv.
+                    #renaming the existing file so we can create a new one with the name camplist.csv as we want.
+                    new_name = 'camplist_old'
+                    os.rename(file, new_name+file_extension)
+                    f = open("camplist.csv", "w")
+                    #creating emergency ID, adding data to pandas and then saving them in the csv file.
+                    emergency_id = country_code + '1'
+                    first_entry = {'Emergency ID': [emergency_id], 'Type of emergency': [type_emergency],
+                                'Description': [description], 'Location': [country], 'Start date': [startDate],
+                                'Close date': [''], 'Number of refugees': [''], 'Camp ID': [''],
+                                'No of Volunteers': [''], 'Capacity': ['']}
+                    df4 = pd.DataFrame(first_entry)
+                    df4.to_csv('camplist.csv', index=False)
+                    f.close()
+        except FileNotFoundError:
+            #handling the case that file doesn't exist and then following the same procedure.
+            f = open("camplist.csv", "w")
+            emergency_id = country_code+'1'
+            first_entry = {'Emergency ID': [emergency_id], 'Type of emergency': [type_emergency],
+                        'Description': [description], 'Location': [country], 'Start date': [startDate],
+                        'Close date': [''], 'Number of refugees': [''], 'Camp ID': [''], 'No of Volunteers': [''],
+                        'Capacity': ['']}
+            df5 = pd.DataFrame(first_entry)
+            df5.to_csv('camplist.csv', index=False)
+            f.close()
+        except ValueError:
+            #handling with the case that date is inserted in a form different to the required.
+            return "Please enter a valid start date in the form YYYY-MM-DD."
+        except TypeError:
+            #handling with the case that some of the data are not entered as a string form.
+            return "All fields should be entered as a string, even start date."
 
-    def close_emergency(self): # no interaction
-        '''
-        Take the folder and all the data we accumulated in the .csv files and save under a relevant name like "closed emergency XXX"
-        Clear all global and local self.variables.
-        Stop the entire program (I'm not even sure how to do that from a method tbh, but we'll figure it out)
-
-        Advantage of saving all the data under a new name is it won't possibly ever be interacted with by the rest of the program and
-        we get to archive the data which is real-life-useful thing to do.
-        '''
-        pass
+    def close_emergency(current_user, emergency_id, close_date):
+        #selfemergency_id = emergency_id
+        #self.close_date = close_date
+        # checking if the user is admin as is the only one who can close emergency.
+        if current_user != "adm":
+            return "Only admin has access to create emergency."
+        try:
+            # modifying date to the appropriate format with as DD/MM/YYYY.
+            datetime.date.fromisoformat(close_date)
+            closeDate = datetime.datetime.strptime(close_date, "%Y-%m-%d").strftime("%d/%m/%Y")
+            # readind data inside csv file and turning them to a panda dataframe.
+            df1 = pd.read_csv('camplist.csv', encoding='latin-1')
+            #looping through the dataframe.
+            for index in df1.index:
+                #checking if the emergency entered exists by checking the emergency ID.
+                if df1['Emergency ID'].loc[df1.index][index] == emergency_id:
+                    #checking that close date is not earlier than start date.
+                    if df1['Start date'].loc[df1.index][index] <= closeDate:
+                        #add the close date to the pandas dataframe.
+                        df1.loc[index, ['Close date']] = [closeDate]
+                        #save the panda dataframe to the csv file.
+                        df1.to_csv('camplist.csv', index=False)
+                        return "Emergency was successfully closed."
+                    else:
+                        # handling with the case that close date is earlier than start date.
+                        return "Close date shouldn't be earlier than start date"
+            return "Emergency not found. Please enter a new existing emergency."
+        except FileNotFoundError:
+            #handling with the case that file was not found, which means that it was never created as there is no existing
+            #emergency going on.
+            return "No active emergencies right now."
+        except ValueError:
+            # handling with the case that date is inserted in a form different to the required.
+            return "Please enter a valid start date in the form YYYY-MM-DD."
+        except TypeError:
+            # handling with the case that some of the data are not entered as a string form.
+            return "All fields should be entered as a string, even start date."
 
     def amend_camps(self):
         '''
