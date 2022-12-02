@@ -5,7 +5,6 @@ import datetime
 import time
 import os
 
-
 class CentralFunctions():
 
     def __init__(self):
@@ -314,5 +313,631 @@ class CentralFunctions():
             self.refugee_db = list_of_refugees
             break
 
+    def count_ref_vol(self):
+        '''
+        Counts the number of volunteers in each camp and the number of refugees in each camp, after which it updates the camp_database.csv with correct numbers.
+        '''
+        camp_df = self.camps_db.copy()
+        refugee_df = self.refugee_db.copy()
+        vol_df = self.vol_db.copy()
 
-# add volunteer and admin stuff below :)
+        count_vol = vol_df['Camp ID'].value_counts()
+        count_ref = refugee_df['Camp ID'].value_counts()
+
+        for i in count_vol.index:
+            camp_df.loc[camp_df['Camp ID']==i,'Number of volunteers'] = count_vol[i]
+        for i in count_ref.index:
+            camp_df.loc[camp_df['Camp ID']==i,'Number of refugees'] = count_ref[i]
+
+        self.camps_df = camp_df.copy()
+        camp_df.to_csv('camp_database.csv', index=False)
+
+class Amin(CentralFunctions):
+
+    def __init__(self):
+        CentralFunctions.__init__(self)
+
+    def create_emergency(self,prev=None):
+        '''
+        Allows user to create emergency by requesting country of emergencym type of emergency, description and start date.
+        Automatically assigns emergency ID and upon commit adds new emergency to emergency_database.csv 
+        '''
+        print('Please input information about your emergency')
+        print('Expected Inputs:\n'+
+              '\t>Country\n'+
+              '\t>Type of emergency\n'+
+              '\t>Description of your emrgency\n'+
+              '\t>Start date\n')
+        print('[B] to go back')
+        print('[Q] to quit')
+        
+        while True: 
+            emergency_db = self.emergencies_db.copy()
+            country_dict  = self.countries_db.to_dict(orient='index')           
+            
+            def go_back(questionStack):
+                i = 0
+                answerStack = []
+                while i < len(questionStack):
+                    
+                    if i == 0:
+                        while True:
+                            answer = input(questionStack[i])
+                            if answer in list(self.countries_db.index):
+                                break
+                            else:
+                                print('Please select valid country')
+                                continue
+                    elif i == 3:
+                        while True:
+                            answer = input(questionStack[i])
+                            try:
+                                datetime.date.fromisoformat(answer)
+                                answer = datetime.datetime.strptime(answer, "%Y-%m-%d").strftime("%d/%m/%Y") 
+                                break
+                            except:
+                                print('Please enter a day of valid format [YYYY-MM-DD]: ') 
+                                continue
+                    else:
+                        answer = input(questionStack[i])
+
+                    if answer == 'B':
+                        if i == 0:
+                            break
+                        answerStack.pop()
+                        i -= 1
+                        continue
+                    elif answer == 'Q':
+                        break
+
+                    answerStack.append(answer)
+                    i += 1
+
+                return answerStack
+
+            questions = ['\nPlease select the country of emergency: ', '\nPlease enter type of emergency: ', '\nPlease briefly describe your emergency: ',
+                 '\nPlease enter start date of the emergency [YYYY-MM-DD]: ']
+            answers = go_back(questions)
+            country_code = country_dict[answers[0]]['Country code']    
+
+            if True in list(emergency_db['Emergency ID'].str.contains(country_code, case=False)):
+                new_no_index = int(emergency_db.loc[emergency_db['Emergency ID'].str.contains(country_code, case=False)].iloc[-1]['Emergency ID'][2:]) + 1
+            else:
+                new_no_index = 1
+            emergency_id = country_code + str(new_no_index)
+            
+            emergency_db.loc[len(emergency_db.index)] = [emergency_id, answers[0], answers[1], answers[2], answers[3], None]
+            
+            print('\n', emergency_db.iloc[-1])
+            while True:
+                commit = input('\nCommit changes? [y]/[n] ')
+                if commit == 'y' or commit == 'n':
+                    break
+                else:
+                    print('Your input is not recognised')
+                    continue
+            
+            if commit == 'y':
+                self.emergencies_db = emergency_db.copy()
+                emergency_db.to_csv('emergency_database.csv', index=False)
+                break
+            else:
+                continue
+
+    def close_emergency(self,prev=None):
+        '''
+        Closes emergency by adding current date to Close Date column.
+        '''
+        emergency_db = self.emergencies_db.copy()
+        
+        while True:
+            print('Please specify which emergency you would like to close')
+            print('Expected Inputs:\n'+
+              '\t>Emergency ID\n')
+            print('[B] to go back')
+            print('[Q] to quit\n')
+            print(emergency_db)
+            
+            while True:
+                ID = input('\nPlease provide the emergency ID: ').upper()
+                if ID in list(emergency_db['Emergency ID']):
+                    break
+                elif ID == 'Q':
+                    break
+                else:
+                    print('Please provide valid ID')
+                    continue
+            if ID == 'Q':
+                break
+            
+            emergency_db.loc[emergency_db['Emergency ID'] == ID,'Close date'] = datetime.date.today().strftime("%d/%m/%Y")
+            print(emergency_db.loc[emergency_db['Emergency ID'] == ID])
+            while True:
+                commit = input('\nCommit changes? [y]/[n] ')
+                if commit == 'y' or commit == 'n':
+                    break
+                else:
+                    print('Your input is not recognised')
+                    continue
+            
+            if commit == 'y':
+                self.emergencies_db = emergency_db.copy()
+                emergency_db.to_csv('emergency_database.csv', index=False)
+                break
+            else:
+                continue
+
+    def amend_camp_capacity(self,prev=None):
+        '''
+        Allows user to change the capacity of one of the camps. Selection by camp ID.
+        '''
+        camp_db = self.camps_db.copy()
+        print("Select which camp's capacity needs to be altered")
+        print('Expected Inputs:\n'+
+              '\t>Emergency ID\n')
+        print('[B] to go back')
+        print('[Q] to quit\n')
+        print(camp_db)
+        
+        while True:
+            while True:
+                choose_camp = input("\nChoose camp for which you want to edit: ").upper()
+                if choose_camp in list(camp_db['Camp ID']) or choose_camp == 'Q':
+                    break
+                else:
+                    print('Please select a valid camp')
+                    continue
+            if choose_camp == 'Q':
+                    break
+                
+            print(camp_db.loc[camp_db["Camp ID"] == choose_camp])
+            
+            while True:
+                cap = input("\nState new capacity: ")
+                if cap == 'B' or cap == 'Q':
+                    break
+                else:
+                    try:
+                        cap = int(cap)
+                        if cap < int(camp_db.loc[camp_db['Camp ID'] == choose_camp]['Number of refugees']):
+                            print('Your new capacity is lower than current number of refugees.')
+                            continue
+                        else:
+                            break
+                    except ValueError:
+                        print('Your input needs to be an integer')
+                        continue
+            if cap == 'B':
+                continue
+            elif cap == 'Q':
+                break
+            
+            camp_db.loc[camp_db['Camp ID'] == choose_camp,'Capacity'] = cap
+            print(camp_db.loc[camp_db['Camp ID'] == choose_camp])
+            
+            while True:
+                commit = input('\nCommit changes? [y]/[n] ')
+                if commit == 'y' or commit == 'n':
+                    break
+                else:
+                    print('Your input is not recognised')
+                    continue
+            
+            if commit == 'y':
+                self.camps_db = camp_db.copy()
+                camp_db.to_csv('camp_database.csv', index=False)
+                break
+            else:
+                continue
+
+    def write_volunteer(self,prev=None):
+        '''
+        Allows admin to create one or more empty volunteer accounts.
+
+        Either manual input can be selected. 
+            INPUTS: username, password and camp of volunteer
+        Or automatic creation of multiple volunteer accounts from the same camp can be made which have automatically generated usernames in form "Volunteer"+index
+            INPUTS: number of volunteers desired, camp of volunteers
+        '''
+        vol_df = self.vol_db.copy()
+        users_df = self.user_db.copy()
+        camps_df = self.camps_db.copy()
+        users_exist = list(users_df['username'])
+        camps_exist = list(camps_df['Camp ID'])
+        self.quit = False
+        
+        print('Please select how would you like to create a new volunteer profile')
+        print('[1] - manual input')
+        print('[2] - automatic creation')
+        print('[B] to go back')
+        print('[Q] to quit')               
+        
+        def manual(): 
+            counter = 0  
+            while True:
+
+                def assign_username():
+                    global username
+                    while True:
+                        inpt = input('\nEnter a new username: ')
+                        if inpt in users_exist:
+                            print('Username taken. Try another.')
+                            continue
+                        break
+                    username = inpt
+                    if inpt == 'Q':
+                        self.quit = True
+                    return 1
+                
+                def assign_password():
+                    global password       
+                    inpt = input('\nSet a password: ')
+                    password = inpt
+                    if inpt == 'B':
+                        return -1
+                    elif inpt == 'Q':
+                        self.quit = True
+                        return 0
+                    else:
+                        return 1
+                
+                def assign_camp():
+                    global camp
+                    while True:
+                        print('\nSet camp:')
+                        print('[1] - View camp summary information')
+                        print('[2] - Assign camp')
+                        print('[B] to go back')
+                        print('[Q] to quit')
+                        user_input = input('\nChoose interaction: ')
+                        if user_input == '1':
+                            print(camps_df)
+                        elif user_input == '2':
+                            pass
+                        elif user_input == 'B' or user_input == 'Q':
+                            break
+                        else:
+                            print('Invalid input.')
+                            continue
+                        user_input = input('\nEnter camp ID: ')
+                        while user_input not in camps_exist:
+                            print('Invalid Camp ID.')
+                            user_input = input('\nEnter camp ID: ')
+                        camp = user_input
+                        break
+                    
+                    if user_input == 'B':
+                        return -1
+                    elif user_input == 'Q':
+                        self.quit = True
+                        return 0
+                    else:
+                        return 1
+
+                inputs = [assign_username, assign_password, assign_camp]
+                
+                while counter < len(inputs):
+                    counter += inputs[counter]()
+                    if self.quit == True:
+                        break
+                if self.quit == True:
+                        break
+                
+                vol_df.loc[len(vol_df.index)] = [username, '', '', '', camp, '']
+                users_df.loc[len(users_df.index)] = [username, password, 'volunteer', 'TRUE']
+                print(users_df.tail(1))  
+                while True:
+                    commit = input('\nCommit changes? [y]/[n] ')
+                    if commit == 'y' or commit == 'n':
+                        break
+                    else:
+                        print('Your input is not recognised')
+                        continue
+                
+                if commit == 'y':
+                    self.vol_db = vol_df.copy()
+                    self.user_db = users_df.copy()
+                    vol_df.to_csv('volunteer_database.csv', index=False)
+                    users_df.to_csv('user_database.csv', index=False)
+                else:
+                    counter = 0 
+                    continue
+                
+                while True:
+                    repeat = input('\nWould you like to create another volunteer? [y]/[n] ')
+                    if repeat == 'y' or repeat == 'n':
+                        break
+                    else:
+                        print('Your input is not recognised')
+                        continue
+                if repeat == 'n':
+                    break
+                else:
+                    counter = 0 
+                    continue
+        
+        def automatic():
+            while True:
+                while True:
+                    no_of_new_users = input('\nPlease select the number of new volunteers you wish to create: ')
+                    try:
+                        no_of_new_users = int(no_of_new_users)
+                        if no_of_new_users == 'Q':
+                            break
+                    except ValueError:
+                        print('Your input needs to be an integer')
+                        continue
+                    while True:
+                        camp = input('\nEnter camp ID: ')
+                        if camp not in camps_exist:
+                            print('Invalid Camp ID.')
+                            continue
+                        else:
+                            break
+                    if camp == 'B':
+                        continue
+                    else:
+                        break
+                if camp == 'Q' or no_of_new_users == 'Q':
+                    break
+                
+                new_usr_index = len(vol_df.index)+1
+                for i in range(no_of_new_users):
+                    vol_df.loc[len(vol_df.index)] = ['Volunteer'+str(new_usr_index+i), '', '', '', camp, '']
+                    users_df.loc[len(users_df.index)] = ['Volunteer'+str(new_usr_index+i), '111', 'volunteer', 'TRUE']
+                
+                print(users_df.tail(no_of_new_users))  
+                while True:
+                    commit = input('\nCommit changes? [y]/[n] ')
+                    if commit == 'y' or commit == 'n':
+                        break
+                    else:
+                        print('Your input is not recognised')
+                        continue
+                
+                if commit == 'y':
+                    self.vol_db = vol_df.copy()
+                    self.user_db = users_df.copy()
+                    vol_df.to_csv('volunteer_database.csv', index=False)
+                    users_df.to_csv('user_database.csv', index=False)
+                    break
+                else:
+                    continue  
+            
+        while True:
+            user_input = input('Choose interaction: ')
+            if user_input == '1' or user_input == '2':
+                break
+            else:
+                print('You input is not recognised')
+                continue
+            
+        if user_input == '1':
+            manual()
+        else:
+            automatic()
+
+    def write_camp(self,prev=None):
+        '''
+        Allows admin to add a news camp to an existing emergency.
+        '''
+        self.quit = False
+        counter = 0
+        self.count_ref_vol()
+        print('Please provide details of the new camp')
+        print('Expected Inputs:\n'+
+              '\t>Country\n'+
+              '\t>Emergency ID\n'+
+              '\t>Camp capacity\n')
+        print('[B] to go back')
+        print('[Q] to quit')
+
+        while True:
+            
+            camps_df = self.camps_db.copy()
+            emergency_df = self.emergencies_db.copy()
+            countries = self.countries_db.to_dict(orient='index')
+
+            def assign_country():
+                global country_id
+                global country
+                while True:
+                    country = input("\nEnter country name: ")
+                    if country == 'B' or country == 'Q':
+                        break
+                    if country in countries.keys(): #and country_id in list(emergency_df['Emergency ID']):
+                        country_id = countries[country]['Country code']
+                        if True in list(emergency_df['Emergency ID'].str.contains('PK', case=False)):
+                            break
+                    print('Please select country with an existing emergency.')
+                if country == 'Q':
+                    self.quit = True
+                return 1
+            
+            def assign_emergency():
+                global emergency
+                emergencies_in_country = emergency_df.loc[emergency_df['Emergency ID'].str.contains(country_id, case=False)]
+                if len(emergencies_in_country.index) >= 1:
+                    print('\n',emergencies_in_country)
+                while True:
+                    if len(emergencies_in_country.index) > 1:
+                        emergency = input('\nPlease select which emergency you would like to assign your camp to: ')
+                        if emergency == 'B' or emergency == 'Q':
+                            break
+                        if emergency in list(emergencies_in_country['Emergency ID']):
+                            break
+                        else:
+                            print('Please select valid ID.')
+                            continue
+                    else:
+                        emergency = list(emergencies_in_country['Emergency ID'])[0]
+                        break
+                if emergency == 'B':
+                    return -1
+                elif emergency == 'Q':
+                    self.quit = True
+                    return 0
+                else:
+                    return 1
+
+            def assign_capacity():
+                global capacity
+                while True:
+                    capacity = input("\nEnter maximum camp capacity:")
+                    if capacity == 'B' or emergency == 'Q':
+                        break
+                    if capacity.isdigit()==False:
+                        print('Please enter an integer.')
+                        continue
+                    break
+                if capacity == 'B':
+                    return -1
+                elif capacity == 'Q':
+                    self.quit = True
+                    return 0
+                else:
+                    return 1
+                
+            inputs = [assign_country, assign_emergency, assign_capacity]
+                
+            while counter < len(inputs):
+                counter += inputs[counter]()
+                if self.quit == True:
+                    break
+            if self.quit == True:
+                    break
+
+            new_camp_index = len(camps_df.loc[camps_df['Camp ID'].str.contains(emergency, case=False)].index)+1
+            new_ID = emergency + '-' + str(new_camp_index)
+
+            camps_df.loc[len(camps_df.index)] = [new_ID, country, '', capacity, emergency, '']
+
+            print(camps_df.tail(1))
+            while True:
+                commit = input('\nCommit changes? [y]/[n] ')
+                if commit == 'y' or commit == 'n':
+                    break
+                else:
+                    print('Your input is not recognised')
+                    continue
+            
+            if commit == 'y':
+                self.camps_df = camps_df.copy()
+                camps_df.to_csv('camp_database.csv', index=False)
+                break
+            else:
+                continue    
+        
+class Volunteer(CentralFunctions):
+
+    def __init__(self):
+        CentralFunctions.__init__(self)
+
+    def amend_self_info(self,prev=None):
+        '''
+        Allows volunteer user to input their name, surname, phone number and availability.
+        '''        
+        print('Please select input or update any information about you.')
+        print("If you do NOT wish to change current value press ENTER during input.")
+        print('Expected Inputs:\n'+
+              '\t>First name\n'+
+              '\t>Family name\n'+
+              '\t>Phone number\n'+
+              '\t>Availability\n')
+        print('[B] to go back')
+        print('[Q] to quit\n')
+
+        vol_df = self.vol_db
+        print(vol_df.loc[vol_df['Username']==self.current_user])
+        questions = ['\nEnter new first name: ', '\nEnter new second name: ', '\nEnter new phone number in the format [44_______]:', '\nEnter new availability: ']
+
+        def go_back(questionStack):
+                i = 0
+                answerStack = []
+
+                while i < len(questionStack):
+                    if i == 0 or i == 1:
+                        while True:
+                            answer = input(questionStack[i])
+                            if answer == 'B':
+                                if i == 0:
+                                    break
+                                answerStack.pop()
+                                i -= 1
+                            elif answer == 'Q':
+                                break
+                            elif answer == '':
+                                answer = vol_df.iloc[vol_df.index[vol_df['Username'] == self.current_user][0],i+1]
+                            elif not answer.isalpha():
+                                print("Please enter a valid name.")
+                                continue
+                            break
+                    elif i == 2:
+                        while True:
+                            answer = input(questionStack[i])
+                            if answer == 'B':
+                                if i == 0:
+                                    break
+                                answerStack.pop()
+                                i -= 1
+                            elif answer == 'Q':
+                                break
+                            elif answer == '':
+                                answer = vol_df.iloc[vol_df.index[vol_df['Username'] == self.current_user][0],3]
+                            elif not answer.isnumeric():
+                                print("Please enter a valid phone number.")
+                                continue
+                            elif len(answer) != 9 or answer[:2] != "44":
+                                print("Invalid format.")
+                                continue
+                            break
+                    elif i == 3:
+                        while True:
+                            answer = input(questionStack[i])
+                            if answer == 'B':
+                                if i == 0:
+                                    break
+                                answerStack.pop()
+                                i -= 1
+                            elif answer == 'Q':
+                                break
+                            elif answer == '':
+                                answer = vol_df.iloc[vol_df.index[vol_df['Username'] == self.current_user][0],5]
+                            elif not answer.isnumeric():
+                                print("Invalid input.")
+                                continue
+                            elif int(answer) > 48:
+                                print("Availability exceeds maximum weekly working hours (48h).")
+                                continue
+                            break                    
+                    if answer == 'B':     
+                        continue 
+                    elif answer == 'Q':
+                        exit()
+                    answerStack.append(answer)
+                    i += 1
+
+                return answerStack
+
+        while True:
+            answers = go_back(questions)
+            print(answers)
+            vol_df.loc[vol_df['Username']==self.current_user] = [self.current_user,answers[0],answers[1],answers[2],self.camp_of_user,answers[3]]
+
+            print('\n', vol_df.loc[vol_df['Username']==self.current_user])
+            while True:
+                commit = input('\nCommit changes? [y]/[n] ')
+                if commit == 'y' or commit == 'n':
+                    break
+                else:
+                    print('Your input is not recognised')
+                    continue
+            
+            if commit == 'y':
+                self.emergencies_db = vol_df.copy()
+                vol_df.to_csv('volunteer_database.csv', index=False)
+                break
+            else:
+                answers = []
+                continue
+
