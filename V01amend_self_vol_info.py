@@ -17,8 +17,8 @@ class test():
         if fileCheckError:
             exit()
 
-        self.current_user = None
-        self.camp_of_user = None
+        self.current_user = 'Volunteer1'
+        self.camp_of_user = 'AU1-1'
         
         pass
     
@@ -28,6 +28,8 @@ class test():
 
         try: 
             df = pd.read_csv('user_database.csv')
+            df.dropna(how="all", inplace=True)
+            df.fillna('',inplace=True)
             df['password'] = df['password'].astype(str)
             self.user_db = df
         except FileNotFoundError:
@@ -43,6 +45,8 @@ class test():
 
         try:
             df = pd.read_csv('volunteer_database.csv')
+            df.dropna(how="all", inplace=True)
+            df.fillna('',inplace=True)
             self.vol_db = df
         except FileNotFoundError:
             vol_db = {'Username':[''],'First name':[''],'Second name':[''],'Camp ID':[''],'Avability':[''],'Status':['']}
@@ -56,6 +60,8 @@ class test():
 
         try:
             df = pd.read_csv('refugee_database.csv')
+            df.dropna(how="all", inplace=True)
+            df.fillna('',inplace=True)
             self.refugee_db = df
         except FileNotFoundError:
             refugee_db = {'Family ID':[''],'Lead Family Member Name':[''],'Lead Family Member Surname':[''],'Camp ID':[''],'Mental State':[''],'Physical State':[''],'No. Of Family Members':['']}
@@ -69,6 +75,8 @@ class test():
 
         try:
             df = pd.read_csv('camp_database.csv')
+            df.dropna(how="all", inplace=True)
+            df.fillna('',inplace=True)
             self.camps_db = df
         except FileNotFoundError:
             camps_db = {'Emergency ID':[''],'Type of emergency':[''],'Description':[''],'Location':[''],'Start date':[''],'Close date':[''],'Number of refugees':[''],'Camp ID':[''],'No Of Volounteers':[''],'Capacity':['']}
@@ -82,6 +90,8 @@ class test():
 
         try:
             df = pd.read_csv('emergency_database.csv')
+            df.dropna(how="all", inplace=True)
+            df.fillna('',inplace=True)
             self.emergencies_db = df
         except FileNotFoundError:
             emergencies_db = {'Emergency ID':[''],'Location':[''],'Type':[''],'Description':[''],'Start date':[''],'Close date':['']}
@@ -101,79 +111,97 @@ class test():
             dataFailure = True
         
         return dataFailure
+    
+    def amend_self_info(self):
         
-    def create_emergency(self,prev=None):
-        '''
-        Allows user to create emergency by requesting country of emergencym type of emergency, description and start date.
-        Automatically assigns emergency ID and upon commit adds new emergency to emergency_database.csv 
-        '''
-        print('Please input information about your emergency')
+        print('Please select input or update any information about you.')
+        print("If you do NOT wish to change current value press ENTER during input.")
         print('Expected Inputs:\n'+
-              '\t>Country\n'+
-              '\t>Type of emergency\n'+
-              '\t>Description of your emrgency\n'+
-              '\t>Start date\n')
+              '\t>First name\n'+
+              '\t>Family name\n'+
+              '\t>Phone number\n'+
+              '\t>Availability\n')
         print('[B] to go back')
-        print('[Q] to quit')
-        
-        while True: 
-            emergency_db = self.emergencies_db.copy()
-            country_dict  = self.countries_db.to_dict(orient='index')           
-            
-            def go_back(questionStack):
+        print('[Q] to quit\n')
+
+        vol_df = self.vol_db
+        print(vol_df.loc[vol_df['Username']==self.current_user])
+        questions = ['\nEnter new first name: ', '\nEnter new second name: ', '\nEnter new phone number in the format [44_______]:', '\nEnter new availability: ']
+
+        def go_back(questionStack):
                 i = 0
                 answerStack = []
+
                 while i < len(questionStack):
-                    
-                    if i == 0:
+                    if i == 0 or i == 1:
                         while True:
                             answer = input(questionStack[i])
-                            if answer in list(self.countries_db.index):
+                            if answer == 'B':
+                                if i == 0:
+                                    break
+                                answerStack.pop()
+                                i -= 1
+                            elif answer == 'Q':
                                 break
-                            else:
-                                print('Please select valid country')
+                            elif answer == '':
+                                answer = vol_df.iloc[vol_df.index[vol_df['Username'] == self.current_user][0],i+1]
+                            elif not answer.isalpha():
+                                print("Please enter a valid name.")
                                 continue
+                            break
+                    elif i == 2:
+                        while True:
+                            answer = input(questionStack[i])
+                            if answer == 'B':
+                                if i == 0:
+                                    break
+                                answerStack.pop()
+                                i -= 1
+                            elif answer == 'Q':
+                                break
+                            elif answer == '':
+                                answer = vol_df.iloc[vol_df.index[vol_df['Username'] == self.current_user][0],3]
+                            elif not answer.isnumeric():
+                                print("Please enter a valid phone number.")
+                                continue
+                            elif len(answer) != 9 or answer[:2] != "44":
+                                print("Invalid format.")
+                                continue
+                            break
                     elif i == 3:
                         while True:
                             answer = input(questionStack[i])
-                            try:
-                                datetime.date.fromisoformat(answer)
-                                answer = datetime.datetime.strptime(answer, "%Y-%m-%d").strftime("%d/%m/%Y") 
+                            if answer == 'B':
+                                if i == 0:
+                                    break
+                                answerStack.pop()
+                                i -= 1
+                            elif answer == 'Q':
                                 break
-                            except:
-                                print('Please enter a day of valid format [YYYY-MM-DD]: ') 
+                            elif answer == '':
+                                answer = vol_df.iloc[vol_df.index[vol_df['Username'] == self.current_user][0],5]
+                            elif not answer.isnumeric():
+                                print("Invalid input.")
                                 continue
-                    else:
-                        answer = input(questionStack[i])
-
-                    if answer == 'B':
-                        if i == 0:
-                            break
-                        answerStack.pop()
-                        i -= 1
-                        continue
+                            elif int(answer) > 48:
+                                print("Availability exceeds maximum weekly working hours (48h).")
+                                continue
+                            break                    
+                    if answer == 'B':     
+                        continue 
                     elif answer == 'Q':
-                        break
-
+                        exit()
                     answerStack.append(answer)
                     i += 1
 
                 return answerStack
 
-            questions = ['\nPlease select the country of emergency: ', '\nPlease enter type of emergency: ', '\nPlease briefly describe your emergency: ',
-                 '\nPlease enter start date of the emergency [YYYY-MM-DD]: ']
+        while True:
             answers = go_back(questions)
-            country_code = country_dict[answers[0]]['Country code']    
+            print(answers)
+            vol_df.loc[vol_df['Username']==self.current_user] = [self.current_user,answers[0],answers[1],answers[2],self.camp_of_user,answers[3]]
 
-            if True in list(emergency_db['Emergency ID'].str.contains(country_code, case=False)):
-                new_no_index = int(emergency_db.loc[emergency_db['Emergency ID'].str.contains(country_code, case=False)].iloc[-1]['Emergency ID'][2:]) + 1
-            else:
-                new_no_index = 1
-            emergency_id = country_code + str(new_no_index)
-            
-            emergency_db.loc[len(emergency_db.index)] = [emergency_id, answers[0], answers[1], answers[2], answers[3], None]
-            
-            print('\n', emergency_db.iloc[-1])
+            print('\n', vol_df.loc[vol_df['Username']==self.current_user])
             while True:
                 commit = input('\nCommit changes? [y]/[n] ')
                 if commit == 'y' or commit == 'n':
@@ -183,12 +211,12 @@ class test():
                     continue
             
             if commit == 'y':
-                self.emergencies_db = emergency_db.copy()
-                emergency_db.to_csv('emergency_database.csv', index=False)
+                self.emergencies_db = vol_df.copy()
+                vol_df.to_csv('volunteer_database.csv', index=False)
                 break
             else:
+                answers = []
                 continue
-            
-            
+        
 tst = test()
-tst.create_emergency()
+tst.amend_self_info()
