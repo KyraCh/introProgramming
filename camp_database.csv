@@ -1,6 +1,6 @@
 Camp ID,Location,Number of volunteers,Capacity,Current Emergency ,Number of refugees
-A1,Australia,100,200,AU1,189
-A2,Australia,50,150,AU1,131
-A3,Pakistan,11,50,PK4,35
-A4,New Zealand,45,100,None,0
-A5,China,200,400,None,0
+A1,Australia,30,201,AU1,8
+A2,Australia,12,150,AU1,11
+A3,Pakistan,1,50,PK4,0
+A4,New Zealand,0,100,None,0
+A5,China,0,400,None,0

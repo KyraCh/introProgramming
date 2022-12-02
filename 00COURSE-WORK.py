@@ -72,7 +72,7 @@ class CentralFunctions():
             df.to_csv('emergency_database.csv')
             self.emergency_data = df
         except:
-            print("System couldn't read your emergency database file." 
+            print("System couldn't read your emergency database file.")
         
         try:
             df = pd.read_csv('volunteer_database.csv').set_index('Username')
@@ -124,7 +124,7 @@ class CentralFunctions():
             print("System couldn't read your camplist database file.")
 
         try:
-            df = pd.read_csv("camp_database.csv", index_col = 'Camp ID')
+            df = pd.read_csv("camp_database.csv") #index cannot be camp id because we cant access it
             self.camps_df = df
         except FileNotFoundError:
             camps_df = {'Camp ID':[''],'Location':[''],'Number of volunteers':[''],'Capacity':[''],'Current Emergency':[''],'Number of refugees':['']}
@@ -141,76 +141,86 @@ class CentralFunctions():
         except:
             print("System couldn't read the countries database file.")
 
-    
+        #counted the real values for volunteers and refugees in camp database
+
+        for index, row in self.camps_df.iterrows():
+            self.camps_df.at[index,'Number of volunteers']=len(self.vol_data[self.vol_data['Camp ID']==row['Camp ID']])
+            self.camps_df.at[index,'Number of refugees']=self.list_of_refugee.loc[self.list_of_refugee['Camp ID'] == row['Camp ID'], 'No. Of Family Members'].sum()
+
+
+        self.camps_df.to_csv("camp_database.csv", index=False)
+
+
     def save(self, file=None):
         '''
         Saves a relvant file when we are done inputting new data.
         I put default value as None so we have a quick trigger to save every file together. If you manage a particular file at a time then 
         what file we are saving should be specified
         '''
+
         pass
                   
     def call_no_refugees(self):
-    '''Updated method'''              
+        '''Updated method'''
                   
-    if self.current_user == 'adm':
-        #prints list of emergency IDs + emergency description
-        print(self.emergency_df['Description'])
-        #list of emergency IDs
-        list_emID = list(self.emergency_df.index)
-        #list of camp IDs
-        list_campID = list(self.camps_df.index)
-        #list of family IDs
-        list_famID = list(self.list_of_refugee.index)
-        choose_emergency = input('Choose emergency by entering the associated emergency ID:')
-        while choose_emergency not in list_emID:
-            print('Invalid emergency ID.')
+        if self.current_user == 'adm':
+            #prints list of emergency IDs + emergency description
+            print(self.emergency_df['Description'])
+            #list of emergency IDs
+            list_emID = list(self.emergency_df.index)
+            #list of camp IDs
+            list_campID = list(self.camps_df.index)
+            #list of family IDs
+            list_famID = list(self.list_of_refugee.index)
             choose_emergency = input('Choose emergency by entering the associated emergency ID:')
-        choose_emergency = choose_emergency.upper()
-        campID = input('Choose camp by entering the associated emergency ID:')
-        while campID not in list_campID:
-            print('Invalid camp ID.')
+            while choose_emergency not in list_emID:
+                print('Invalid emergency ID.')
+                choose_emergency = input('Choose emergency by entering the associated emergency ID:')
+            choose_emergency = choose_emergency.upper()
             campID = input('Choose camp by entering the associated emergency ID:')
-    else:
-        campID = self.camp_of_user
-        choose_emergency = self.camps_df[self.camps_df.index == campID]["Current Emergency "].values[0]
-    while True:
-        print('Enter [1] to view current total number of refugees.')
-        print('Enter [2] to view the number of refugees allocated per camp.')
-        print('Enter [3] to view the number of families allocated per camp.')
-        print(f'Enter [4] to view list of families allocated to your camp.')
-        print('Enter [5] to view information about a specific family.')
-        print('Enter [Quit] to exit.')
-        user_input = input('Choose interaction:')
-        if user_input == '1':
-            total_ref = sum(self.camps_df[self.camps_df['Current Emergency ']==choose_emergency]['Number of refugees'])
-            print(f'Current total number of refugees from {choose_emergency} is {total_ref}.')
-        elif user_input == '2':
-            ref_per_camp = self.camps_df[self.camps_df['Current Emergency ']==choose_emergency]['Number of refugees']
-        elif user_input == '3':
-            count_families = self.list_of_refugee['Camp ID'].value_counts()
-            print(count_families)
-        elif user_input == '4':
-            if self.current_user == 'adm':
-                camp_ID = input('Enter camp ID:')
-                while camp_ID not in list_campID:
-                    print('Invalid camp ID.')
-                    camp_ID = input('Enter camp ID:')
-            list_of_families = self.list_of_refugee[self.list_of_refugee['Camp ID']==camp_ID]
-            print(list_of_families)
-        elif user_input == '5':
-            family = input('Enter family ID:')
-            while family not in list_famID:
-                print('Invalid family ID.')
-                family = input('Enter family ID:')
-            family_sum = self.list_of_refugee[self.list_of_refugee.index == family]
-            while str(family_sum['Camp ID'].values[0])!= campID:
-                print('Access denied.')
-                family = input('Enter family ID:')
-                family_sum = self.list_of_refugee[self.list_of_refugee.index == family]
-            print(family_sum)
+            while campID not in list_campID:
+                print('Invalid camp ID.')
+                campID = input('Choose camp by entering the associated emergency ID:')
         else:
-            break
+            campID = self.camp_of_user
+            choose_emergency = self.camps_df[self.camps_df.index == campID]["Current Emergency "].values[0]
+        while True:
+            print('Enter [1] to view current total number of refugees.')
+            print('Enter [2] to view the number of refugees allocated per camp.')
+            print('Enter [3] to view the number of families allocated per camp.')
+            print(f'Enter [4] to view list of families allocated to your camp.')
+            print('Enter [5] to view information about a specific family.')
+            print('Enter [Quit] to exit.')
+            user_input = input('Choose interaction:')
+            if user_input == '1':
+                total_ref = sum(self.camps_df[self.camps_df['Current Emergency ']==choose_emergency]['Number of refugees'])
+                print(f'Current total number of refugees from {choose_emergency} is {total_ref}.')
+            elif user_input == '2':
+                ref_per_camp = self.camps_df[self.camps_df['Current Emergency ']==choose_emergency]['Number of refugees']
+            elif user_input == '3':
+                count_families = self.list_of_refugee['Camp ID'].value_counts()
+                print(count_families)
+            elif user_input == '4':
+                if self.current_user == 'adm':
+                    camp_ID = input('Enter camp ID:')
+                    while camp_ID not in list_campID:
+                        print('Invalid camp ID.')
+                        camp_ID = input('Enter camp ID:')
+                list_of_families = self.list_of_refugee[self.list_of_refugee['Camp ID']==camp_ID]
+                print(list_of_families)
+            elif user_input == '5':
+                family = input('Enter family ID:')
+                while family not in list_famID:
+                    print('Invalid family ID.')
+                    family = input('Enter family ID:')
+                family_sum = self.list_of_refugee[self.list_of_refugee.index == family]
+                while str(family_sum['Camp ID'].values[0])!= campID:
+                    print('Access denied.')
+                    family = input('Enter family ID:')
+                    family_sum = self.list_of_refugee[self.list_of_refugee.index == family]
+                print(family_sum)
+            else:
+                break
 
     def call_no_of_refugees(self):
 
@@ -341,8 +351,9 @@ class CentralFunctions():
             break
                   
     def call_camps(self):
+
                   
-            '''Updated method'''      
+        '''Updated method'''
                   
         print("Choose 1 if you want to see the list of all camps")
         print("Choose 2 if you want to see the total number of camps")
@@ -444,15 +455,15 @@ class CentralFunctions():
         >delete capacity
         >
         '''
-        list_of_camps = self.list_of_camps.copy()
-        camps = list_of_camps["Emergency ID"]
+        list_of_camps = self.camps_df.copy()
+        camps = list_of_camps["Camp ID"]
 
         print(*camps, sep='\n')
 
-        choose_emergency = input("Choose emergency for which you want to edit:")
-        choose_emergency = choose_emergency.upper()
+        choose_camp = input("Choose camp for which you want to edit:")
+        choose_camp = choose_camp.upper()
 
-        print(list_of_camps[list_of_camps["Emergency ID"] == choose_emergency])
+        print(list_of_camps[list_of_camps["Camp ID"] == choose_camp])
 
         camp_amend = True
 
@@ -466,30 +477,30 @@ class CentralFunctions():
                 while True:
                     try:
                         cap=int(input("State new capacity: "))
-                        ind = list_of_camps[list_of_camps["Emergency ID"] == choose_emergency].index.values
-                        if cap < int(list_of_camps[list_of_camps["Emergency ID"] == choose_emergency]["Number of refugees"]):
+                        ind = list_of_camps[list_of_camps["Camp ID"] == choose_camp].index.values
+                        if cap < int(list_of_camps[list_of_camps["Camp ID"] == choose_camp]["Number of refugees"]):
                             raise CapacityTooSmall
                         break
                     except CapacityTooSmall:
                         print("Capacity is smaller than the number of refugees, try again!")
 
-                ind = list_of_camps[list_of_camps["Emergency ID"] == choose_emergency].index.values
+                ind = list_of_camps[list_of_camps["Camp ID"] == choose_camp].index.values
                 list_of_camps.loc[ind[0], ['Capacity']] =cap
-                print(list_of_camps[list_of_camps["Emergency ID"] == choose_emergency])
+                print(list_of_camps[list_of_camps["Camp ID"] == choose_camp])
                 # writing into the file
-                list_of_camps.to_csv("camplist.csv", index=False)
+                list_of_camps.to_csv("camp_database.csv", index=False)
             elif user_input=="BACK":
                 print(*camps, sep='\n')
 
-                choose_emergency = input("Choose emergency for which you want to edit:")
-                choose_emergency = choose_emergency.upper()
-                print(list_of_camps[list_of_camps["Emergency ID"] == choose_emergency])
+                choose_camp = input("Choose camp for which you want to edit:")
+                choose_camp = choose_camp.upper()
+                print(list_of_camps[list_of_camps["Camp ID"] == choose_camp])
             else:
                 break
 
-        self.list_of_camps = list_of_camps
+        self.camps_df = list_of_camps
 
-  def call_volunteers(self):
+    def call_volunteers(self):
         '''
         Reads the .csv file with volunteers and returns relevant info
             > How many volunteers
@@ -1082,3 +1093,5 @@ def execute():
     # employ a while loop to keep the program running
     # call login method and methods made to check if there exists an emergency, then use logic to determine how to treat the admin and volunteers
     # depending on who the user is call relevant interaction method
+
+
