@@ -1012,13 +1012,14 @@ def menu(functions):
         print(100*'=')
         functions[user_input]['method']()
 
-login = CentralFunctions()
-login.users_login()
-if login.current_user != 'adm':
-    vol = Volunteer(login.current_user,login.camp_of_user)
-    print(vol.current_user)
-    menu(vol.functions)
-else:
-    adm = Admin(login.current_user,login.camp_of_user)
-    print(adm.current_user)
-    menu(adm.functions)
+if __name__ == '__main__':
+    login = CentralFunctions()
+    login.users_login()
+    if login.current_user != 'adm':
+        vol = Volunteer(login.current_user,login.camp_of_user)
+        print(vol.current_user)
+        menu(vol.functions)
+    else:
+        adm = Admin(login.current_user,login.camp_of_user)
+        print(adm.current_user)
+        menu(adm.functions)
