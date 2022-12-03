@@ -6,7 +6,11 @@
 import pandas as pd
 import matplotlib.pyplot as plt
 import numpy as np
-
+import os
+import random
+from email.message import EmailMessage
+import ssl
+import smtplib
 # define Python user-defined exceptions
 class Error(Exception):
     """Base class for other exceptions"""
@@ -287,6 +291,7 @@ class CentralFunctions():
         # part which reads/creates the user_database file
         try:
             df = pd.read_csv('user_database.csv').set_index('username')
+            # df = pd.read_csv('user_database.csv').set_index('username')
             df['password'] = df['password'].astype(str)
             users_dict = df.to_dict(orient='index')
             self.user_data = df
@@ -346,10 +351,43 @@ class CentralFunctions():
                     print('You entered incorrect password')
             break
     def user_password(self):
-        # email_sender = "hemsystem1@gmail.com"
-        # email_password = ""
-        email_receiver = self.user_data
-        print(email_receiver)
+        print("Email with OTP to reset password was sent to you")
+        otp = ''.join([str(random.randint(0,9)) for x in range(4)])
+        email_sender = "hemsystem1@gmail.com"
+        email_password = "asbwtshlldlaalld"
+        data = self.user_data.reset_index()
+        email_receiver = data[data["username"] == self.user_id]['email'].values[0]
+
+        subject = "OTP to reset password"
+        body = """Yours OTP to reset password is: {}""".format(str(otp))
+        mail = EmailMessage()
+        mail["From"] = email_sender
+        mail["To"] = email_receiver
+        mail["Subject"] = subject
+        mail.set_content(body)
+        context = ssl.create_default_context()
+
+        with smtplib.SMTP_SSL('smtp.gmail.com',465,context=context) as smtp:
+            smtp.login(email_sender,email_password)
+            smtp.sendmail(email_sender,email_receiver,mail.as_string())
+        while True:
+            otp_validation = input("Input here the OTP: ")
+            if otp != otp_validation:
+                print("Please enter valid OTP")
+            else:
+                break
+        while True:
+            new_password = input("Type your new password: ")
+            password = data[data["username"] == self.user_id]['password'].values[0]
+            if password == new_password:
+                print("Sorry but your password can't be the same as the previous one")
+            elif len(new_password) < 8:
+                print("Sorry but your password needs to be at least 8 characters long")
+            else:
+                self.user_data.at[self.user_id,"password"] = new_password
+                self.user_data.to_csv("user_database.csv")
+                print("Password has been changed")
+                break
     def users(self):
         '''
         Will read the .csv file with the volunteers and form a dictionary which will be employed by login(), with passwords and logins
