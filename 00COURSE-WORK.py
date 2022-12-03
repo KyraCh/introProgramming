@@ -348,7 +348,7 @@ class CentralFunctions():
     def user_password(self):
         # email_sender = "hemsystem1@gmail.com"
         # email_password = ""
-        email_receiver = self.user_data[self.user_data['username']==self.user_id]['email']
+        email_receiver = self.user_data
         print(email_receiver)
     def users(self):
         '''
