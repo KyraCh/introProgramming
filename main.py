@@ -23,14 +23,12 @@ class CentralFunctions():
         self.current_user = None
         self.camp_of_user = None
 
-        self.users_login()
-
     def download_all_data(self):
 
         dataFailure = False
 
         try:
-            df = pd.read_csv('user_database.csv').set_index('username')
+            df = pd.read_csv('user_database.csv')#.set_index('username')
             df['password'] = df['password'].astype(str)
             self.user_db = df
         except FileNotFoundError:
@@ -59,7 +57,7 @@ class CentralFunctions():
             dataFailure = True
 
         try:
-            df = pd.read_csv('volunteer_database.csv').set_index('Username')
+            df = pd.read_csv('volunteer_database.csv')#.set_index('Username')
             self.vol_db = df
         except FileNotFoundError:
             vol_db = {'Username': [''], 'First name': [''], 'Second name': [
@@ -119,8 +117,8 @@ class CentralFunctions():
 
     def users_login(self):
 
-        users_dict = self.user_db.to_dict(orient='index')
-        vol_dict = self.vol_db.to_dict(orient='index')
+        users_dict = self.user_db.copy().set_index('username').to_dict(orient='index')
+        vol_dict = self.vol_db.copy().set_index('Username').to_dict(orient='index')
 
         while True:
             username = input('Please input your username: ').strip()
@@ -135,7 +133,7 @@ class CentralFunctions():
             else:
                 break
 
-        self.current_user = 'vol'
+        self.current_user = username
 
         if username == 'admin':
             self.current_user = 'adm'
@@ -332,16 +330,27 @@ class CentralFunctions():
         self.camps_df = camp_df.copy()
         camp_df.to_csv('camp_database.csv', index=False)
 
-class Amin(CentralFunctions):
+class Admin(CentralFunctions):
 
-    def __init__(self):
-        CentralFunctions.__init__(self)
+    def __init__(self,current_user,camp_of_user):
+        CentralFunctions.__init__(self,)
+        self.functions = {"1":{'method':self.create_emergency,      'message':'[1] - Add new Emergency',},
+                          "2":{'method':self.close_emergency,       'message':'[2] - Close Emergency',},
+                          "3":{'method':self.call_camps,            'message':'[3] - See camp info',},
+                          "4":{'method':self.write_camp,            'message':'[4] - Add new camp',},
+                          "5":{'method':self.amend_camp_capacity,   'message':'[5] - Amend capacity of a camp',},
+                          "6":{'method':self.write_volunteer,       'message':'[6] - Add new volunteer(s) profile(s)',},
+                          "7":{'method':self.create_profile,        'message':'[7] - Create refugee profile',},
+                          "8":{'method':self.amend_refugee_profile, 'message':'[8] - Amend refugee profile',}}
+        self.current_user = current_user
+        self.camp_of_user = camp_of_user
 
-    def create_emergency(self,prev=None):
+    def create_emergency(self):
         '''
         Allows user to create emergency by requesting country of emergencym type of emergency, description and start date.
         Automatically assigns emergency ID and upon commit adds new emergency to emergency_database.csv 
         '''
+        print(100*'=')
         print('Please input information about your emergency')
         print('Expected Inputs:\n'+
               '\t>Country\n'+
@@ -383,12 +392,16 @@ class Amin(CentralFunctions):
 
                     if answer == 'B':
                         if i == 0:
-                            break
+                            print(100*'=')
+                            menu(self.functions,self.current_user)
+                            exit()
                         answerStack.pop()
                         i -= 1
                         continue
                     elif answer == 'Q':
-                        break
+                        print(100*'=')
+                        menu(self.functions,self.current_user)
+                        exit()
 
                     answerStack.append(answer)
                     i += 1
@@ -423,13 +436,14 @@ class Amin(CentralFunctions):
                 break
             else:
                 continue
+        print(100*'=')
 
-    def close_emergency(self,prev=None):
+    def close_emergency(self):
         '''
         Closes emergency by adding current date to Close Date column.
         '''
         emergency_db = self.emergencies_db.copy()
-        
+        print(100*'=')
         while True:
             print('Please specify which emergency you would like to close')
             print('Expected Inputs:\n'+
@@ -442,13 +456,13 @@ class Amin(CentralFunctions):
                 ID = input('\nPlease provide the emergency ID: ').upper()
                 if ID in list(emergency_db['Emergency ID']):
                     break
-                elif ID == 'Q':
-                    break
+                elif ID == 'Q' or ID == 'B':
+                    print(100*'=')
+                    menu(self.functions,self.current_user)
+                    exit()
                 else:
                     print('Please provide valid ID')
                     continue
-            if ID == 'Q':
-                break
             
             emergency_db.loc[emergency_db['Emergency ID'] == ID,'Close date'] = datetime.date.today().strftime("%d/%m/%Y")
             print(emergency_db.loc[emergency_db['Emergency ID'] == ID])
@@ -466,12 +480,14 @@ class Amin(CentralFunctions):
                 break
             else:
                 continue
+        print(100*'=')
 
-    def amend_camp_capacity(self,prev=None):
+    def amend_camp_capacity(self):
         '''
         Allows user to change the capacity of one of the camps. Selection by camp ID.
         '''
         camp_db = self.camps_db.copy()
+        print(100*'=')
         print("Select which camp's capacity needs to be altered")
         print('Expected Inputs:\n'+
               '\t>Emergency ID\n')
@@ -482,13 +498,15 @@ class Amin(CentralFunctions):
         while True:
             while True:
                 choose_camp = input("\nChoose camp for which you want to edit: ").upper()
-                if choose_camp in list(camp_db['Camp ID']) or choose_camp == 'Q':
+                if choose_camp in list(camp_db['Camp ID']) or choose_camp == 'Q' or choose_camp == 'B':
                     break
                 else:
                     print('Please select a valid camp')
                     continue
-            if choose_camp == 'Q':
-                    break
+            if choose_camp == 'Q' or choose_camp == 'B':
+                    print(100*'=')
+                    menu(self.functions,self.current_user)
+                    exit()
                 
             print(camp_db.loc[camp_db["Camp ID"] == choose_camp])
             
@@ -510,7 +528,9 @@ class Amin(CentralFunctions):
             if cap == 'B':
                 continue
             elif cap == 'Q':
-                break
+                print(100*'=')
+                menu(self.functions,self.current_user)
+                exit()
             
             camp_db.loc[camp_db['Camp ID'] == choose_camp,'Capacity'] = cap
             print(camp_db.loc[camp_db['Camp ID'] == choose_camp])
@@ -529,8 +549,9 @@ class Amin(CentralFunctions):
                 break
             else:
                 continue
+        print(100*'=')
 
-    def write_volunteer(self,prev=None):
+    def write_volunteer(self):
         '''
         Allows admin to create one or more empty volunteer accounts.
 
@@ -545,7 +566,7 @@ class Amin(CentralFunctions):
         users_exist = list(users_df['username'])
         camps_exist = list(camps_df['Camp ID'])
         self.quit = False
-        
+        print(100*'=')
         print('Please select how would you like to create a new volunteer profile')
         print('[1] - manual input')
         print('[2] - automatic creation')
@@ -565,8 +586,10 @@ class Amin(CentralFunctions):
                             continue
                         break
                     username = inpt
-                    if inpt == 'Q':
-                        self.quit = True
+                    if inpt == 'Q' or inpt == 'B':
+                        print(100*'=')
+                        menu(self.functions,self.current_user)
+                        exit()
                     return 1
                 
                 def assign_password():
@@ -576,8 +599,9 @@ class Amin(CentralFunctions):
                     if inpt == 'B':
                         return -1
                     elif inpt == 'Q':
-                        self.quit = True
-                        return 0
+                        print(100*'=')
+                        menu(self.functions,self.current_user)
+                        exit()
                     else:
                         return 1
                 
@@ -609,8 +633,9 @@ class Amin(CentralFunctions):
                     if user_input == 'B':
                         return -1
                     elif user_input == 'Q':
-                        self.quit = True
-                        return 0
+                        print(100*'=')
+                        menu(self.functions,self.current_user)
+                        exit()
                     else:
                         return 1
 
@@ -663,7 +688,9 @@ class Amin(CentralFunctions):
                     try:
                         no_of_new_users = int(no_of_new_users)
                         if no_of_new_users == 'Q':
-                            break
+                            print(100*'=')
+                            menu(self.functions,self.current_user)
+                            exit()
                     except ValueError:
                         print('Your input needs to be an integer')
                         continue
@@ -676,10 +703,11 @@ class Amin(CentralFunctions):
                             break
                     if camp == 'B':
                         continue
+                    elif no_of_new_users == 'Q':
+                        menu(self.functions,self.current_user)
+                        exit()
                     else:
                         break
-                if camp == 'Q' or no_of_new_users == 'Q':
-                    break
                 
                 new_usr_index = len(vol_df.index)+1
                 for i in range(no_of_new_users):
@@ -716,14 +744,16 @@ class Amin(CentralFunctions):
             manual()
         else:
             automatic()
+        print(100*'=')
 
-    def write_camp(self,prev=None):
+    def write_camp(self):
         '''
         Allows admin to add a news camp to an existing emergency.
         '''
         self.quit = False
         counter = 0
         self.count_ref_vol()
+        print(100*'=')
         print('Please provide details of the new camp')
         print('Expected Inputs:\n'+
               '\t>Country\n'+
@@ -744,14 +774,14 @@ class Amin(CentralFunctions):
                 while True:
                     country = input("\nEnter country name: ")
                     if country == 'B' or country == 'Q':
-                        break
+                        print(100*'=')
+                        menu(self.functions,self.current_user)
+                        exit()
                     if country in countries.keys(): #and country_id in list(emergency_df['Emergency ID']):
                         country_id = countries[country]['Country code']
                         if True in list(emergency_df['Emergency ID'].str.contains('PK', case=False)):
                             break
                     print('Please select country with an existing emergency.')
-                if country == 'Q':
-                    self.quit = True
                 return 1
             
             def assign_emergency():
@@ -775,8 +805,9 @@ class Amin(CentralFunctions):
                 if emergency == 'B':
                     return -1
                 elif emergency == 'Q':
-                    self.quit = True
-                    return 0
+                    print(100*'=')
+                    menu(self.functions,self.current_user)
+                    exit()
                 else:
                     return 1
 
@@ -793,8 +824,9 @@ class Amin(CentralFunctions):
                 if capacity == 'B':
                     return -1
                 elif capacity == 'Q':
-                    self.quit = True
-                    return 0
+                    print(100*'=')
+                    menu(self.functions,self.current_user)
+                    exit()
                 else:
                     return 1
                 
@@ -826,17 +858,25 @@ class Amin(CentralFunctions):
                 camps_df.to_csv('camp_database.csv', index=False)
                 break
             else:
-                continue    
+                continue   
+        print(100*'=') 
         
 class Volunteer(CentralFunctions):
 
-    def __init__(self):
+    def __init__(self,current_user,camp_of_user):
         CentralFunctions.__init__(self)
+        self.functions = {"1":{'method':self.amend_self_info,         'message':'[1] - Amend your profile info',},
+                          "2":{'method':self.call_camps,              'message':'[2] - See camp info',},
+                          "3":{'method':self.create_profile,          'message':'[3] - Create refugee profile',},
+                          "4":{'method':self.amend_refugee_profile,   'message':'[4] - Amend refugee profile',}}
+        self.current_user = current_user
+        self.camp_of_user = camp_of_user
 
-    def amend_self_info(self,prev=None):
+    def amend_self_info(self):
         '''
         Allows volunteer user to input their name, surname, phone number and availability.
         '''        
+        print(100*'=')
         print('Please select input or update any information about you.')
         print("If you do NOT wish to change current value press ENTER during input.")
         print('Expected Inputs:\n'+
@@ -861,11 +901,15 @@ class Volunteer(CentralFunctions):
                             answer = input(questionStack[i])
                             if answer == 'B':
                                 if i == 0:
-                                    break
+                                    print(100*'=')
+                                    menu(self.functions,self.current_user)
+                                    exit()
                                 answerStack.pop()
                                 i -= 1
                             elif answer == 'Q':
-                                break
+                                print(100*'=')
+                                menu(self.functions,self.current_user)
+                                exit()
                             elif answer == '':
                                 answer = vol_df.iloc[vol_df.index[vol_df['Username'] == self.current_user][0],i+1]
                             elif not answer.isalpha():
@@ -881,7 +925,9 @@ class Volunteer(CentralFunctions):
                                 answerStack.pop()
                                 i -= 1
                             elif answer == 'Q':
-                                break
+                                print(100*'=')
+                                menu(self.functions,self.current_user)
+                                exit()
                             elif answer == '':
                                 answer = vol_df.iloc[vol_df.index[vol_df['Username'] == self.current_user][0],3]
                             elif not answer.isnumeric():
@@ -900,7 +946,9 @@ class Volunteer(CentralFunctions):
                                 answerStack.pop()
                                 i -= 1
                             elif answer == 'Q':
-                                break
+                                print(100*'=')
+                                menu(self.functions,self.current_user)
+                                exit()
                             elif answer == '':
                                 answer = vol_df.iloc[vol_df.index[vol_df['Username'] == self.current_user][0],5]
                             elif not answer.isnumeric():
@@ -912,8 +960,7 @@ class Volunteer(CentralFunctions):
                             break                    
                     if answer == 'B':     
                         continue 
-                    elif answer == 'Q':
-                        exit()
+
                     answerStack.append(answer)
                     i += 1
 
@@ -921,7 +968,6 @@ class Volunteer(CentralFunctions):
 
         while True:
             answers = go_back(questions)
-            print(answers)
             vol_df.loc[vol_df['Username']==self.current_user] = [self.current_user,answers[0],answers[1],answers[2],self.camp_of_user,answers[3]]
 
             print('\n', vol_df.loc[vol_df['Username']==self.current_user])
@@ -940,4 +986,39 @@ class Volunteer(CentralFunctions):
             else:
                 answers = []
                 continue
+        print(100*'=')
 
+def session_over_message():
+    print(100*'=')
+    print('\nSESSION OVER')
+    print(100*'=')
+
+def menu(functions):
+    while True:
+        print(100*'=')
+        print('MAIN MENU')
+        print('\nChoose an interaction by typing the corresponding number.')
+        print('Example: type "1" to a'+functions['1']['message'][7:]+'.\n')
+        for i in range(len(functions.keys())):
+            print(functions[str(i+1)]['message'])
+        print('\n[Q] to end session')
+        user_input = input('\nPlease select your interaction: ')
+        if user_input == 'Q':
+            session_over_message()
+            exit()
+        if user_input not in functions.keys():
+            print('Please select valid input.')
+            continue
+        print(100*'=')
+        functions[user_input]['method']()
+
+login = CentralFunctions()
+login.users_login()
+if login.current_user != 'adm':
+    vol = Volunteer(login.current_user,login.camp_of_user)
+    print(vol.current_user)
+    menu(vol.functions)
+else:
+    adm = Admin(login.current_user,login.camp_of_user)
+    print(adm.current_user)
+    menu(adm.functions)
