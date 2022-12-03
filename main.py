@@ -27,13 +27,14 @@ class CentralFunctions():
 
         dataFailure = False
 
-        try:
-            df = pd.read_csv('user_database.csv')#.set_index('username')
+        try: 
+            df = pd.read_csv('user_database.csv')
+            df.dropna(how="all", inplace=True)
+            df.fillna('',inplace=True)
             df['password'] = df['password'].astype(str)
             self.user_db = df
         except FileNotFoundError:
-            user_db = {'username': ['admin'], 'password': [
-                '111'], 'role': ['admin'], 'activated': ['TRUE']}
+            user_db = {'username':['admin'],'password':['111'],'role':['admin'],'activated':['TRUE']}
             df = pd.DataFrame(user_db)
             df.set_index('username', inplace=True)
             df['password'] = df['password'].astype(str)
@@ -41,27 +42,15 @@ class CentralFunctions():
             self.user_db = df
         except:
             print("System couldn't read your user database file.")
-            dataFailure = True
+            dataFailure = True 
 
         try:
-            df = pd.read_csv('emergency_database.csv')
-            self.emergencies_db = df
-        except FileNotFoundError:
-            emergencies_db = {'Emergency ID': [''], 'Location': [''], 'Type': [
-                ''], 'Description': [''], 'Start date': [''], 'Close date': ['']}
-            df = pd.DataFrame(emergencies_db)
-            df.set_index('Emergency ID', inplace=True)
-            self.emergencies_db = df
-        except:
-            print("System couldn't read your emergency database file.")
-            dataFailure = True
-
-        try:
-            df = pd.read_csv('volunteer_database.csv')#.set_index('Username')
+            df = pd.read_csv('volunteer_database.csv')
+            df.dropna(how="all", inplace=True)
+            df.fillna('',inplace=True)
             self.vol_db = df
         except FileNotFoundError:
-            vol_db = {'Username': [''], 'First name': [''], 'Second name': [
-                ''], 'Camp ID': [''], 'Avability': [''], 'Status': ['']}
+            vol_db = {'Username':[''],'First name':[''],'Second name':[''],'Camp ID':[''],'Avability':[''],'Status':['']}
             df = pd.DataFrame(vol_db)
             df.set_index('Username', inplace=True)
             df.to_csv('volunteer_database.csv')
@@ -72,10 +61,11 @@ class CentralFunctions():
 
         try:
             df = pd.read_csv('refugee_database.csv')
+            df.dropna(how="all", inplace=True)
+            df.fillna('',inplace=True)
             self.refugee_db = df
         except FileNotFoundError:
-            refugee_db = {'Family ID': [''], 'Lead Family Member Name': [''], 'Lead Family Member Surname': [
-                ''], 'Camp ID': [''], 'Mental State': [''], 'Physical State': [''], 'No. Of Family Members': ['']}
+            refugee_db = {'Family ID':[''],'Lead Family Member Name':[''],'Lead Family Member Surname':[''],'Camp ID':[''],'Mental State':[''],'Physical State':[''],'No. Of Family Members':['']}
             df = pd.DataFrame(refugee_db)
             df.set_index('Family ID', inplace=True)
             df.to_csv('refugee_database.csv')
@@ -86,12 +76,13 @@ class CentralFunctions():
 
         try:
             df = pd.read_csv('camp_database.csv')
+            df.dropna(how="all", inplace=True)
+            df.fillna('',inplace=True)
             self.camps_db = df
         except FileNotFoundError:
-            camps_db = {'Camp ID': [''], 'Location': [''], 'Number of volunteers': [''], 'Capacity': [''], 'Current Emergency': [
-                ''], 'Number of refugees': ['']}
+            camps_db = {'Emergency ID':[''],'Type of emergency':[''],'Description':[''],'Location':[''],'Start date':[''],'Close date':[''],'Number of refugees':[''],'Camp ID':[''],'No Of Volounteers':[''],'Capacity':['']}
             df = pd.DataFrame(camps_db)
-            df.set_index('Camp ID', inplace=True)
+            df.set_index('Emergency ID', inplace=True)
             df.to_csv('camp_database.csv')
             self.camps_db = df
         except:
@@ -99,13 +90,27 @@ class CentralFunctions():
             dataFailure = True
 
         try:
-            df = list(pd.read_csv("countries.csv",
-                      index_col='Country name').index)
+            df = pd.read_csv('emergency_database.csv')
+            df.dropna(how="all", inplace=True)
+            df.fillna('',inplace=True)
+            self.emergencies_db = df
+        except FileNotFoundError:
+            emergencies_db = {'Emergency ID':[''],'Location':[''],'Type':[''],'Description':[''],'Start date':[''],'Close date':['']}
+            df = pd.DataFrame(emergencies_db)
+            df.set_index('Emergency ID', inplace=True)
+            df.to_csv('emergency_database.csv')
+            self.emergencies_db = df
+        except:
+            print("System couldn't read your camplist database file.")
+            dataFailure = True
+        
+        try:
+            df = pd.read_csv("countries.csv", index_col = 'Country name')
             self.countries_db = df
         except:
             print("System couldn't read the countries database file.")
             dataFailure = True
-
+        
         return dataFailure
 
     def save(self, dataFrame, fileName):
@@ -393,14 +398,14 @@ class Admin(CentralFunctions):
                     if answer == 'B':
                         if i == 0:
                             print(100*'=')
-                            menu(self.functions,self.current_user)
+                            menu(self.functions)
                             exit()
                         answerStack.pop()
                         i -= 1
                         continue
                     elif answer == 'Q':
                         print(100*'=')
-                        menu(self.functions,self.current_user)
+                        menu(self.functions)
                         exit()
 
                     answerStack.append(answer)
@@ -458,7 +463,7 @@ class Admin(CentralFunctions):
                     break
                 elif ID == 'Q' or ID == 'B':
                     print(100*'=')
-                    menu(self.functions,self.current_user)
+                    menu(self.functions)
                     exit()
                 else:
                     print('Please provide valid ID')
@@ -505,7 +510,7 @@ class Admin(CentralFunctions):
                     continue
             if choose_camp == 'Q' or choose_camp == 'B':
                     print(100*'=')
-                    menu(self.functions,self.current_user)
+                    menu(self.functions)
                     exit()
                 
             print(camp_db.loc[camp_db["Camp ID"] == choose_camp])
@@ -529,7 +534,7 @@ class Admin(CentralFunctions):
                 continue
             elif cap == 'Q':
                 print(100*'=')
-                menu(self.functions,self.current_user)
+                menu(self.functions)
                 exit()
             
             camp_db.loc[camp_db['Camp ID'] == choose_camp,'Capacity'] = cap
@@ -588,7 +593,7 @@ class Admin(CentralFunctions):
                     username = inpt
                     if inpt == 'Q' or inpt == 'B':
                         print(100*'=')
-                        menu(self.functions,self.current_user)
+                        menu(self.functions)
                         exit()
                     return 1
                 
@@ -600,7 +605,7 @@ class Admin(CentralFunctions):
                         return -1
                     elif inpt == 'Q':
                         print(100*'=')
-                        menu(self.functions,self.current_user)
+                        menu(self.functions)
                         exit()
                     else:
                         return 1
@@ -634,7 +639,7 @@ class Admin(CentralFunctions):
                         return -1
                     elif user_input == 'Q':
                         print(100*'=')
-                        menu(self.functions,self.current_user)
+                        menu(self.functions)
                         exit()
                     else:
                         return 1
@@ -689,7 +694,7 @@ class Admin(CentralFunctions):
                         no_of_new_users = int(no_of_new_users)
                         if no_of_new_users == 'Q':
                             print(100*'=')
-                            menu(self.functions,self.current_user)
+                            menu(self.functions)
                             exit()
                     except ValueError:
                         print('Your input needs to be an integer')
@@ -704,7 +709,7 @@ class Admin(CentralFunctions):
                     if camp == 'B':
                         continue
                     elif no_of_new_users == 'Q':
-                        menu(self.functions,self.current_user)
+                        menu(self.functions)
                         exit()
                     else:
                         break
@@ -775,7 +780,7 @@ class Admin(CentralFunctions):
                     country = input("\nEnter country name: ")
                     if country == 'B' or country == 'Q':
                         print(100*'=')
-                        menu(self.functions,self.current_user)
+                        menu(self.functions)
                         exit()
                     if country in countries.keys(): #and country_id in list(emergency_df['Emergency ID']):
                         country_id = countries[country]['Country code']
@@ -806,7 +811,7 @@ class Admin(CentralFunctions):
                     return -1
                 elif emergency == 'Q':
                     print(100*'=')
-                    menu(self.functions,self.current_user)
+                    menu(self.functions)
                     exit()
                 else:
                     return 1
@@ -825,7 +830,7 @@ class Admin(CentralFunctions):
                     return -1
                 elif capacity == 'Q':
                     print(100*'=')
-                    menu(self.functions,self.current_user)
+                    menu(self.functions)
                     exit()
                 else:
                     return 1
@@ -858,9 +863,10 @@ class Admin(CentralFunctions):
                 camps_df.to_csv('camp_database.csv', index=False)
                 break
             else:
+                counter = 0
                 continue   
         print(100*'=') 
-        
+
 class Volunteer(CentralFunctions):
 
     def __init__(self,current_user,camp_of_user):
@@ -902,13 +908,13 @@ class Volunteer(CentralFunctions):
                             if answer == 'B':
                                 if i == 0:
                                     print(100*'=')
-                                    menu(self.functions,self.current_user)
+                                    menu(self.functions)
                                     exit()
                                 answerStack.pop()
                                 i -= 1
                             elif answer == 'Q':
                                 print(100*'=')
-                                menu(self.functions,self.current_user)
+                                menu(self.functions)
                                 exit()
                             elif answer == '':
                                 answer = vol_df.iloc[vol_df.index[vol_df['Username'] == self.current_user][0],i+1]
@@ -926,7 +932,7 @@ class Volunteer(CentralFunctions):
                                 i -= 1
                             elif answer == 'Q':
                                 print(100*'=')
-                                menu(self.functions,self.current_user)
+                                menu(self.functions)
                                 exit()
                             elif answer == '':
                                 answer = vol_df.iloc[vol_df.index[vol_df['Username'] == self.current_user][0],3]
@@ -947,7 +953,7 @@ class Volunteer(CentralFunctions):
                                 i -= 1
                             elif answer == 'Q':
                                 print(100*'=')
-                                menu(self.functions,self.current_user)
+                                menu(self.functions)
                                 exit()
                             elif answer == '':
                                 answer = vol_df.iloc[vol_df.index[vol_df['Username'] == self.current_user][0],5]
