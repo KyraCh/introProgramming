@@ -144,7 +144,7 @@ class CentralFunctions():
             self.camp_of_user = vol_dict[username]['Camp ID']
             print(f'Welcome back {name}\n')
 
-    def create_profile(self):  # no interaction
+    def create_profile(self):
         '''
         Interactive method which allows to add new family to the list
         '''
