@@ -350,44 +350,44 @@ class CentralFunctions():
                 else:
                     print('You entered incorrect password')
             break
-    def user_password(self):
-        print("Email with OTP to reset password was sent to you")
-        otp = ''.join([str(random.randint(0,9)) for x in range(4)])
-        email_sender = "hemsystem1@gmail.com"
-        email_password = "asbwtshlldlaalld"
-        data = self.user_data.reset_index()
-        email_receiver = data[data["username"] == self.user_id]['email'].values[0]
-
-        subject = "OTP to reset password"
-        body = """Yours OTP to reset password is: {}""".format(str(otp))
-        mail = EmailMessage()
-        mail["From"] = email_sender
-        mail["To"] = email_receiver
-        mail["Subject"] = subject
-        mail.set_content(body)
-        context = ssl.create_default_context()
-
-        with smtplib.SMTP_SSL('smtp.gmail.com',465,context=context) as smtp:
-            smtp.login(email_sender,email_password)
-            smtp.sendmail(email_sender,email_receiver,mail.as_string())
-        while True:
-            otp_validation = input("Input here the OTP: ")
-            if otp != otp_validation:
-                print("Please enter valid OTP")
-            else:
-                break
-        while True:
-            new_password = input("Type your new password: ")
-            password = data[data["username"] == self.user_id]['password'].values[0]
-            if password == new_password:
-                print("Sorry but your password can't be the same as the previous one")
-            elif len(new_password) < 8:
-                print("Sorry but your password needs to be at least 8 characters long")
-            else:
-                self.user_data.at[self.user_id,"password"] = new_password
-                self.user_data.to_csv("user_database.csv")
-                print("Password has been changed")
-                break
+    # def user_password(self):
+        # print("Email with OTP to reset password was sent to you")
+        # otp = ''.join([str(random.randint(0,9)) for x in range(4)])
+        # email_sender = "hemsystem1@gmail.com"
+        # email_password = "asbwtshlldlaalld"
+        # data = self.user_data.reset_index()
+        # email_receiver = data[data["username"] == self.user_id]['email'].values[0]
+        #
+        # subject = "OTP to reset password"
+        # body = """Yours OTP to reset password is: {}""".format(str(otp))
+        # mail = EmailMessage()
+        # mail["From"] = email_sender
+        # mail["To"] = email_receiver
+        # mail["Subject"] = subject
+        # mail.set_content(body)
+        # context = ssl.create_default_context()
+        #
+        # with smtplib.SMTP_SSL('smtp.gmail.com',465,context=context) as smtp:
+        #     smtp.login(email_sender,email_password)
+        #     smtp.sendmail(email_sender,email_receiver,mail.as_string())
+        # while True:
+        #     otp_validation = input("Input here the OTP: ")
+        #     if otp != otp_validation:
+        #         print("Please enter valid OTP")
+        #     else:
+        #         break
+        # while True:
+        #     new_password = input("Type your new password: ")
+        #     password = data[data["username"] == self.user_id]['password'].values[0]
+        #     if password == new_password:
+        #         print("Sorry but your password can't be the same as the previous one")
+        #     elif len(new_password) < 8:
+        #         print("Sorry but your password needs to be at least 8 characters long")
+        #     else:
+        #         self.user_data.at[self.user_id,"password"] = new_password
+        #         self.user_data.to_csv("user_database.csv")
+        #         print("Password has been changed")
+        #         break
     def users(self):
         '''
         Will read the .csv file with the volunteers and form a dictionary which will be employed by login(), with passwords and logins
@@ -511,11 +511,139 @@ class volunteer(CentralFunctions):
         '''
         pass
 
-    def edit_self_info(self, name, phone, age, gender): # no interaction
-        '''
-        Write into the volunteer dataframe to update info on a particular volunteer
-        '''
-        pass
+    def edit_self_info(self):
+        vol_df = self.vol_data
+        current_user = self.user_id
+        while True:
+            print("Enter [1] to edit first name.\n"
+                "Enter [2] to edit second name.\n"
+                "Enter [3] to edit phone number.\n"
+                "Enter [4] to edit availability.\n"
+                "Enter [5] to change password.\n"
+                "Enter [6] to exit.")
+            user_input = input("Choose interaction:")
+            if user_input == '1':
+                current_name = vol_df.at[current_user,"First name "]
+                print(f"Currently, your first name is set to {current_name}.")
+                while True:
+                    new_name = input("Enter new first name:")
+                    new_name = new_name.capitalize()
+                    if not new_name.isalpha():
+                        print("Please enter a valid name.")
+                    else:
+                        break
+                while True:
+                    user_input = input("To confirm change of data, enter [y]:")
+                    if user_input == "y":
+                        vol_df.at[current_user, "First name "] = new_name
+                        vol_df.to_csv("volunteer_database.csv")
+                        print(f"First name has been set to {new_name}.")
+                        break
+                    else:
+                        print("Invalid input.")
+            elif user_input == '2':
+                current_second_name = vol_df.at[current_user, "Second name "]
+                print(f"Currently, your second name is set to {current_second_name}.")
+                while True:
+                    new_second_name = input("Enter new second name:")
+                    new_second_name = new_second_name.capitalize()
+                    if not new_second_name.isalpha():
+                        print("Please enter a valid name.")
+                    else:
+                        break
+                while True:
+                    user_input = input("To confirm change of data, enter [y]:")
+                    if user_input == "y":
+                        vol_df.at[current_user, "Second name "] = new_second_name
+                        vol_df.to_csv("volunteer_database.csv")
+                        print(f"Second name has been set to {new_second_name}.")
+                        break
+                    else:
+                        print("Invalid input.")
+            elif user_input == '3':
+                current_phone = vol_df.at[current_user, "Phone "]
+                print(f"Currently, your phone number is set to {current_phone}.")
+                while True:
+                    new_phone = input("Enter new phone number in the format [44_______]:")
+                    if not new_phone.isnumeric():
+                        print("Please enter a valid phone number.")
+                    elif len(new_phone)!= 9:
+                        print("Invalid format.")
+                    elif new_phone[:2]!="44":
+                        print("Invalid format.")
+                    else:
+                        break
+                while True:
+                    user_input = input("To confirm change of data, enter [y]:")
+                    if user_input == "y":
+                        vol_df.at[current_user, "Phone "] = new_phone
+                        vol_df.to_csv("volunteer_database.csv")
+                        print(f"Phone number has been set to {new_phone}.")
+                        break
+                    else:
+                        print("Invalid input.")
+            elif user_input == '4':
+                current_availability = vol_df.at[current_user, "Availability "]
+                print(f"Currently, your availability is set to {current_availability}.")
+                while True:
+                    new_availability = input("Enter new availability:")
+                    if not new_availability.isnumeric():
+                        print("Invalid input.")
+                    elif int(new_availability)>48:
+                        print("Availability exceeds maximum weekly working hours (48h).")
+                    else:
+                        break
+                while True:
+                    user_input = input("To confirm change of data, enter [y]:")
+                    if user_input == "y":
+                        vol_df.at[current_user, "Availability "] = f"{new_availability}h"
+                        vol_df.to_csv("volunteer_database.csv")
+                        print(f"Availability has been set to {new_availability}.")
+                        break
+                    else:
+                        print("Invalid input.")
+            elif user_input == '5':
+                print("Email with OTP to reset password was sent to you")
+                otp = ''.join([str(random.randint(0, 9)) for x in range(4)])
+                email_sender = "hemsystem1@gmail.com"
+                email_password = "asbwtshlldlaalld"
+                data = self.user_data.reset_index()
+                email_receiver = data[data["username"] == self.user_id]['email'].values[0]
+
+                subject = "OTP to reset password"
+                body = """Yours OTP to reset password is: {}""".format(str(otp))
+                mail = EmailMessage()
+                mail["From"] = email_sender
+                mail["To"] = email_receiver
+                mail["Subject"] = subject
+                mail.set_content(body)
+                context = ssl.create_default_context()
+
+                with smtplib.SMTP_SSL('smtp.gmail.com', 465, context=context) as smtp:
+                    smtp.login(email_sender, email_password)
+                    smtp.sendmail(email_sender, email_receiver, mail.as_string())
+                while True:
+                    otp_validation = input("Input here the OTP: ")
+                    if otp != otp_validation:
+                        print("Please enter valid OTP")
+                    else:
+                        break
+                while True:
+                    new_password = input("Type your new password: ")
+                    password = data[data["username"] == self.user_id]['password'].values[0]
+                    if password == new_password:
+                        print("Sorry but your password can't be the same as the previous one")
+                    elif len(new_password) < 8:
+                        print("Sorry but your password needs to be at least 8 characters long")
+                    else:
+                        self.user_data.at[self.user_id, "password"] = new_password
+                        self.user_data.to_csv("user_database.csv")
+                        print("Password has been changed")
+                        break
+            elif user_input=="6":
+                quit()
+            else:
+                print("Invalid input. Please select from the following options.")
 
     def create_profile(self): # no interaction
         '''
@@ -592,8 +720,9 @@ c = CentralFunctions()
 v = volunteer()
 # c.users_login()
 # volunteer.create_profile(input("State name of family's lead member: "),input("State surname of the family: "),input("Choose from 'bad' and 'good' to describe the mental state of the family: "),input("Choose from 'bad' and 'good' to describe the physical state of the family: "))
-c.users_login()
-c.user_password()
+v.users_login()
+v.edit_self_info()
+# c.user_password()
 # v.call_no_of_refugees()
 # v.create_profile()
 
