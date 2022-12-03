@@ -38,6 +38,7 @@ class CentralFunctions():
         self.functions()
         self.list_of_refugee = None
         self.list_of_camps = None
+        self.user_id = None
         pass
     
     def read_all_data(self):
@@ -104,9 +105,7 @@ class CentralFunctions():
             print("Choose 1 if you want to see the list of all refugees for all camps")
             print("Choose 2 if you want to see the total number of refugees in chosen camp")
             print("Choose 3 if you want to see the number of families in each camp")
-            print("Choose 4 if you want to see the summary of mental state of refugees in chosen camp")
-            print("Choose 5 if you want to see the summary of physical state of refugees in chosen camp")
-            print("Choose 6 if you want to see the total summary for each camp")
+            print("Choose 4 if you want to see the total summary for each camp")
             print("Choose Quit if you want exit this summary")
             user_input = input("Choose interaction: ")
             if user_input == '1':
@@ -121,16 +120,6 @@ class CentralFunctions():
                 print("Number of families for camp {}:".format(choose_emergency))
                 print(*count_camps, sep='\n')
             elif user_input == "4":
-                camp_id = self.list_of_camps[self.list_of_camps["Emergency ID"] == choose_emergency]['Camp ID'].values[0]
-                mental = self.list_of_refugee[self.list_of_refugee["Camp ID"] ==camp_id]["Mental State"].value_counts()
-                print("Number of families for each mental state group in camp {}:".format(choose_emergency))
-                print(mental.to_string())
-            elif user_input == "5":
-                camp_id = self.list_of_camps[self.list_of_camps["Emergency ID"] == choose_emergency]['Camp ID'].values[0]
-                physical_state_count = self.list_of_refugee[self.list_of_refugee["Camp ID"] ==camp_id]["Physical State"].value_counts()
-                print("Number of families for each physical state group in camp {}:".format(choose_emergency))
-                print(physical_state_count.to_string())
-            elif user_input == "6":
                 camp_id = self.list_of_camps[self.list_of_camps["Emergency ID"] == choose_emergency]['Camp ID'].values[0]
                 group_camps = self.list_of_refugee[self.list_of_refugee["Camp ID"] ==camp_id].groupby("Camp ID")
                 for name, camp in group_camps:
@@ -296,7 +285,7 @@ class CentralFunctions():
         (IMPORTANT: considers existence of only one admin username)
         '''
         # part which reads/creates the user_database file
-        try: 
+        try:
             df = pd.read_csv('user_database.csv').set_index('username')
             df['password'] = df['password'].astype(str)
             users_dict = df.to_dict(orient='index')
@@ -335,6 +324,7 @@ class CentralFunctions():
                 print('Please input valid username')
                 continue
             while True:
+                self.user_id = username
                 password = input('Please input your password: ')
                 if password == users_dict[username]['password']:
                     if username == 'admin':
@@ -351,12 +341,15 @@ class CentralFunctions():
                         print(f'Welcome back {a}!')
 
                     self.camp_of_user = vol_dict[username]['Camp ID']
-
                     break
                 else:
                     print('You entered incorrect password')
             break
-
+    def user_password(self):
+        # email_sender = "hemsystem1@gmail.com"
+        # email_password = ""
+        email_receiver = self.user_data[self.user_data['username']==self.user_id]['email']
+        print(email_receiver)
     def users(self):
         '''
         Will read the .csv file with the volunteers and form a dictionary which will be employed by login(), with passwords and logins
@@ -561,7 +554,8 @@ c = CentralFunctions()
 v = volunteer()
 # c.users_login()
 # volunteer.create_profile(input("State name of family's lead member: "),input("State surname of the family: "),input("Choose from 'bad' and 'good' to describe the mental state of the family: "),input("Choose from 'bad' and 'good' to describe the physical state of the family: "))
-v.users_login()
-v.call_no_of_refugees()
+c.users_login()
+c.user_password()
+# v.call_no_of_refugees()
 # v.create_profile()
 

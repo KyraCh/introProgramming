@@ -1,6 +1,6 @@
-username,password,role,activated
-admin,111,admin,TRUE
-Volunteer1,111,volunteer,TRUE
+username,password,email,role,activated
+admin,111,zuzanna.sosnow@gmail.com,admin,TRUE
+Volunteer1,111,zuzanna.sosnow@gmail.com,volunteer,TRUE
 Volunteer2,111,volunteer,TRUE
 Volunteer3,111,volunteer,TRUE
 Volunteer4,111,volunteer,TRUE
