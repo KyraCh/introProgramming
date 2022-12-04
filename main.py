@@ -4,7 +4,10 @@ import numpy as np
 import datetime
 import time
 import os
-
+import random
+from email.message import EmailMessage
+import ssl
+import smtplib
 
 class CentralFunctions():
 
@@ -181,12 +184,10 @@ class CentralFunctions():
                 continue
 
         campID = self.camp_of_user
-        count_camps = self.refugee_db[self.refugee_db["Camp ID"]
-                                      == self.camp_of_user]['Camp ID'].value_counts().values[0]
+        count_camps = self.refugee_db[self.refugee_db["Camp ID"]== self.camp_of_user]['Camp ID'].value_counts().values[0]
         family_id = str(count_camps + 1) + self.camp_of_user
 
-        self.refugee_db.loc[len(self.refugee_db)] = [
-            family_id, name, surname, self.camp_of_user, mental_state, physical_state, no_of_members]
+        self.refugee_db.loc[len(self.refugee_db)] = [family_id, name, surname, self.camp_of_user, mental_state, physical_state, no_of_members]
 
         self.refugee_db.to_csv("refugee_db.csv", index=False)
         self.save(self.refugee_db, 'refugee_database.csv')
@@ -898,118 +899,140 @@ class Volunteer(CentralFunctions):
         Allows volunteer user to input their name, surname, phone number and availability.
         '''
         print(100 * '=')
-        print('Please select input or update any information about you.')
-        print("If you do NOT wish to change current value press ENTER during input.")
-        print('Expected Inputs:\n' +
-              '\t>First name\n' +
-              '\t>Family name\n' +
-              '\t>Phone number\n' +
-              '\t>Availability\n')
+        print('Please select which information you would like to change about yourself.')
+        print('Possible interactions:\n' +
+              '\t[1]First name\n' +
+              '\t[2]Family name\n' +
+              '\t[3]Phone number\n' +
+              '\t[4]Availability\n'+
+              '\t[5]Change password\n')
         print('[B] to go back')
         print('[Q] to quit\n')
 
-        vol_df = self.vol_db
-        print(vol_df.loc[vol_df['Username'] == self.current_user])
-        questions = ['\nEnter new first name: ', '\nEnter new second name: ',
-                     '\nEnter new phone number in the format [44_______]:', '\nEnter new availability: ']
-
-        def go_back(questionStack):
-            i = 0
-            answerStack = []
-
-            while i < len(questionStack):
-                if i == 0 or i == 1:
-                    while True:
-                        answer = input(questionStack[i])
-                        if answer == 'B':
-                            if i == 0:
-                                print(100 * '=')
-                                menu(self.functions)
-                                exit()
-                            answerStack.pop()
-                            i -= 1
-                        elif answer == 'Q':
-                            print(100 * '=')
-                            menu(self.functions)
-                            exit()
-                        elif answer == '':
-                            answer = vol_df.iloc[vol_df.index[vol_df['Username'] == self.current_user][0], i + 1]
-                        elif not answer.isalpha():
-                            print("Please enter a valid name.")
-                            continue
-                        break
-                elif i == 2:
-                    while True:
-                        answer = input(questionStack[i])
-                        if answer == 'B':
-                            if i == 0:
-                                break
-                            answerStack.pop()
-                            i -= 1
-                        elif answer == 'Q':
-                            print(100 * '=')
-                            menu(self.functions)
-                            exit()
-                        elif answer == '':
-                            answer = vol_df.iloc[vol_df.index[vol_df['Username'] == self.current_user][0], 3]
-                        elif not answer.isnumeric():
-                            print("Please enter a valid phone number.")
-                            continue
-                        elif len(answer) != 9 or answer[:2] != "44":
-                            print("Invalid format.")
-                            continue
-                        break
-                elif i == 3:
-                    while True:
-                        answer = input(questionStack[i])
-                        if answer == 'B':
-                            if i == 0:
-                                break
-                            answerStack.pop()
-                            i -= 1
-                        elif answer == 'Q':
-                            print(100 * '=')
-                            menu(self.functions)
-                            exit()
-                        elif answer == '':
-                            answer = vol_df.iloc[vol_df.index[vol_df['Username'] == self.current_user][0], 5]
-                        elif not answer.isnumeric():
-                            print("Invalid input.")
-                            continue
-                        elif int(answer) > 48:
-                            print("Availability exceeds maximum weekly working hours (48h).")
-                            continue
-                        break
-                if answer == 'B':
-                    continue
-
-                answerStack.append(answer)
-                i += 1
-
-            return answerStack
-
         while True:
-            answers = go_back(questions)
-            vol_df.loc[vol_df['Username'] == self.current_user] = [self.current_user, answers[0], answers[1],
-                                                                   answers[2], self.camp_of_user, answers[3]]
+            user_input = input("Choose interaction:")
+            if user_input == '1':
+                current_name = self.vol_db[self.vol_db["Username"] == self.current_user]["First name"].values[0]
+                print(f"Currently, your first name is set to {current_name}.")
+                while True:
+                    new_name = input("Enter new first name:")
+                    new_name = new_name.capitalize()
+                    if not new_name.isalpha():
+                        print("Please enter a valid name.")
+                    else:
+                        break
+                while True:
+                    user_input = input("To confirm change of data, enter [y]:").lower()
+                    if user_input == "y":
+                        self.vol_db.at[self.current_user, "First name "] = new_name
+                        self.vol_db.to_csv("volunteer_database.csv")
+                        print(f"First name has been set to {new_name}.")
+                        break
+                    else:
+                        print("Invalid input.")
+            elif user_input == '2':
+                current_second_name = self.vol_db[self.vol_db["Username"] == self.current_user]["Second name"].values[0]
+                print(f"Currently, your second name is set to {current_second_name}.")
+                while True:
+                    new_second_name = input("Enter new second name:")
+                    new_second_name = new_second_name.capitalize()
+                    if not new_second_name.isalpha():
+                        print("Please enter a valid name.")
+                    else:
+                        break
+                while True:
+                    user_input = input("To confirm change of data, enter [y]:").lower()
+                    if user_input == "y":
+                        self.vol_db.at[self.current_user, "Second name "] = new_second_name
+                        self.vol_db.to_csv("volunteer_database.csv")
+                        print(f"Second name has been set to {new_second_name}.")
+                        break
+                    else:
+                        print("Invalid input.")
+            elif user_input == '3':
+                current_phone = self.vol_db.at[self.current_user, "Phone"].values[0]
+                print(f"Currently, your phone number is set to {current_phone}.")
+                while True:
+                    new_phone = input(
+                        "Enter new phone number in the format +44_______:")
+                    if not new_phone.isnumeric():
+                        print("Please enter a valid phone number.")
+                    elif len(new_phone) != 9:
+                        print("Invalid format.")
+                    elif new_phone[:2] != "44":
+                        print("Invalid format.")
+                    else:
+                        break
+                while True:
+                    user_input = input("To confirm change of data, enter [y]:").lower()
+                    if user_input == "y":
+                        self.vol_db.at[self.current_user, "Phone "] = new_phone
+                        self.vol_db.to_csv("volunteer_database.csv")
+                        print(f"Phone number has been set to {new_phone}.")
+                        break
+                    else:
+                        print("Invalid input.")
+            elif user_input == '4':
+                current_availability = self.vol_db.at[self.current_user, "Availability "].values[0]
+                print(f"Currently, your availability is set to {current_availability}.")
+                while True:
+                    new_availability = input("Enter new availability:")
+                    if not new_availability.isnumeric():
+                        print("Invalid input.")
+                    elif int(new_availability) > 48:
+                        print("Availability exceeds maximum weekly working hours (48h).")
+                    else:
+                        break
+                while True:
+                    user_input = input("To confirm change of data, enter [y]:")
+                    if user_input == "y":
+                        self.vol_db.at[self.current_user, "Availability "] = f"{new_availability}h"
+                        self.vol_db.to_csv("volunteer_database.csv")
+                        print(f"Availability has been set to {new_availability}.")
+                        break
+                    else:
+                        print("Invalid input.")
+            elif user_input == '5':
+                print("Email with OTP to reset password was sent to you")
+                otp = ''.join([str(random.randint(0, 9)) for x in range(4)])
+                email_sender = "hemsystem1@gmail.com"
+                email_password = "asbwtshlldlaalld"
+                email_receiver = self.user_db[self.user_db["username"] == self.current_user]['email'].values[0]
 
-            print('\n', vol_df.loc[vol_df['Username'] == self.current_user])
-            while True:
-                commit = input('\nCommit changes? [y]/[n] ')
-                if commit == 'y' or commit == 'n':
-                    break
-                else:
-                    print('Your input is not recognised')
-                    continue
+                subject = "OTP to reset password"
+                body = """Yours OTP to reset password is: {}""".format(str(otp))
+                mail = EmailMessage()
+                mail["From"] = email_sender
+                mail["To"] = email_receiver
+                mail["Subject"] = subject
+                mail.set_content(body)
+                context = ssl.create_default_context()
 
-            if commit == 'y':
-                self.emergencies_db = vol_df.copy()
-                vol_df.to_csv('volunteer_database.csv', index=False)
-                break
+                with smtplib.SMTP_SSL('smtp.gmail.com', 465, context=context) as smtp:
+                    smtp.login(email_sender, email_password)
+                    smtp.sendmail(email_sender, email_receiver, mail.as_string())
+                while True:
+                    otp_validation = input("Input here the OTP: ")
+                    if otp != otp_validation:
+                        print("Please enter valid OTP")
+                    else:
+                        break
+                while True:
+                    new_password = input("Type your new password: ")
+                    password = self.user_db[self.user_db["username"] == self.current_user]['password'].values[0]
+                    if password == new_password:
+                        print("Sorry but your password can't be the same as the previous one")
+                    elif len(new_password) < 8:
+                        print("Sorry but your password needs to be at least 8 characters long")
+                    else:
+                        self.user_db.at[self.current_user, "password"] = new_password
+                        self.user_db.to_csv("user_database.csv")
+                        print("Password has been changed")
+                        break
+            elif user_input == "6":
+                quit()
             else:
-                answers = []
-                continue
-        print(100 * '=')
+                print("Invalid input. Please select from the following options.")
 
 
 def session_over_message():

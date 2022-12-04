@@ -6,7 +6,6 @@
 import pandas as pd
 import matplotlib.pyplot as plt
 import numpy as np
-import os
 import random
 from email.message import EmailMessage
 import ssl
@@ -163,61 +162,29 @@ class CentralFunctions():
         pass
 
     def call_no_of_refugees(self):
-        '''Reads the file and prints out the general list of families in a system with 
+
+        '''Reads the file and prints out the general list of families in a system with
         some summary about them by sating the number of refugees, their mental and physical
-        state per each camp and gives information about each family that is assigned to certain camp'''
+        state per each camp and gives information about each family that is assigned to certain camp.
+        Secondly, the method call no of refugees now will only show you camp details of only the one that you are assigned to.
+        Unless you are admin then you can see evrything '''
 
         # pd.set_option('display.max_columns', 15)
-        try:
-            df = pd.read_csv('RefugeeList.csv')
-            list_of_refugee = df.to_dict(orient='index')
-            self.list_of_refugee = df
 
-        except FileNotFoundError:
-            list_of_refugee = {'Family ID':[''],'Lead Family Member Name':[''],'Lead Family Member Surname':[''],'Camp ID':[''],'Mental State':[''],'Physical State':[''],'No. Of Family Members':['']}
-            df = pd.DataFrame(list_of_refugee)
-            df.set_index('Family ID', inplace=True)
-            df.to_csv('RefugeeList.csv')
-            list_of_refugee = df.to_dict(orient='index')
-            self.list_of_refugee = df
-        try:
-            df = pd.read_csv('camplist.csv')
-            self.list_of_camps = df
-
-        except FileNotFoundError:
-            list_of_camps = {'Emergency ID':[''],'Type of emergency':[''],'Description':[''],'Location':[''],'Start date':[''],'Close date':[''],'Number of refugees':[''],'Camp ID':[''],'No Of Volounteers':[''],'Capacity':['']}
-            df = pd.DataFrame(list_of_camps)
-            df.set_index('Emergency ID', inplace=True)
-            df.to_csv('camplist.csv')
-            list_of_camps = df.to_dict(orient='index')
-            self.list_of_camps = df
+        # pd.set_option('display.max_columns', 15)
 
         if self.current_user == "adm":
             countries_camps = self.list_of_camps["Emergency ID"]
-            print(*countries_camps,sep='\n')
-            choose_emergency = input("Choose emergency for which you want to see the summary:")
-            choose_emergency= choose_emergency.upper()
-        else:
-            volunteer_campID = self.camp_of_user
-            choose_emergency = self.list_of_camps[self.list_of_camps["Camp ID"] == volunteer_campID]["Emergency ID"].values[0]
-        while True:
-            print("Choose 1 if you want to see the list of all refugees for all camps")
-            print("Choose 2 if you want to see the total number of refugees in chosen camp")
-
-        if self.current_user == "adm":
-            countries_camps = self.camps_db["Emergency ID"]
             print(*countries_camps, sep='\n')
-            choose_emergency = input(
-                "Choose emergency for which you want to see the summary:")
+            choose_emergency = input("Choose emergency for which you want to see the summary:")
             choose_emergency = choose_emergency.upper()
         else:
             volunteer_campID = self.camp_of_user
-            choose_emergency = self.camps_db[self.camps_db["Camp ID"]== volunteer_campID]["Emergency ID"].values[0]
+            choose_emergency = \
+            self.list_of_camps[self.list_of_camps["Camp ID"] == volunteer_campID]["Emergency ID"].values[0]
         while True:
             print("Choose 1 if you want to see the list of all refugees for all camps")
-            print(
-                "Choose 2 if you want to see the total number of refugees in chosen camp")
-
+            print("Choose 2 if you want to see the total number of refugees in chosen camp")
             print("Choose 3 if you want to see the number of families in each camp")
             print("Choose 4 if you want to see the total summary for each camp")
             print("Choose Quit if you want exit this summary")
@@ -226,37 +193,21 @@ class CentralFunctions():
                 country_refugees = self.list_of_camps[self.list_of_camps["Emergency ID"] == choose_emergency]
                 print(country_refugees)
             elif user_input == "2":
-                number_of_refugee = self.list_of_camps[self.list_of_camps["Emergency ID"] == choose_emergency]['Number of refugees']
+                number_of_refugee = self.list_of_camps[self.list_of_camps["Emergency ID"] == choose_emergency][
+                    'Number of refugees']
                 print("Number of refugee in {}: ".format(choose_emergency), *number_of_refugee, sep='\n')
             elif user_input == "3":
-                camp_id = self.list_of_camps[self.list_of_camps["Emergency ID"] == choose_emergency]['Camp ID'].values[0]
-                count_camps = self.list_of_refugee[self.list_of_refugee["Camp ID"] ==camp_id]['Camp ID'].value_counts()
+                camp_id = self.list_of_camps[self.list_of_camps["Emergency ID"] == choose_emergency]['Camp ID'].values[
+                    0]
+                count_camps = self.list_of_refugee[self.list_of_refugee["Camp ID"] == camp_id]['Camp ID'].value_counts()
                 print("Number of families for camp {}:".format(choose_emergency))
                 print(*count_camps, sep='\n')
             elif user_input == "4":
-                camp_id = self.list_of_camps[self.list_of_camps["Emergency ID"] == choose_emergency]['Camp ID'].values[0]
-                group_camps = self.list_of_refugee[self.list_of_refugee["Camp ID"] ==camp_id].groupby("Camp ID")
-                country_refugees = self.camps_db[self.camps_db["Emergency ID"]== choose_emergency]
-                print(country_refugees)
-            elif user_input == "2":
-                number_of_refugee = self.camps_db[self.camps_db["Emergency ID"]
-                                                  == choose_emergency]['Number of refugees']
-                print("Number of refugee in {}: ".format(
-                    choose_emergency), *number_of_refugee, sep='\n')
-            elif user_input == "3":
-                camp_id = self.camps_db[self.camps_db["Emergency ID"]
-                                        == choose_emergency]['Camp ID'].values[0]
-                count_camps = self.refugee_db[self.refugee_db["Camp ID"] == camp_id]['Camp ID'].count(
-                )
-                print("Number of families for camp {}:".format(choose_emergency))
-                print(*count_camps, sep='\n')
-            elif user_input == "4":
-                camp_id = self.camps_db[self.camps_db["Emergency ID"]== choose_emergency]['Camp ID'].values[0]
-                group_camps = self.refugee_db[self.refugee_db["Camp ID"] == camp_id].groupby(
-                    "Camp ID")
+                camp_id = self.list_of_camps[self.list_of_camps["Emergency ID"] == choose_emergency]['Camp ID'].values[
+                    0]
+                group_camps = self.list_of_refugee[self.list_of_refugee["Camp ID"] == camp_id].groupby("Camp ID")
                 for name, camp in group_camps:
-                    print("Camp " + name + "->" +
-                          str(len(camp)) + " family/families")
+                    print("Camp " + name + "->" + str(len(camp)) + " family/families")
                     print(camp)
             else:
                 break
@@ -822,8 +773,6 @@ class Volunteer(CentralFunctions):
             user_input = input("Choose interaction:")
             if user_input == '1':
                 current_name = vol_df.at[current_user,"First name "]
-        vol_df = self.vol_data
-        current_user = 'Volunteer1'
         while True:
             print("Enter [1] to edit first name.\n"
                 "Enter [2] to edit second name.\n"
