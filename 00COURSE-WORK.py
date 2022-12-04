@@ -973,13 +973,13 @@ class Volunteer(CentralFunctions):
     # depending on who the user is call relevant interaction method
     # depending on who the user is call relevant interaction method
         pass
-c = CentralFunctions()
+# c = CentralFunctions()
 # c.call_no_of_refugees()
-# v = volunteer()
+v = Volunteer()
 # c.users_login()
 # volunteer.create_profile(input("State name of family's lead member: "),input("State surname of the family: "),input("Choose from 'bad' and 'good' to describe the mental state of the family: "),input("Choose from 'bad' and 'good' to describe the physical state of the family: "))
-# v.users_login()
-# v.edit_self_info()
+v.users_login()
+v.edit_self_info()
     # c.user_password()
     # v.call_no_of_refugees()
     # v.create_profile()
