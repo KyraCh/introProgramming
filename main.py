@@ -162,37 +162,36 @@ class CentralFunctions():
         '''
         Interactive method which allows to add new family to the list
         '''
+        if self.current_user == 'admin':
+            while True:
+                name = input("State name of family's lead member: ")
+                surname = input("State surname of the family: ")
+                if not name.isalpha() or not surname.isalpha():
+                    print("You can't use numbers for this input. Try again ")
+                else:
+                    break
 
-        while True:
-            name = input("State name of family's lead member: ")
-            surname = input("State surname of the family: ")
-            if not name.isalpha() or not surname.isalpha():
-                print("You can't use numbers for this input. Try again ")
-            else:
-                break
+            mental_state = input("Describe the mental state of the family: ")
+            physical_state = input("Describe the physical state of the family: ")
 
-        mental_state = input("Describe the mental state of the family: ")
-        physical_state = input("Describe the physical state of the family: ")
+            while True:
+                try:
+                    no_of_members = int(
+                        input("Type the number of family members: "))
+                    break
+                except ValueError:
+                    print("It has to be an integer")
+                    continue
+            print(self.emergencies_db["Emergency ID"])
+            campID = input("Assign the family to a camp: ")
+            count_camps = self.refugee_db[self.refugee_db["Camp ID"]== campID]['Camp ID'].value_counts().values[0]
+            family_id = str(count_camps + 1) + self.camp_of_user
 
-        while True:
-            try:
-                no_of_members = int(
-                    input("Type the number of family members: "))
-                break
-            except ValueError:
-                print("It has to be an integer")
-                continue
+            self.refugee_db.loc[len(self.refugee_db)] = [
+                family_id, name, surname, self.camp_of_user, mental_state, physical_state, no_of_members]
 
-        campID = self.camp_of_user
-        count_camps = self.refugee_db[self.refugee_db["Camp ID"]
-                                      == self.camp_of_user]['Camp ID'].value_counts().values[0]
-        family_id = str(count_camps + 1) + self.camp_of_user
-
-        self.refugee_db.loc[len(self.refugee_db)] = [
-            family_id, name, surname, self.camp_of_user, mental_state, physical_state, no_of_members]
-
-        self.refugee_db.to_csv("refugee_db.csv", index=False)
-        self.save(self.refugee_db, 'refugee_database.csv')
+            self.refugee_db.to_csv("refugee_db.csv", index=False)
+            self.save(self.refugee_db, 'refugee_database.csv')
 
     def call_camps(self):
         # need to add 7,8,9
@@ -926,7 +925,7 @@ class Volunteer(CentralFunctions):
                     user_input = input("To confirm change of data, enter [Y]. To go back to the menu without saving this change, enter [B]:").lower()
                     if user_input == "y":
                         self.vol_db.loc[self.vol_db["Username"] == self.current_user, "First name"] = new_name
-                        self.vol_db.to_csv("volunteer_database.csv",index_label=False)
+                        self.vol_db.to_csv("volunteer_database.csv",index=False)
                         print(f"First name has been set to {new_name}.")
                         break
                     elif user_input == "b":
@@ -949,7 +948,7 @@ class Volunteer(CentralFunctions):
                     user_input = input("To confirm change of data, enter [Y]. To go back to the menu without saving this change, enter [B]:").lower()
                     if user_input == "y":
                         self.vol_db.loc[self.vol_db["Username"] == self.current_user, "Second name"] = new_second_name
-                        self.vol_db.to_csv("volunteer_database.csv",index_label=False)
+                        self.vol_db.to_csv("volunteer_database.csv",index=False)
                         print(f"Second name has been set to {new_second_name}.")
                         break
                     elif user_input == "b":
@@ -959,8 +958,8 @@ class Volunteer(CentralFunctions):
                     else:
                         print("Invalid input.")
             elif user_input == '3':
-                current_phone = self.vol_db[self.vol_db["Username"] == self.current_user]["Phone"].values[0]
-                print(f"Currently, your phone number is set to {current_phone}.")
+                current_phone = str(self.vol_db[self.vol_db["Username"] == self.current_user]["Phone"].values[0])
+                print(f"Currently, your phone number is set to +{current_phone}.")
                 while True:
                     new_phone = input(
                         "Enter new phone number in the format +44_______:")
@@ -975,9 +974,10 @@ class Volunteer(CentralFunctions):
                 while True:
                     user_input = input("To confirm change of data, enter [Y]. To go back to the menu without saving this change, enter [B]:").lower()
                     if user_input == "y":
+                        # new_phone = f"+{str(new_phone)}"
                         self.vol_db.loc[self.vol_db["Username"] == self.current_user, "Phone"] = new_phone
-                        self.vol_db.to_csv("volunteer_database.csv",index_label=False)
-                        print(f"Phone number has been set to {new_phone}.")
+                        self.vol_db.to_csv("volunteer_database.csv",index=False)
+                        print(f"Phone number has been set to +{new_phone}.")
                         break
                     elif user_input == "b":
                         print(100 * '=')
@@ -1001,7 +1001,7 @@ class Volunteer(CentralFunctions):
                     if user_input == "y":
                         new_availability= f"{new_availability}h"
                         self.vol_db.loc[self.vol_db["Username"] == self.current_user, "Availability"] = new_availability
-                        self.vol_db.to_csv("volunteer_database.csv",index_label=False)
+                        self.vol_db.to_csv("volunteer_database.csv",index=False)
                         print(f"Availability has been set to {new_availability}.")
                         break
                     elif user_input == "b":
@@ -1047,7 +1047,7 @@ class Volunteer(CentralFunctions):
                             user_input = input("To confirm change of data, enter [Y]. To go back to the menu without saving this change, enter [B]:").lower()
                             if user_input == "y":
                                 self.user_db.loc[self.user_db["username"] == self.current_user, 'password'] = new_password
-                                self.user_db.to_csv("user_database.csv",index_label=False)
+                                self.user_db.to_csv("user_database.csv",index=False)
                                 print("Password has been changed")
                                 break
                             elif user_input == "b":
