@@ -160,25 +160,25 @@ class CentralFunctions():
         '''
         Interactive method which allows to add new family to the list
         '''
+        while True:
+            name = input("State name of family's lead member: ")
+            surname = input("State surname of the family: ")
+            if not name.isalpha() or not surname.isalpha():
+                print("You can't use numbers for this input. Try again ")
+            else:
+                break
+        mental_state = input("Describe the mental state of the family: ")
+        physical_state = input("Describe the physical state of the family: ")
+
+        while True:
+            try:
+                no_of_members = int(input("Type the number of family members: "))
+                break
+            except ValueError:
+                print("It has to be an integer")
+                continue
+
         if self.current_user == 'adm':
-            while True:
-                name = input("State name of family's lead member: ")
-                surname = input("State surname of the family: ")
-                if not name.isalpha() or not surname.isalpha():
-                    print("You can't use numbers for this input. Try again ")
-                else:
-                    break
-
-            mental_state = input("Describe the mental state of the family: ")
-            physical_state = input("Describe the physical state of the family: ")
-
-            while True:
-                try:
-                    no_of_members = int(input("Type the number of family members: "))
-                    break
-                except ValueError:
-                    print("It has to be an integer")
-                    continue
             emergency_options = self.emergencies_db["Emergency ID"]
             print(*emergency_options,sep='\n')
             emergency_list = self.emergencies_db["Emergency ID"].tolist()
@@ -199,36 +199,14 @@ class CentralFunctions():
                     break
             family_count = len(self.refugee_db.loc[self.refugee_db['Camp ID'].str.contains(camp_choice, case=False)]) + 1
             family_id = str(family_count) + camp_choice
-            self.refugee_db.loc[len(self.refugee_db)] = [family_id, name, surname, camp_choice, mental_state, physical_state, no_of_members]
-
-            self.refugee_db.to_csv("refugee_db.csv", index=False)
-            self.save(self.refugee_db, 'refugee_database.csv')
         else:
-            while True:
-                name = input("State name of family's lead member: ")
-                surname = input("State surname of the family: ")
-                if not name.isalpha() or not surname.isalpha():
-                    print("You can't use numbers for this input. Try again ")
-                else:
-                    break
+            camp_choice = self.vol_db[self.vol_db['Camp ID'] == self.camp_of_user]['Camp ID'].values[0]
+            family_count = len(self.refugee_db.loc[self.refugee_db['Camp ID'].str.contains(camp_choice, case=False)]) + 1
+            family_id = str(family_count) + camp_choice
 
-            mental_state = input("Describe the mental state of the family: ")
-            physical_state = input("Describe the physical state of the family: ")
-
-            while True:
-                try:
-                    no_of_members = int(input("Type the number of family members: "))
-                    break
-                except ValueError:
-                    print("It has to be an integer")
-                    continue
-            camp_id = self.vol_db[self.vol_db['Camp ID'] == self.camp_of_user]['Camp ID'].values[0]
-            family_count = len(self.refugee_db.loc[self.refugee_db['Camp ID'].str.contains(camp_id, case=False)]) + 1
-            family_id = str(family_count) + camp_id
-            self.refugee_db.loc[len(self.refugee_db)] = [family_id, name, surname, camp_id, mental_state, physical_state, no_of_members]
-
-            self.refugee_db.to_csv("refugee_db.csv", index=False)
-            self.save(self.refugee_db, 'refugee_database.csv')
+        self.refugee_db.loc[len(self.refugee_db)] = [family_id, name, surname, camp_choice, mental_state, physical_state, no_of_members]
+        self.refugee_db.to_csv("refugee_db.csv", index=False)
+        self.save(self.refugee_db, 'refugee_database.csv')
         print("New refugee family was created")
 
     def call_camps(self):
