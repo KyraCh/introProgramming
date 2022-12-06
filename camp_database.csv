@@ -1,4 +1,4 @@
-Camp ID,Location,Number of volunteers,Capacity,Current Emergency,Number of refugees
+Camp ID,Location,Number of volunteers,Capacity,Emergency ID,Number of refugees
 AU1-1,Australia,29,1000,AU1,3
 AU1-2,Australia,13,250,AU1,3
 PK1-1,Pakistan,1,50,PK1,
