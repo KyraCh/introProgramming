@@ -130,34 +130,104 @@ class CentralFunctions():
             return False
 
     def users_login(self):
-
+        '''
+        Login function that allows you to login normally with 111 password first time and
+        once you input new password and email you user your double authentication.
+        '''
         users_dict = self.user_db.copy().set_index('username').to_dict(orient='index')
+        users_df = self.user_db.copy()
         vol_dict = self.vol_db.copy().set_index('Username').to_dict(orient='index')
-
         while True:
-            username = input('Please input your username: ').strip()
-            password = input('Please input your password: ').strip()
+            while True:
+                username = input('\nPlease input your USERNAME: ').strip()
 
-            if username not in users_dict:
-                print('Username is incorrect.')
-            elif password != users_dict[username]['password']:
-                print('Password is incorrect.')
-            elif not users_dict[username]['activated']:
-                print('Account not activated. Please contact your admin.')
+                if username not in users_dict:
+                    print('Username is incorrect.')
+                elif not users_dict[username]['activated']:
+                    print('Account not activated. Please contact your admin.')
+                else:
+                    break
+
+            self.current_user = username
+            ### IF PASSWORD = 111
+            #if users_df.loc[users_df['username'] == username,'email'].values[0] == '': # CHECKS IF EMAIL IS SET
+            if users_df.loc[users_df['username'] == username,'password'].values[0] == '111': # CHECKS IF PASSWORD IS 111
+                
+                while True:
+                    password = input('\nPlease input your PASSWORD: ').strip()
+                    if password == 'B':
+                        break
+                    elif password != users_dict[username]['password']:
+                            print('Password is incorrect.')
+                            continue
+                    break
+                if password == 'B':
+                    continue
+                
+                print(100*'=')
+                if username == 'admin':
+                    self.current_user = 'adm'
+                    self.camp_of_user = 'adm'
+                    print(f'Welcome admin!')
+                    print('WARNING: YOUR PASSWORD IS IN DANGER\n')
+                else:
+                    name = vol_dict[username]['First name']
+                    self.camp_of_user = vol_dict[username]['Camp ID']
+                    print(f'Welcome {name}!')
+                    print('WARNING: PLEASE ADD YOUR PERSONAL INFORMATION AND CHANGE PASSWORD\n')
+                break        
+            ### IF PASSWORD != 111
             else:
+                
+                while True:
+                    password = input('\nPlease input your PASSWORD: ').strip()
+                    if password == 'B':
+                        break
+                    elif password != users_dict[username]['password']:
+                            print('Password is incorrect.')
+                            continue
+                    break
+                if password == 'B':
+                    continue
+                    
+                print("\nEmail with One-Time-Password to reset password was sent to you.")
+                otp = ''.join([str(random.randint(0, 9)) for x in range(4)])
+                email_sender = "hemsystem1@gmail.com"
+                email_password = "asbwtshlldlaalld"
+                email_receiver = self.user_db[self.user_db["username"] == self.current_user]['email'].values[0]
+
+                subject = "OTP to login"
+                body = """Yours OTP to login is: {}""".format(str(otp))
+                mail = EmailMessage()
+                mail["From"] = email_sender
+                mail["To"] = email_receiver
+                mail["Subject"] = subject
+                mail.set_content(body)
+                context = ssl.create_default_context()
+                with smtplib.SMTP_SSL('smtp.gmail.com', 465, context=context) as smtp:
+                    smtp.login(email_sender, email_password)
+                    smtp.sendmail(email_sender, email_receiver, mail.as_string())
+                    
+                while True:
+                    inpt = input("\nInput here the OTP: ")
+                    if inpt == 'B':
+                        break
+                    elif otp != inpt:
+                        print("Please enter valid OTP.")
+                    else:
+                        break    
+                if inpt == 'B':
+                    continue
+                
+                print('')
+                print(100*'=')
+                if username == 'admin':
+                    print('Welcome back admin!')
+                else:
+                    name = vol_dict[username]['First name']  
+                    print(f'Welcome back {name}!')
                 break
-
-        self.current_user = username
-
-        if username == 'admin':
-            self.current_user = 'adm'
-            self.camp_of_user = 'adm'
-            print(f'Welcome Back admin\n')
-        else:
-            name = vol_dict[username]['First name']
-            self.camp_of_user = vol_dict[username]['Camp ID']
-            print(f'Welcome back {name}\n')
-
+                
     def create_profile(self):
         '''
         Interactive method which allows to add new family to the list
@@ -1601,11 +1671,9 @@ def menu(functions):
 if __name__ == '__main__':
     login = CentralFunctions()
     login.users_login()
-    if login.current_user != 'adm':
+    if login.current_user != 'admin':
         vol = Volunteer(login.current_user, login.camp_of_user)
-        print(vol.current_user)
         menu(vol.functions)
     else:
         adm = Admin(login.current_user, login.camp_of_user)
-        print(adm.current_user)
         menu(adm.functions)
