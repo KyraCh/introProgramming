@@ -3,7 +3,7 @@ import pandas as pd
 import numpy as np
 import datetime
 import time
-import os
+import re
 import smtplib
 import random
 from email.message import EmailMessage
@@ -39,7 +39,7 @@ class CentralFunctions():
             self.user_db = df
         except FileNotFoundError:
             user_db = {'username': ['admin'], 'password': [
-                '111'], 'role': ['admin'], 'activated': ['TRUE']}
+                '111'], 'role': ['admin'], 'activated': ['TRUE'], 'email':['hemtest11@gmail.com']}
             df = pd.DataFrame(user_db)
             df.set_index('username', inplace=True)
             df['password'] = df['password'].astype(str)
@@ -688,7 +688,7 @@ class Admin(CentralFunctions):
                 vol_df.loc[len(vol_df.index)] = [
                     username, '', '', '', camp, '']
                 users_df.loc[len(users_df.index)] = [
-                    username, password, 'volunteer', 'TRUE']
+                    username, password, 'volunteer', 'TRUE', '']
                 print(users_df.tail(1))
                 while True:
                     commit = input('\nCommit changes? [y]/[n] ')
@@ -755,7 +755,7 @@ class Admin(CentralFunctions):
                     vol_df.loc[len(vol_df.index)] = [
                         'Volunteer'+str(new_usr_index+i), '', '', '', camp, '']
                     users_df.loc[len(users_df.index)] = [
-                        'Volunteer'+str(new_usr_index+i), '111', 'volunteer', 'TRUE']
+                        'Volunteer'+str(new_usr_index+i), '111', 'volunteer', 'TRUE', '']
 
                 print(users_df.tail(no_of_new_users))
                 while True:
@@ -929,6 +929,23 @@ class Volunteer(CentralFunctions):
         If system detects no lack of an input it will launch a "flowing" version, otherwise it will launch
         "selective" version of this method.
         '''
+        current_name = self.vol_db[self.vol_db["Username"] == self.current_user]["First name"].values[0]
+        current_second_name = self.vol_db[self.vol_db["Username"] == self.current_user]["Second name"].values[0]
+        current_phone = str(self.vol_db[self.vol_db["Username"] == self.current_user]["Phone"].values[0])
+        current_availability = self.vol_db[self.vol_db["Username"] == self.current_user]["Availability"].values[0]
+        password = self.user_db[self.user_db["username"] == self.current_user]['password'].values[0]
+        current_email = self.user_db[self.user_db["username"] == self.current_user]['email'].values[0]
+        vol_df = self.vol_db.copy()
+        users_df = self.user_db.copy()
+        
+        regex = '^[a-z0-9]+[\._]?[a-z0-9]+[@]\w+[.]\w{2,3}$'  
+                
+        def check_email(email):   
+            if(re.search(regex,email)):   
+                return True  
+            else:   
+                return False 
+                    
         if '' not in list(self.vol_db.loc[self.vol_db['Username']==self.current_user]):
         
             while True:
@@ -940,18 +957,13 @@ class Volunteer(CentralFunctions):
                         '[2] - Family name\n' +
                         '[3] - Phone number\n' +
                         '[4] - Availability\n' +
-                        '[5] - Change password\n')
-                print('[B] to go back')
+                        '[5] - Change password\n'+
+                        '[6] - Change email')
+                print('\n[B] to go back')
                 print('[Q] to quit')
-                
-                current_name = self.vol_db[self.vol_db["Username"] == self.current_user]["First name"].values[0]
-                current_second_name = self.vol_db[self.vol_db["Username"] == self.current_user]["Second name"].values[0]
-                current_phone = str(self.vol_db[self.vol_db["Username"] == self.current_user]["Phone"].values[0])
-                current_availability = self.vol_db[self.vol_db["Username"] == self.current_user]["Availability"].values[0]
-                password = self.user_db[self.user_db["username"] == self.current_user]['password'].values[0]
-                vol_df = self.vol_db
-                
+                              
                 user_input = input("\nChoose interaction: ")
+                        
                 if user_input == '1':
                     print(f"Currently, your first name is set to {current_name}.")
                     while True:
@@ -1048,6 +1060,19 @@ class Volunteer(CentralFunctions):
                         else:
                             password = inpt
                             break
+                        
+                if user_input == '6':
+                    print(f"Currently, your email is set to {current_email}.")
+                    while True:
+                        inpt = input("\nEnter new email: ")
+                        inpt = inpt.capitalize()
+                        if inpt == 'B' or inpt == 'Q':
+                            break
+                        elif check_email(inpt):
+                            print("Please enter a valid email address.")
+                            continue
+                        current_email = inpt
+                        break
 
                 else:
                     print('Invalid input. Please select from the options above.')
@@ -1061,8 +1086,10 @@ class Volunteer(CentralFunctions):
                     exit()
 
                 vol_df.loc[vol_df['Username']==self.current_user] = [self.current_user, current_name, current_second_name, current_phone, self.camp_of_user, current_availability]
-                print('')
-                print(vol_df.loc[vol_df['Username']==self.current_user])
+                users_df.loc[users_df['username']==self.current_user,['password','email']] = (password,current_email)
+
+                print('\n',vol_df.loc[vol_df['Username']==self.current_user])
+                print(users_df.loc[users_df['username']==self.current_user,['username','password','email']])
                 
                 while True:
                     commit = input('\nCommit changes? [y]/[n] ')
@@ -1104,14 +1131,16 @@ class Volunteer(CentralFunctions):
                 '\t>First name\n' +
                 '\t>Family name\n' +
                 '\t>Phone number\n' +
-                '\t>Availability\n')
+                '\t>Availability\n' +
+                '\t>Email\n' +
+                '\t>Password\n')
             print('[B] to go back')
             print('[Q] to quit\n')
 
-            vol_df = self.vol_db
             print(vol_df.loc[vol_df['Username'] == self.current_user])
-            questions = ['\nEnter new first name: ', '\nEnter new second name: ',
-                        '\nEnter new phone number in the format [44_______]:', '\nEnter new availability: ']
+            questions = ['\nEnter first name: ', '\nEnter second name: ',
+                        '\nEnter phone number in the format [+44(0)_______]:', '\nEnter availability: ',
+                        '\nEnter your email', '\nEnter your new password (over 8 characters long)']
 
             def go_back(questionStack):
                 i = 0
@@ -1152,8 +1181,7 @@ class Volunteer(CentralFunctions):
                                 menu(self.functions)
                                 exit()
                             elif answer == '':
-                                answer = vol_df.iloc[vol_df.index[vol_df['Username']
-                                                                == self.current_user][0], 3]
+                                answer = current_phone
                             elif not answer.isnumeric():
                                 print("Please enter a valid phone number.")
                                 continue
@@ -1174,8 +1202,7 @@ class Volunteer(CentralFunctions):
                                 menu(self.functions)
                                 exit()
                             elif answer == '':
-                                answer = vol_df.iloc[vol_df.index[vol_df['Username']
-                                                                == self.current_user][0], 5]
+                                answer = current_availability
                             elif not answer.isnumeric():
                                 print("Invalid input.")
                                 continue
@@ -1184,6 +1211,43 @@ class Volunteer(CentralFunctions):
                                     "Availability exceeds maximum weekly working hours (48h).")
                                 continue
                             break
+                    elif i == 4:
+                        while True:
+                            answer = input(questionStack[i])
+                            if answer == 'B':
+                                if i == 0:
+                                    break
+                                answerStack.pop()
+                                i -= 1
+                            elif answer == 'Q':
+                                print(100*'=')
+                                menu(self.functions)
+                                exit()
+                            elif answer == '':
+                                answer = current_email
+                            elif len(inpt) < 8:
+                                print("Sorry but your password needs to be at least 8 characters long.")
+                                continue
+                            break
+                    elif i == 5:
+                        while True:
+                            answer = input(questionStack[i])
+                            if answer == 'B':
+                                if i == 0:
+                                    break
+                                answerStack.pop()
+                                i -= 1
+                            elif answer == 'Q':
+                                print(100*'=')
+                                menu(self.functions)
+                                exit()
+                            elif answer == '':
+                                answer = password
+                            elif len(inpt) < 8:
+                                print("Sorry but your password needs to be at least 8 characters long.")
+                                continue
+                            break
+                            
                     if answer == 'B':
                         continue
 
@@ -1198,6 +1262,7 @@ class Volunteer(CentralFunctions):
                     self.current_user, answers[0], answers[1], answers[2], self.camp_of_user, answers[3]]
 
                 print('\n', vol_df.loc[vol_df['Username'] == self.current_user])
+                print(users_df.loc[users_df['username']==self.current_user,['username','password','email']])
                 while True:
                     commit = input('\nCommit changes? [y]/[n] ')
                     if commit == 'y' or commit == 'n':
