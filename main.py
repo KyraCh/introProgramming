@@ -9,6 +9,7 @@ import random
 from email.message import EmailMessage
 import ssl
 
+
 class CentralFunctions():
 
     def __init__(self):
@@ -39,7 +40,7 @@ class CentralFunctions():
             self.user_db = df
         except FileNotFoundError:
             user_db = {'username': ['admin'], 'password': [
-                '111'], 'role': ['admin'], 'activated': ['TRUE'], 'email':['hemtest11@gmail.com']}
+                '111'], 'role': ['admin'], 'activated': ['TRUE'], 'email': ['hemtest11@gmail.com']}
             df = pd.DataFrame(user_db)
             df.set_index('username', inplace=True)
             df['password'] = df['password'].astype(str)
@@ -149,21 +150,22 @@ class CentralFunctions():
                     break
 
             self.current_user = username
-            ### IF PASSWORD = 111
-            #if users_df.loc[users_df['username'] == username,'email'].values[0] == '': # CHECKS IF EMAIL IS SET
-            if users_df.loc[users_df['username'] == username,'password'].values[0] == '111': # CHECKS IF PASSWORD IS 111
-                
+            # IF PASSWORD = 111
+            # if users_df.loc[users_df['username'] == username,'email'].values[0] == '': # CHECKS IF EMAIL IS SET
+            # CHECKS IF PASSWORD IS 111
+            if users_df.loc[users_df['username'] == username, 'password'].values[0] == '111':
+
                 while True:
                     password = input('\nPlease input your PASSWORD: ').strip()
                     if password == 'B':
                         break
                     elif password != users_dict[username]['password']:
-                            print('Password is incorrect.')
-                            continue
+                        print('Password is incorrect.')
+                        continue
                     break
                 if password == 'B':
                     continue
-                
+
                 print(100*'=')
                 if username == 'admin':
                     self.current_user = 'admin'
@@ -174,27 +176,30 @@ class CentralFunctions():
                     name = vol_dict[username]['First name']
                     self.camp_of_user = vol_dict[username]['Camp ID']
                     print(f'Welcome {name}!')
-                    print('WARNING: PLEASE ADD YOUR PERSONAL INFORMATION AND CHANGE PASSWORD')
-                break        
-            ### IF PASSWORD != 111
+                    print(
+                        'WARNING: PLEASE ADD YOUR PERSONAL INFORMATION AND CHANGE PASSWORD')
+                break
+            # IF PASSWORD != 111
             else:
-                
+
                 while True:
                     password = input('\nPlease input your PASSWORD: ').strip()
                     if password == 'B':
                         break
                     elif password != users_dict[username]['password']:
-                            print('Password is incorrect.')
-                            continue
+                        print('Password is incorrect.')
+                        continue
                     break
                 if password == 'B':
                     continue
-                    
-                print("\nEmail with One-Time-Password to reset password was sent to you.")
+
+                print(
+                    "\nEmail with One-Time-Password to reset password was sent to you.")
                 otp = ''.join([str(random.randint(0, 9)) for x in range(4)])
                 email_sender = "hemsystem1@gmail.com"
                 email_password = "asbwtshlldlaalld"
-                email_receiver = self.user_db[self.user_db["username"] == self.current_user]['email'].values[0]
+                email_receiver = self.user_db[self.user_db["username"]
+                                              == self.current_user]['email'].values[0]
 
                 subject = "OTP to login"
                 body = """Yours OTP to login is: {}""".format(str(otp))
@@ -206,8 +211,9 @@ class CentralFunctions():
                 context = ssl.create_default_context()
                 with smtplib.SMTP_SSL('smtp.gmail.com', 465, context=context) as smtp:
                     smtp.login(email_sender, email_password)
-                    smtp.sendmail(email_sender, email_receiver, mail.as_string())
-                    
+                    smtp.sendmail(email_sender, email_receiver,
+                                  mail.as_string())
+
                 while True:
                     inpt = input("\nInput here the OTP: ")
                     if inpt == 'B':
@@ -215,21 +221,21 @@ class CentralFunctions():
                     elif otp != inpt:
                         print("Please enter valid OTP.")
                     else:
-                        break    
+                        break
                 if inpt == 'B':
                     continue
-                
+
                 print('')
                 print(100*'=')
                 if username == 'admin':
                     self.camp_of_user = 'adm'
                     print('Welcome back admin!')
                 else:
-                    name = vol_dict[username]['First name'] 
-                    self.camp_of_user = vol_dict[username]['Camp ID'] 
+                    name = vol_dict[username]['First name']
+                    self.camp_of_user = vol_dict[username]['Camp ID']
                     print(f'Welcome back {name}!')
                 break
-                
+
     def create_profile(self):
         '''
         Interactive method which allows to add new family to the list
@@ -250,29 +256,32 @@ class CentralFunctions():
                     print("You can't use numbers for this input. Try again ")
                 while True:
                     print('[B] to go back to main menu')
-                    mental_state = input("Describe the mental state of the family: ")
+                    mental_state = input(
+                        "Describe the mental state of the family: ")
                     if mental_state == "b" or mental_state == "B":
                         break
                     while True:
-                        physical_state = input("Describe the physical state of the family: ")
+                        physical_state = input(
+                            "Describe the physical state of the family: ")
                         if physical_state == "b" or physical_state == "B":
                             break
                         while True:
                             print('[Q] to go back to main menu')
-                            no_of_members = (input("Type the number of family members: "))
+                            no_of_members = (
+                                input("Type the number of family members: "))
                             if no_of_members == "b" or no_of_members == "B":
                                 break
                             try:
                                 no_of_members = int(no_of_members)
-    
+
                             except ValueError:
                                 print("It has to be an integer")
 
-
                             if self.current_user == 'adm':
                                 emergency_options = self.emergencies_db["Emergency ID"]
-                                print(*emergency_options,sep='\n')
-                                emergency_list = self.emergencies_db["Emergency ID"].tolist()
+                                print(*emergency_options, sep='\n')
+                                emergency_list = self.emergencies_db["Emergency ID"].tolist(
+                                )
                                 while True:
                                     print('[B] to go back to main menu')
                                     emergency_id = input("Choose emergency: ")
@@ -280,36 +289,48 @@ class CentralFunctions():
                                         break
                                     elif emergency_id not in emergency_list:
                                         print("Invalid input for emergency")
-                                    camp_id = self.refugee_db.loc[self.refugee_db['Camp ID'].str.contains(emergency_id, case=False)]['Camp ID']
+                                    camp_id = self.refugee_db.loc[self.refugee_db['Camp ID'].str.contains(
+                                        emergency_id, case=False)]['Camp ID']
                                     camp_id_list = camp_id.tolist()
-                                    print(*set(camp_id),sep='\n')
+                                    print(*set(camp_id), sep='\n')
                                     while True:
                                         print('[B] to go back to main menu')
-                                        camp_choice = input("Choose a camp to which you want to assign family: ")
+                                        camp_choice = input(
+                                            "Choose a camp to which you want to assign family: ")
                                         if camp_choice not in camp_id_list:
-                                            print("You have to choose from a list of available camps!")
+                                            print(
+                                                "You have to choose from a list of available camps!")
                                         elif camp_choice == "b" or camp_choice == "B":
                                             break
 
-                                        family_count = len(self.refugee_db.loc[self.refugee_db['Camp ID'].str.contains(camp_choice, case=False)]) + 1
-                                        family_id = str(family_count) + camp_choice
+                                        family_count = len(self.refugee_db.loc[self.refugee_db['Camp ID'].str.contains(
+                                            camp_choice, case=False)]) + 1
+                                        family_id = str(
+                                            family_count) + camp_choice
                                         self.refugee_db.loc[len(self.refugee_db)] = [family_id, name, surname, camp_choice,
                                                                                      mental_state, physical_state,
                                                                                      no_of_members]
-                                        self.refugee_db.to_csv("refugee_db.csv", index=False)
-                                        self.save(self.refugee_db, 'refugee_database.csv')
+                                        self.refugee_db.to_csv(
+                                            "refugee_db.csv", index=False)
+                                        self.save(self.refugee_db,
+                                                  'refugee_database.csv')
                                         print("New refugee family was created")
                                         print(100 * '=')
                                         menu(self.functions)
                                         exit()
                             else:
-                                camp_choice = self.vol_db[self.vol_db['Camp ID'] == self.camp_of_user]['Camp ID'].values[0]
-                                family_count = len(self.refugee_db.loc[self.refugee_db['Camp ID'].str.contains(camp_choice, case=False)]) + 1
+                                camp_choice = self.vol_db[self.vol_db['Camp ID']
+                                                          == self.camp_of_user]['Camp ID'].values[0]
+                                family_count = len(self.refugee_db.loc[self.refugee_db['Camp ID'].str.contains(
+                                    camp_choice, case=False)]) + 1
                                 family_id = str(family_count) + camp_choice
 
-                                self.refugee_db.loc[len(self.refugee_db)] = [family_id, name, surname, camp_choice, mental_state, physical_state, no_of_members]
-                                self.refugee_db.to_csv("refugee_db.csv", index=False)
-                                self.save(self.refugee_db, 'refugee_database.csv')
+                                self.refugee_db.loc[len(self.refugee_db)] = [
+                                    family_id, name, surname, camp_choice, mental_state, physical_state, no_of_members]
+                                self.refugee_db.to_csv(
+                                    "refugee_db.csv", index=False)
+                                self.save(self.refugee_db,
+                                          'refugee_database.csv')
                                 print("New refugee family was created")
                                 print(100 * '=')
                                 menu(self.functions)
@@ -317,20 +338,22 @@ class CentralFunctions():
 
     def call_camps(self):
         # need to add 7,8,9
-        print("Choose 1 if you want to see the list of all camps")
-        print("Choose 2 if you want to see the total number of camps")
-        print("Choose 3 if you want to see the number of volunteers in each camp")
-        print("Choose 4 if you want to see the number of refugees in each camp")
-        print("Choose 5 if you want to see the capacity by camp")
-        print("Choose 6 if you want to see the number of camps in each area")
-        print("Choose 7 if you want to see the number of active camps")
-        print("Choose 8 if you want to see the number of inactive camps")
-        print("Choose 9 if you want to see the number of camps by emergency type")
-        print("Choose Quit if you want exit this summary")
+        print("[1] - List of all camps")
+        print("[2] - total number of camps")
+        print("[3] - Number of volunteers in each camp")
+        print("[4] - number of refugees in each camp")
+        print("[5] - Capacity by camp")
+        print("[6] - Number of camps in each area")
+        print("[7] - Number of active camps")
+        print("[8] - Number of inactive camps")
+        print("[9] - Number of camps by emergency type")
+        print("Choose [Q] if you want exit this summary")
 
         while True:
 
             user_input = input("Choose interaction: ")
+            local_db = self.camps_db.merge(
+                self.emergencies_db, on='Emergency ID', how='inner')
 
             if user_input == '1':
                 print("See camp list: \n", self.camps_db)
@@ -347,6 +370,13 @@ class CentralFunctions():
             elif user_input == "6":
                 print("Camps in each area: \n", self.camps_db.groupby(
                     by=self.camps_db['Location']).size())
+            elif user_input == '7':
+                print(local_db['Close date'].isnull().sum())
+            elif user_input == '8':
+                print(local_db['Close date'].count())
+            elif user_input == '9':
+                print(self.emergencies_db.groupby(
+                    by=self.emergencies_db['Type']).size())
             else:
                 break
 
@@ -1033,43 +1063,51 @@ class Volunteer(CentralFunctions):
         If system detects no lack of an input it will launch a "flowing" version, otherwise it will launch
         "selective" version of this method.
         '''
-        current_name = self.vol_db[self.vol_db["Username"] == self.current_user]["First name"].values[0]
-        current_second_name = self.vol_db[self.vol_db["Username"] == self.current_user]["Second name"].values[0]
-        current_phone = str(self.vol_db[self.vol_db["Username"] == self.current_user]["Phone"].values[0])
-        current_availability = self.vol_db[self.vol_db["Username"] == self.current_user]["Availability"].values[0]
-        password = self.user_db[self.user_db["username"] == self.current_user]['password'].values[0]
-        current_email = self.user_db[self.user_db["username"] == self.current_user]['email'].values[0]
+        current_name = self.vol_db[self.vol_db["Username"]
+                                   == self.current_user]["First name"].values[0]
+        current_second_name = self.vol_db[self.vol_db["Username"]
+                                          == self.current_user]["Second name"].values[0]
+        current_phone = str(
+            self.vol_db[self.vol_db["Username"] == self.current_user]["Phone"].values[0])
+        current_availability = self.vol_db[self.vol_db["Username"]
+                                           == self.current_user]["Availability"].values[0]
+        password = self.user_db[self.user_db["username"]
+                                == self.current_user]['password'].values[0]
+        current_email = self.user_db[self.user_db["username"]
+                                     == self.current_user]['email'].values[0]
         vol_df = self.vol_db.copy()
         users_df = self.user_db.copy()
-        
-        regex = '^[a-z0-9]+[\._]?[a-z0-9]+[@]\w+[.]\w{2,3}$'  
-                
-        def check_email(email):   
-            if(re.search(regex,email)):   
-                return True  
-            else:   
-                return False 
-                    
-        if '' not in list(self.vol_db.loc[self.vol_db['Username']==self.current_user]):
-        
+
+        regex = '^[a-z0-9]+[\._]?[a-z0-9]+[@]\w+[.]\w{2,3}$'
+
+        def check_email(email):
+            if(re.search(regex, email)):
+                return True
+            else:
+                return False
+
+        if '' not in list(self.vol_db.loc[self.vol_db['Username'] == self.current_user]):
+
             while True:
                 print(100 * '=')
-                print('Please select which information you would like to change about yourself.')
+                print(
+                    'Please select which information you would like to change about yourself.')
                 print('Input a digit to change the correpsonding piece of information.')
                 print('E.g. input "1" to change your first name.\n' +
-                        '[1] - First name\n' +
-                        '[2] - Family name\n' +
-                        '[3] - Phone number\n' +
-                        '[4] - Availability\n' +
-                        '[5] - Change password\n'+
-                        '[6] - Change email')
+                      '[1] - First name\n' +
+                      '[2] - Family name\n' +
+                      '[3] - Phone number\n' +
+                      '[4] - Availability\n' +
+                      '[5] - Change password\n' +
+                      '[6] - Change email')
                 print('\n[B] to go back')
                 print('[Q] to quit')
-                              
+
                 user_input = input("\nChoose interaction: ")
-                        
+
                 if user_input == '1':
-                    print(f"Currently, your first name is set to {current_name}.")
+                    print(
+                        f"Currently, your first name is set to {current_name}.")
                     while True:
                         inpt = input("\nEnter new first name: ")
                         inpt = inpt.capitalize()
@@ -1080,9 +1118,10 @@ class Volunteer(CentralFunctions):
                             continue
                         current_name = inpt
                         break
-                
+
                 elif user_input == '2':
-                    print(f"Currently, your second name is set to {current_second_name}.")
+                    print(
+                        f"Currently, your second name is set to {current_second_name}.")
                     while True:
                         inpt = input("\nEnter new second name: ")
                         inpt = inpt.capitalize()
@@ -1094,9 +1133,10 @@ class Volunteer(CentralFunctions):
                         else:
                             current_second_name = inpt
                             break
-                        
+
                 elif user_input == '3':
-                    print(f"Currently, your phone number is set to +{current_phone}.")
+                    print(
+                        f"Currently, your phone number is set to +{current_phone}.")
                     while True:
                         inpt = input(
                             "\nEnter new phone number in the format +44(0)_______: ")
@@ -1111,9 +1151,10 @@ class Volunteer(CentralFunctions):
                         else:
                             current_phone = inpt
                             break
-                    
+
                 elif user_input == '4':
-                    print(f"Currently, your availability is set to {current_availability}.")
+                    print(
+                        f"Currently, your availability is set to {current_availability}.")
                     while True:
                         inpt = input("\nEnter new availability: ")
                         if inpt == 'B' or inpt == 'Q':
@@ -1121,20 +1162,24 @@ class Volunteer(CentralFunctions):
                         elif not inpt.isnumeric():
                             print("Invalid input.")
                         elif int(inpt) > 48:
-                            print("Availability exceeds maximum weekly working hours (48h).")
+                            print(
+                                "Availability exceeds maximum weekly working hours (48h).")
                         else:
                             current_availability = inpt
                             break
-                
+
                 elif user_input == '5':
                     print("Email with OTP to reset password was sent to you")
-                    otp = ''.join([str(random.randint(0, 9)) for x in range(4)])
+                    otp = ''.join([str(random.randint(0, 9))
+                                  for x in range(4)])
                     email_sender = "hemsystem1@gmail.com"
                     email_password = "asbwtshlldlaalld"
-                    email_receiver = self.user_db[self.user_db["username"] == self.current_user]['email'].values[0]
+                    email_receiver = self.user_db[self.user_db["username"]
+                                                  == self.current_user]['email'].values[0]
 
                     subject = "OTP to reset password"
-                    body = """Yours OTP to reset password is: {}""".format(str(otp))
+                    body = """Yours OTP to reset password is: {}""".format(
+                        str(otp))
                     mail = EmailMessage()
                     mail["From"] = email_sender
                     mail["To"] = email_receiver
@@ -1144,7 +1189,8 @@ class Volunteer(CentralFunctions):
 
                     with smtplib.SMTP_SSL('smtp.gmail.com', 465, context=context) as smtp:
                         smtp.login(email_sender, email_password)
-                        smtp.sendmail(email_sender, email_receiver, mail.as_string())
+                        smtp.sendmail(
+                            email_sender, email_receiver, mail.as_string())
                     while True:
                         inpt = input("\nInput here the OTP: ")
                         if inpt == 'B' or inpt == 'Q':
@@ -1158,13 +1204,15 @@ class Volunteer(CentralFunctions):
                         if inpt == 'B' or inpt == 'Q':
                             break
                         elif password == inpt:
-                            print("Sorry but your password can't be the same as the previous one.")
+                            print(
+                                "Sorry but your password can't be the same as the previous one.")
                         elif len(inpt) < 8:
-                            print("Sorry but your password needs to be at least 8 characters long.")
+                            print(
+                                "Sorry but your password needs to be at least 8 characters long.")
                         else:
                             password = inpt
                             break
-                        
+
                 if user_input == '6':
                     print(f"Currently, your email is set to {current_email}.")
                     while True:
@@ -1181,7 +1229,7 @@ class Volunteer(CentralFunctions):
                 else:
                     print('Invalid input. Please select from the options above.')
                     continue
-                
+
                 if inpt == 'B':
                     continue
                 elif inpt == 'Q' or user_input == 'B' or user_input == 'Q':
@@ -1189,12 +1237,16 @@ class Volunteer(CentralFunctions):
                     menu(self.functions)
                     exit()
 
-                vol_df.loc[vol_df['Username']==self.current_user] = [self.current_user, current_name, current_second_name, current_phone, self.camp_of_user, current_availability]
-                users_df.loc[users_df['username']==self.current_user,['password','email']] = (password,current_email)
+                vol_df.loc[vol_df['Username'] == self.current_user] = [self.current_user, current_name,
+                                                                       current_second_name, current_phone, self.camp_of_user, current_availability]
+                users_df.loc[users_df['username'] == self.current_user, [
+                    'password', 'email']] = (password, current_email)
 
-                print('\n',vol_df.loc[vol_df['Username']==self.current_user])
-                print(users_df.loc[users_df['username']==self.current_user,['username','password','email']])
-                
+                print(
+                    '\n', vol_df.loc[vol_df['Username'] == self.current_user])
+                print(users_df.loc[users_df['username'] == self.current_user, [
+                      'username', 'password', 'email']])
+
                 while True:
                     commit = input('\nCommit changes? [y]/[n] ')
                     if commit == 'y' or commit == 'n':
@@ -1223,28 +1275,28 @@ class Volunteer(CentralFunctions):
                 else:
                     counter = 0
                     continue
-                
+
             print(100*'=')
-        
-        else:        
-        
+
+        else:
+
             print(100*'=')
             print('Please select input or update any information about you.')
             print("If you do NOT wish to change current value press ENTER during input.")
             print('Expected Inputs:\n' +
-                '\t>First name\n' +
-                '\t>Family name\n' +
-                '\t>Phone number\n' +
-                '\t>Availability\n' +
-                '\t>Email\n' +
-                '\t>Password\n')
+                  '\t>First name\n' +
+                  '\t>Family name\n' +
+                  '\t>Phone number\n' +
+                  '\t>Availability\n' +
+                  '\t>Email\n' +
+                  '\t>Password\n')
             print('[B] to go back')
             print('[Q] to quit\n')
 
             print(vol_df.loc[vol_df['Username'] == self.current_user])
             questions = ['\nEnter first name: ', '\nEnter second name: ',
-                        '\nEnter phone number in the format [+44(0)_______]:', '\nEnter availability: ',
-                        '\nEnter your email', '\nEnter your new password (over 8 characters long)']
+                         '\nEnter phone number in the format [+44(0)_______]:', '\nEnter availability: ',
+                         '\nEnter your email', '\nEnter your new password (over 8 characters long)']
 
             def go_back(questionStack):
                 i = 0
@@ -1267,7 +1319,7 @@ class Volunteer(CentralFunctions):
                                 exit()
                             elif answer == '':
                                 answer = vol_df.iloc[vol_df.index[vol_df['Username']
-                                                                == self.current_user][0], i+1]
+                                                                  == self.current_user][0], i+1]
                             elif not answer.isalpha():
                                 print("Please enter a valid name.")
                                 continue
@@ -1330,7 +1382,8 @@ class Volunteer(CentralFunctions):
                             elif answer == '':
                                 answer = current_email
                             elif len(inpt) < 8:
-                                print("Sorry but your password needs to be at least 8 characters long.")
+                                print(
+                                    "Sorry but your password needs to be at least 8 characters long.")
                                 continue
                             break
                     elif i == 5:
@@ -1348,10 +1401,11 @@ class Volunteer(CentralFunctions):
                             elif answer == '':
                                 answer = password
                             elif len(inpt) < 8:
-                                print("Sorry but your password needs to be at least 8 characters long.")
+                                print(
+                                    "Sorry but your password needs to be at least 8 characters long.")
                                 continue
                             break
-                            
+
                     if answer == 'B':
                         continue
 
@@ -1365,8 +1419,10 @@ class Volunteer(CentralFunctions):
                 vol_df.loc[vol_df['Username'] == self.current_user] = [
                     self.current_user, answers[0], answers[1], answers[2], self.camp_of_user, answers[3]]
 
-                print('\n', vol_df.loc[vol_df['Username'] == self.current_user])
-                print(users_df.loc[users_df['username']==self.current_user,['username','password','email']])
+                print(
+                    '\n', vol_df.loc[vol_df['Username'] == self.current_user])
+                print(users_df.loc[users_df['username'] == self.current_user, [
+                      'username', 'password', 'email']])
                 while True:
                     commit = input('\nCommit changes? [y]/[n] ')
                     if commit == 'y' or commit == 'n':
@@ -1383,7 +1439,7 @@ class Volunteer(CentralFunctions):
                     answers = []
                     continue
             print(100*'=')
-    
+
     # def amend_self_info(self):
     #     '''
     #     Allows volunteer user to input their name, surname, phone number and availability.
@@ -1552,7 +1608,7 @@ class Volunteer(CentralFunctions):
     #             exit()
     #         else:
     #             print("Invalid input. Please select from the following options.")
- 
+
     # def amend_self_info(self):
         '''
         Allows volunteer user to input their name, surname, phone number and availability.
