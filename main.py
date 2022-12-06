@@ -166,15 +166,15 @@ class CentralFunctions():
                 
                 print(100*'=')
                 if username == 'admin':
-                    self.current_user = 'adm'
+                    self.current_user = 'admin'
                     self.camp_of_user = 'adm'
                     print(f'Welcome admin!')
-                    print('WARNING: YOUR PASSWORD IS IN DANGER\n')
+                    print('WARNING: YOUR PASSWORD IS IN DANGER')
                 else:
                     name = vol_dict[username]['First name']
                     self.camp_of_user = vol_dict[username]['Camp ID']
                     print(f'Welcome {name}!')
-                    print('WARNING: PLEASE ADD YOUR PERSONAL INFORMATION AND CHANGE PASSWORD\n')
+                    print('WARNING: PLEASE ADD YOUR PERSONAL INFORMATION AND CHANGE PASSWORD')
                 break        
             ### IF PASSWORD != 111
             else:
@@ -222,9 +222,11 @@ class CentralFunctions():
                 print('')
                 print(100*'=')
                 if username == 'admin':
+                    self.camp_of_user = 'adm'
                     print('Welcome back admin!')
                 else:
-                    name = vol_dict[username]['First name']  
+                    name = vol_dict[username]['First name'] 
+                    self.camp_of_user = vol_dict[username]['Camp ID'] 
                     print(f'Welcome back {name}!')
                 break
                 
