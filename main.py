@@ -152,8 +152,7 @@ class CentralFunctions():
             self.current_user = username
             # IF PASSWORD = 111
             # if users_df.loc[users_df['username'] == username,'email'].values[0] == '': # CHECKS IF EMAIL IS SET
-            # CHECKS IF PASSWORD IS 111
-            if users_df.loc[users_df['username'] == username, 'password'].values[0] == '111':
+            if users_df.loc[users_df['username'] == username, 'password'].values[0] == '111': # CHECKS IF PASSWORD IS 111
 
                 while True:
                     password = input('\nPlease input your PASSWORD: ').strip()
