@@ -163,7 +163,7 @@ class CentralFunctions():
                     break
                 if password == 'B':
                     continue
-                
+                print('')
                 print(100*'=')
                 if username == 'admin':
                     self.current_user = 'admin'
@@ -478,6 +478,10 @@ class Admin(CentralFunctions):
                     if i == 0:
                         while True:
                             answer = input(questionStack[i])
+                            if answer == 'B' or answer == 'Q':
+                                print(100*'=')
+                                menu(self.functions)
+                                exit()
                             if answer in list(self.countries_db.index):
                                 break
                             else:
@@ -486,6 +490,12 @@ class Admin(CentralFunctions):
                     elif i == 3:
                         while True:
                             answer = input(questionStack[i])
+                            if answer == 'B':
+                                break
+                            elif answer == 'Q':
+                                print(100*'=')
+                                menu(self.functions)
+                                exit()
                             try:
                                 datetime.date.fromisoformat(answer)
                                 answer = datetime.datetime.strptime(
@@ -499,10 +509,6 @@ class Admin(CentralFunctions):
                         answer = input(questionStack[i])
 
                     if answer == 'B':
-                        if i == 0:
-                            print(100*'=')
-                            menu(self.functions)
-                            exit()
                         answerStack.pop()
                         i -= 1
                         continue
