@@ -337,7 +337,6 @@ class CentralFunctions():
                                 exit()
 
     def call_camps(self):
-        # need to add 7,8,9
         print("[1] - List of all camps")
         print("[2] - total number of camps")
         print("[3] - Number of volunteers in each camp")
@@ -476,7 +475,7 @@ class CentralFunctions():
             self.refugee_db = list_of_refugees
             break
 
-    def count_ref_vol(self):
+    def count_ref_vol(self):  # what is the purpose of this method?
         '''
         Counts the number of volunteers in each camp and the number of refugees in each camp, after which it updates the camp_database.csv with correct numbers.
         '''
@@ -496,6 +495,68 @@ class CentralFunctions():
 
         self.camps_df = camp_df.copy()
         camp_df.to_csv('camp_database.csv', index=False)
+
+    def call_no_of_refugees(self):
+        '''Reads the file and prints out the general list of families in a system with
+        some summary about them by sating the number of refugees, their mental and physical
+        state per each camp and gives information about each family that is assigned to certain camp.
+        Secondly, the method call no of refugees now will only show you camp details of only the one that you are assigned to.
+        Unless you are admin then you can see evrything '''
+
+        if self.current_user == "adm":
+            countries_camps = self.camps_db["Emergency ID"]
+            print(*countries_camps, sep='\n')
+            choose_emergency = input(
+                "\nChoose emergency for which you want to see the summary:").upper()
+
+            while choose_emergency not in set(countries_camps):
+                choose_emergency = input(
+                    "\nChoose emergency for which you want to see the summary:").upper()
+
+        else:
+            volunteer_campID = self.camp_of_user
+            choose_emergency = self.camps_db[self.camps_db["Camp ID"]
+                                             == volunteer_campID]["Emergency ID"].values[0]
+        print("[1] - List of all refugees for all camps")
+        print(
+            "[2] - Total number of refugees in chosen camp")
+        print("[3] - Number of families in each camp")
+        print("[4] - Total summary for each camp")
+        print("Choose Quit if you want exit this summary")
+
+        while True:
+            user_input = input("Choose interaction: ")
+            if user_input == '1':
+                country_refugees = self.camps_db[self.camps_db["Emergency ID"]
+                                                 == choose_emergency]
+                print(country_refugees)
+
+            elif user_input == "2":
+                number_of_refugee = self.camps_db[self.camps_db["Emergency ID"]
+                                                  == choose_emergency]['Number of refugees']
+                print("Number of refugee in {}: ".format(
+                    choose_emergency), *number_of_refugee, sep='\n')
+
+            elif user_input == "3":
+                camp_id = self.camps_db[self.camps_db["Emergency ID"]
+                                        == choose_emergency]['Camp ID'].values[0]
+                count_camps = self.refugee_db[self.refugee_db["Camp ID"] == camp_id]['Camp ID'].count(
+                )
+                print("Number of families for camp {}:".format(choose_emergency))
+                print(count_camps)
+                # print(*count_camps, sep='\n')
+
+            elif user_input == "4":
+                camp_id = self.camps_db[self.camps_db["Emergency ID"]
+                                        == choose_emergency]['Camp ID'].values[0]
+                group_camps = self.refugee_db[self.refugee_db["Camp ID"] == camp_id].groupby(
+                    "Camp ID")
+                for name, camp in group_camps:
+                    print("Camp " + name + "->" +
+                          str(len(camp)) + " family/families")
+                    print(camp)
+            else:
+                break
 
 
 class Admin(CentralFunctions):
