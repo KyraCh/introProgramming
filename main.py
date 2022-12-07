@@ -276,7 +276,7 @@ class CentralFunctions():
                             except ValueError:
                                 print("It has to be an integer")
 
-                            if self.current_user == 'adm':
+                            if self.current_user == 'admin':
                                 emergency_options = self.emergencies_db["Emergency ID"]
                                 print(*emergency_options, sep='\n')
                                 emergency_list = self.emergencies_db["Emergency ID"].tolist(
