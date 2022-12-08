@@ -171,6 +171,8 @@ class CentralFunctions():
                                 self.user_db.loc[self.user_db["username"] == self.current_user, 'activated'] = False
                                 self.user_db.to_csv("user_database.csv",index=False)
                             exit()
+                    else:
+                        break
                 if password == 'B':
                     continue
                 print('')
@@ -207,7 +209,9 @@ class CentralFunctions():
                                 self.user_db.to_csv("user_database.csv", index=False)
                             exit()
                         continue
-                    break
+                    else:
+                        break
+                    # break
                 if password == 'B':
                     continue
 
