@@ -8,6 +8,7 @@ import smtplib
 import random
 from email.message import EmailMessage
 import ssl
+from colorama import Fore, Back, Style
 
 
 class CentralFunctions():
@@ -211,7 +212,6 @@ class CentralFunctions():
                         continue
                     else:
                         break
-                    # break
                 if password == 'B':
                     continue
 
@@ -399,6 +399,104 @@ class CentralFunctions():
                     by=self.emergencies_db['Type']).size())
             else:
                 break
+
+    def call_volunteers(self):
+        while True:
+            vol_data = self.vol_db.copy()
+            camp_data = self.camps_db.copy()
+            print("\nEnter [1] to view all volunteer data\n"
+                  "Enter [2] to see volunteer data by camp\n"
+                  "Enter [3] to see total number of volunteers\n"
+                  "Enter [4] to see number of volunteers by camp\n"
+                  "Enter [5] to check if the volunteer exists\n"
+                  "Enter [6] to go back\n")
+            choose_action = input('Enter here: ')
+            if choose_action == '1':
+                print(f"\n{vol_data}")
+            elif choose_action == '2':
+                while True:
+                    print('\nList of Camp IDs: ')
+                    print(camp_data['Camp ID'].to_string(index=False))
+                    print('\nEnter [B] to go back. ')
+                    choose_camp = input('Enter a Camp ID: ')
+                    if choose_camp.upper() == 'B':
+                        break
+                    elif choose_camp in vol_data['Camp ID'].values:
+                        print(f"\n{vol_data[vol_data['Camp ID'] == choose_camp].to_string(index=False)}\n")
+                    else:
+                        print(Fore.RED + '\nInvalid Camp ID. Try again.')
+                        print(Style.RESET_ALL)
+            elif choose_action == '3':
+                print(f"There are {len(vol_data)} volunteers")
+            elif choose_action == '4':
+                while True:
+                    print('\nList of Camp IDs: ')
+                    print(camp_data['Camp ID'].to_string(index=False))
+                    print('\nEnter [B] to go back. ')
+                    choose_camp = input('Enter a Camp ID: ')
+                    if choose_camp.upper() == 'B':
+                        break
+                    elif choose_camp in vol_data['Camp ID'].values:
+                        lst1 = [item for item in vol_data['Camp ID'] if item == choose_camp]
+                        print(f"\nThere are {len(lst1)} volunteers in {choose_camp}.")
+                    else:
+                        print(Fore.RED + '\nInvalid Camp ID. Try again.')
+                        print(Style.RESET_ALL)
+            elif choose_action == '5':
+                while True:
+                    def go_back(questionStack):
+                        i = 0
+                        answerStack = []
+                        while i < len(questionStack):
+                            if i == 0:
+                                while True:
+                                    answer = input(questionStack[i])
+                                    if answer.isnumeric():
+                                        print(Fore.RED + 'First Name cannot include a number. Try again.')
+                                        print(Style.RESET_ALL)
+                                        continue
+                                    else:
+                                        break
+                            elif i == 1:
+                                while True:
+                                    answer = input(questionStack[i])
+                                    if answer.isnumeric():
+                                        print(Fore.RED + 'Last Name cannot include a number. Try again.')
+                                        print(Style.RESET_ALL)
+                                        continue
+                                    else:
+                                        break
+                            else:
+                                answer = input(questionStack[i])
+                            if answer.upper() == 'B':
+                                if i == 0:
+                                    print(100 * '=')
+                                    menu(self.functions)
+                                    exit()
+                                answerStack.pop()
+                                i -= 1
+                                continue
+                            answerStack.append(answer)
+                            i += 1
+                        return answerStack
+
+                    print('\nAt any point enter [B] to go back.')
+                    questions = ['\nEnter First Name: ', 'Enter Last Name: ']
+                    answers = go_back(questions)
+                    if answers[0] in vol_data['First name'].values and answers[1] in vol_data['Second name'].values:
+                        print(f'\nHere is our record for {answers[0]} {answers[1]}: \n')
+                        print(
+                            f"{vol_data[(vol_data['First name'] == answers[0].title()) & (vol_data['Second name'] == answers[1].title())].to_string(index=False)}\n")
+                    else:
+                        print(Fore.RED + f'\nThere is no volunteer with the name {answers[0]} {answers[1]}\n')
+                        print(Style.RESET_ALL)
+            elif choose_action == '6':
+                print(100 * '=')
+                menu(self.functions)
+                exit()
+            else:
+                print(Fore.RED + '\nInvalid action. Try again.')
+                print(Style.RESET_ALL)
 
     def amend_refugee_profile(self):
         '''
@@ -589,9 +687,11 @@ class Admin(CentralFunctions):
                           "3": {'method': self.call_camps,            'message': '[3] - See camp info', },
                           "4": {'method': self.write_camp,            'message': '[4] - Add new camp', },
                           "5": {'method': self.amend_camp_capacity,   'message': '[5] - Amend capacity of a camp', },
-                          "6": {'method': self.write_volunteer,       'message': '[6] - Add new volunteer(s) profile(s)', },
-                          "7": {'method': self.create_profile,        'message': '[7] - Create refugee profile', },
-                          "8": {'method': self.amend_refugee_profile, 'message': '[8] - Amend refugee profile', }}
+                          "6": {'method': self.call_volunteers,       'message': '[6] - See information about volunteers', },
+                          "7": {'method': self.write_volunteer,       'message': '[7] - Add new volunteer(s) profile(s)', },
+                          "8": {'method': self.admin_volunteer_commands,'message': '[8] - Amend volunteer activation status.', },
+                          "9": {'method': self.create_profile,        'message': '[9] - Create refugee profile', },
+                          "10": {'method': self.amend_refugee_profile,'message': '[10] - Amend refugee profile', }}
         self.current_user = current_user
         self.camp_of_user = camp_of_user
 
@@ -1005,6 +1105,93 @@ class Admin(CentralFunctions):
             automatic()
         print(100*'=')
 
+    def admin_volunteer_commands(self):
+
+        def print_msg_box(msg, indent=1, width=None, title=None):
+            lines = msg.split('\n')
+            space = " " * indent
+            if not width:
+                width = max(map(len, lines))
+            box = f'╔{"═" * (width + indent * 2)}╗\n'  # upper_border
+            if title:
+                box += f'║{space}{title:<{width}}{space}║\n'  # title
+                box += f'║{space}{"-" * len(title):<{width}}{space}║\n'  # underscore
+            box += ''.join([f'║{space}{line:<{width}}{space}║\n' for line in lines])
+            box += f'╚{"═" * (width + indent * 2)}╝'  # lower_border
+            print(box)
+
+        df = self.user_db.copy()
+        df1 = self.vol_db.copy()
+        df2 = self.camps_db.copy()
+        while True:
+            try:
+                print_msg_box('[d] deactivate volunteer account\n'
+                              '[r] reactivate volunteer account\n'
+                              '[del] delete volunteer account')
+                print('\nEnter [B] to go back.')
+                action_and_volunteer = input('Enter d, r or del and the volunteer username separated by space: ')
+
+                if action_and_volunteer.upper() == 'B':
+                    print(100 * '=')
+                    menu(self.functions)
+                    exit()
+                action = action_and_volunteer.split(' ')[0].lower()
+                volunteer_username = action_and_volunteer.split(' ')[1]
+
+                if volunteer_username in df1['Username'].values:
+                    index = df.index[df['username'] == volunteer_username].tolist()[0]
+                    if action == 'd':
+                        if df.at[index, 'activated']:
+                            df.at[index, 'activated'] = False
+                            df.to_csv('user_database.csv', index=False)
+                            print(Fore.BLUE + f'\nAction completed.\n{volunteer_username} has been deactivated.\n')
+                            print(Style.RESET_ALL)
+                            continue
+                        else:
+                            print(Fore.RED + '\nThis user is not active.\n')
+                            print(Style.RESET_ALL)
+                            continue
+                    elif action == 'r':
+                        if df.at[index, 'activated']:
+                            print(Fore.RED + '\nThis user is already active.\n')
+                            print(Style.RESET_ALL)
+                            continue
+                        else:
+                            df.at[index, 'activated'] = True
+                            df.to_csv('user_database.csv', index=False)
+                            print(Fore.BLUE + f'\nAction completed.\n{volunteer_username} has been reactivated.\n')
+                            print(Style.RESET_ALL)
+                            continue
+                    elif action == 'del':
+                        # subtract number of volunteers in camp_database
+                        camp_id = df1[df1['Username'] == volunteer_username]['Camp ID'].values[0]
+                        index_camp = df2.index[df2['Camp ID'] == camp_id].tolist()[0]
+                        df2.at[index_camp, 'Number of volunteers'] = df2[df2['Camp ID'] == camp_id]["Number of volunteers"].values[0] - 1
+                        df2.to_csv('camp_database.csv', index=False)
+                        # delete Volunteer from volunteer_database
+                        df = df.drop(index)
+                        df.to_csv('user_database.csv', index=False)
+                        #delete Volunteer from user_database
+                        index_vol = df1.index[df1['Username'] == volunteer_username].tolist()[0]
+                        df1 = df1.drop(index_vol)
+                        df1.to_csv('volunteer_database.csv', index=False)
+
+                        print(Fore.BLUE + f'\nAction completed.\n{volunteer_username} has been deleted.\n')
+                        print(Style.RESET_ALL)
+                    else:
+                        print(Fore.RED + '\nInvalid action. Try again. \n')
+                        print(Style.RESET_ALL)
+                        continue
+
+                else:
+                    print(Fore.RED + '\nThere is no volunteer with this username. Try again.\n')
+                    print(Style.RESET_ALL)
+                    continue
+            except IndexError:
+                print(Fore.RED + '\nInvalid input. Try again.\n')
+                print(Style.RESET_ALL)
+                continue
+
     def write_camp(self):
         '''
         Allows admin to add a news camp to an existing emergency.
@@ -1134,8 +1321,9 @@ class Volunteer(CentralFunctions):
         CentralFunctions.__init__(self)
         self.functions = {"1": {'method': self.amend_self_info,         'message': '[1] - Amend your profile info', },
                           "2": {'method': self.call_camps,              'message': '[2] - See camp info', },
-                          "3": {'method': self.create_profile,          'message': '[3] - Create refugee profile', },
-                          "4": {'method': self.amend_refugee_profile,   'message': '[4] - Amend refugee profile', }}
+                          "3": {'method': self.call_volunteers,         'message': '[3] - See information about volunteers', },
+                          "4": {'method': self.create_profile,          'message': '[4] - Create refugee profile', },
+                          "5": {'method': self.amend_refugee_profile,   'message': '[5] - Amend refugee profile', }}
         self.current_user = current_user
         self.camp_of_user = camp_of_user
 
