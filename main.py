@@ -150,10 +150,11 @@ class CentralFunctions():
                     break
 
             self.current_user = username
+            count_password = 0 # counts the amount of time password was typed wrongly
             # IF PASSWORD = 111
             # if users_df.loc[users_df['username'] == username,'email'].values[0] == '': # CHECKS IF EMAIL IS SET
-            # CHECKS IF PASSWORD IS 111
-            if users_df.loc[users_df['username'] == username, 'password'].values[0] == '111':
+            if users_df.loc[users_df['username'] == username, 'password'].values[
+                0] == '111':  # CHECKS IF PASSWORD IS 111
 
                 while True:
                     password = input('\nPlease input your PASSWORD: ').strip()
@@ -161,12 +162,19 @@ class CentralFunctions():
                         break
                     elif password != users_dict[username]['password']:
                         print('Password is incorrect.')
-                        continue
-                    break
+                        count_password += 1
+                        left_attempts = 3 - count_password
+                        print(f"You have {left_attempts} attempts left ")
+                        if count_password == 3:
+                            if self.user_db.loc[self.user_db["username"] == self.current_user]['role'].values[0] == "volunteer":
+                                print("Your account was deactivated. Please contact admin")
+                                self.user_db.loc[self.user_db["username"] == self.current_user, 'activated'] = False
+                                self.user_db.to_csv("user_database.csv",index=False)
+                            exit()
                 if password == 'B':
                     continue
-
-                print(100*'=')
+                print('')
+                print(100 * '=')
                 if username == 'admin':
                     self.current_user = 'admin'
                     self.camp_of_user = 'adm'
@@ -188,13 +196,22 @@ class CentralFunctions():
                         break
                     elif password != users_dict[username]['password']:
                         print('Password is incorrect.')
+                        count_password += 1
+                        left_attempts = 3 - count_password
+                        print(f"You have {left_attempts} attempts left ")
+                        if count_password == 3:
+                            if self.user_db.loc[self.user_db["username"] == self.current_user]['role'].values[
+                                0] == "volunteer":
+                                print("Your account was deactivated. Please contact admin")
+                                self.user_db.loc[self.user_db["username"] == self.current_user, 'activated'] = False
+                                self.user_db.to_csv("user_database.csv", index=False)
+                            exit()
                         continue
                     break
                 if password == 'B':
                     continue
 
-                print(
-                    "\nEmail with One-Time-Password to reset password was sent to you.")
+                print("\nEmail with One-Time-Password to reset password was sent to you.")
                 otp = ''.join([str(random.randint(0, 9)) for x in range(4)])
                 email_sender = "hemsystem1@gmail.com"
                 email_password = "asbwtshlldlaalld"
@@ -226,7 +243,7 @@ class CentralFunctions():
                     continue
 
                 print('')
-                print(100*'=')
+                print(100 * '=')
                 if username == 'admin':
                     self.camp_of_user = 'adm'
                     print('Welcome back admin!')
