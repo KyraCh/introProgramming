@@ -1260,13 +1260,18 @@ class Admin(CentralFunctions):
         df2 = self.camps_db.copy()
         while True:
             try:
-                print_msg_box('[d] deactivate volunteer account\n'
-                              '[r] reactivate volunteer account\n'
-                              '[del] delete volunteer account')
-                print('\nEnter [B] to go back.')
-                action_and_volunteer = input('Enter d, r or del and the volunteer username separated by space: ')
+                print_msg_box('Enter d, r or del and the volunteer username separated by space\n'
+                              "Example: d Volunteer1 to deactive Volunteer1's account.\n\n"
+                              '[d] - deactivate volunteer account\n'
+                              '[r] - reactivate volunteer account\n'
+                              '[del] delete volunteer account\n\n'
+                              '[B] to go back.\n'
+                              '[Q] to quit\n')
+                
+                print(tabulate(df[['username','role','activated']].tail(len(df)-1), headers='keys', tablefmt='psql', showindex=False))
+                action_and_volunteer = input('\nInput: ')
 
-                if action_and_volunteer.upper() == 'B':
+                if action_and_volunteer.upper() == 'B' or action_and_volunteer.upper() == 'Q':
                     print(100 * '=')
                     menu(self.functions)
                     exit()
