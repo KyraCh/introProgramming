@@ -2,7 +2,7 @@ import pandas as pd
 # import matplotlib.pyplot as plt
 import numpy as np
 import datetime
-import time
+from tabulate import tabulate
 import re
 import smtplib
 import random
@@ -159,7 +159,7 @@ class CentralFunctions():
 
                 while True:
                     password = input('\nPlease input your PASSWORD: ').strip()
-                    if password == 'B':
+                    if password.upper() == 'B':
                         break
                     elif password != users_dict[username]['password']:
                         print('Password is incorrect.')
@@ -174,7 +174,7 @@ class CentralFunctions():
                             exit()
                     else:
                         break
-                if password == 'B':
+                if password.upper() == 'B':
                     continue
                 print('')
                 print(100 * '=')
@@ -187,8 +187,7 @@ class CentralFunctions():
                     name = vol_dict[username]['First name']
                     self.camp_of_user = vol_dict[username]['Camp ID']
                     print(f'Welcome {name}!')
-                    print(
-                        'WARNING: PLEASE ADD YOUR PERSONAL INFORMATION AND CHANGE PASSWORD')
+                    print('WARNING: PLEASE ADD YOUR PERSONAL INFORMATION AND CHANGE PASSWORD')
                 break
             # IF PASSWORD != 111
             else:
@@ -203,8 +202,7 @@ class CentralFunctions():
                         left_attempts = 3 - count_password
                         print(f"You have {left_attempts} attempts left ")
                         if count_password == 3:
-                            if self.user_db.loc[self.user_db["username"] == self.current_user]['role'].values[
-                                0] == "volunteer":
+                            if self.user_db.loc[self.user_db["username"] == self.current_user]['role'].values[0] == "volunteer":
                                 print("Your account was deactivated. Please contact admin")
                                 self.user_db.loc[self.user_db["username"] == self.current_user, 'activated'] = False
                                 self.user_db.to_csv("user_database.csv", index=False)
@@ -325,13 +323,12 @@ class CentralFunctions():
                                 print("It has to be an integer")
 
                             if self.current_user == 'admin':
-                                emergency_options = self.emergencies_db["Emergency ID"]
-                                print('\n',*emergency_options, sep='\n')
-                                emergency_list = self.emergencies_db["Emergency ID"].tolist(
-                                )
+                                df = self.emergencies_db[["Emergency ID"]]
+                                print(tabulate(df, headers='keys', tablefmt='psql', showindex=False))
+                                emergency_list = self.emergencies_db["Emergency ID"].tolist()
                                 while True:
                                     emergency_id = input("\nChoose emergency: ")
-                                    if emergency_id == 'b' or emergency_id == "B":
+                                    if emergency_id.upper() == "B":
                                         break
                                     elif emergency_id.upper() == "Q":
                                         print(100 * '=')
@@ -340,10 +337,10 @@ class CentralFunctions():
                                     elif emergency_id not in emergency_list:
                                         print("Invalid input for emergency")
                                         continue
-                                    camp_id = refugee_df.loc[refugee_df['Camp ID'].str.contains(
-                                        emergency_id, case=False)]['Camp ID']
-                                    camp_id_list = camp_id.tolist()
-                                    print('\n',*set(camp_id), sep='\n')
+                                    df = self.refugee_db.loc[self.refugee_db['Camp ID'].str.contains('AU1', case=False)][['Camp ID']]
+                                    df.drop_duplicates(subset = 'Camp ID', inplace = True)
+                                    camp_id_list = df['Camp ID']
+                                    print(tabulate(df, headers='keys', tablefmt='psql', showindex=False))
                                     while True:
                                         camp_choice = input(
                                             "\nChoose a camp to which you want to assign family: ")
@@ -378,7 +375,7 @@ class CentralFunctions():
                 break
         
             refugee_df.loc[len(refugee_df)] = [family_id, name, surname, camp_choice, mental_state, physical_state, no_of_members]
-            print(refugee_df.tail(1))
+            print(tabulate(refugee_df.tail(1), headers='keys', tablefmt='psql', showindex=False))
             while True:
                 commit = input('\nCommit changes? [y]/[n] ')
                 if commit == 'y' or commit == 'n':
@@ -416,33 +413,44 @@ class CentralFunctions():
         while True:
 
             user_input = input("\nChoose interaction: ")
-            local_db = self.camps_db.merge(
-                self.emergencies_db, on='Emergency ID', how='inner')
+            local_db = self.camps_db.merge(self.emergencies_db, on='Emergency ID', how='inner')
 
             if user_input == '1':
-                print("\nSee camp list: \n", self.camps_db)
+                df = self.camps_db
+                print("\nSee camp list:")
+                print(tabulate(df, headers='keys', tablefmt='psql', showindex=False))
             elif user_input == "2":
                 print("\nNumber of camps: ", len(self.camps_db.index))
-            elif user_input == "3":
-                print("\nNumber of volunteers per camp: \n",
-                      self.vol_db.groupby(by=self.vol_db['Camp ID']).size())
+            elif user_input == "3":       
+                df = self.camps_db.loc[self.camps_db['Number of volunteers'] != '', ['Camp ID','Number of volunteers']]
+                print("\nNumber of volunteers per camp:")
+                print(tabulate(df, headers='keys', tablefmt='psql', showindex=False))
             elif user_input == "4":
-                print("\nNumber of refugees per camp: \n",
-                      self.refugee_db.groupby(by=self.refugee_db['Camp ID']).size())
+                df = self.camps_db.loc[self.camps_db['Number of refugees'] != '', ['Camp ID','Number of refugees']]
+                print('Number of refugees per each non-empty camp:')
+                print(tabulate(df, headers='keys', tablefmt='psql', showindex=False))
             elif user_input == "5":
-                print("\nCapacity by camp: \n", self.camps_db[['Camp ID','Capacity']])
+                df = self.camps_db[['Camp ID','Capacity']]
+                print("\nCapacity by camp:")
+                print(tabulate(df, headers='keys', tablefmt='psql', showindex=False))
             elif user_input == "6":
-                print("\nCamps in each area: \n", self.camps_db.groupby(
-                    by=self.camps_db['Location']).size())
+                df = self.camps_db.Location.value_counts().reset_index()
+                df.rename(columns = {'index':'Location', 'Location':'Number of camps'}, inplace = True)
+                print("\nCamps for each disaster:")
+                print(tabulate(df, headers='keys', tablefmt='psql', showindex=False))
             elif user_input == '7':
                 print('\nNumber of active camps: ', len(local_db[local_db['Close date'] == '']))
-                print(local_db[local_db['Close date'] == ''])
+                df = local_db[local_db['Close date'] == '']
+                print(tabulate(df, headers='keys', tablefmt='psql', showindex=False))
             elif user_input == '8':
                 print('\nNumber of inactive camps: ',len(local_db[local_db['Close date'] != '']))
-                print(local_db[local_db['Close date'] != ''])
+                df = local_db[local_db['Close date'] != '']
+                print(tabulate(df, headers='keys', tablefmt='psql', showindex=False))
             elif user_input == '9':
-                print(self.emergencies_db.groupby(
-                    by=self.emergencies_db['Type']).size())
+                df = self.emergencies_db.Type.value_counts().reset_index()
+                df.rename(columns = {'index':'Type', 'Type':'Number of camps'}, inplace = True)
+                print("\nCamps in each area:")
+                print(tabulate(df, headers='keys', tablefmt='psql', showindex=False))
             elif user_input.upper() == 'B' or user_input.upper() == 'Q':
                 break
             else:
@@ -468,23 +476,28 @@ class CentralFunctions():
             print('[Q] to quit')
             choose_action = input('\nEnter here: ')
             if choose_action == '1':
-                print(f"\n{vol_data}")
+                print('')
+                print(tabulate(vol_data, headers='keys', tablefmt='psql', showindex=False))
+                #print(f"\n{vol_data}")
             elif choose_action == '2':
                 while True:
                     print('\nList of Camp IDs: ')
-                    print(camp_data['Camp ID'].to_string(index=False))
+                    print(tabulate(self.camps_db[['Camp ID']], headers='keys', tablefmt='psql', showindex=False))
                     choose_camp = input('\nEnter a Camp ID: ')
                     if choose_camp.upper() == 'B':
                         break
                     elif choose_camp in vol_data['Camp ID'].values:
-                        print(f"\n{vol_data[vol_data['Camp ID'] == choose_camp].to_string(index=False)}\n")
+                        df = self.vol_db.loc[self.vol_db['Camp ID'] == choose_camp]
+                        print(tabulate(df, headers='keys', tablefmt='psql', showindex=False))
+                        #print(f"\n{vol_data[vol_data['Camp ID'] == choose_camp].to_string(index=False)}\n")
                     else:
                         print(Fore.RED + '\nInvalid Camp ID. Try again.')
                         print(Style.RESET_ALL)
             elif choose_action == '3':
                 print(f"There are {len(vol_data)} volunteers")
             elif choose_action == '4':
-                print(camp_data[['Camp ID','Number of volunteers']])
+                df = camp_data[['Camp ID','Number of volunteers']]
+                print(tabulate(df, headers='keys', tablefmt='psql', showindex=False))
                 # while True:
                 #     print('\nList of Camp IDs: ')
                 #     print(camp_data['Camp ID'].to_string(index=False))
@@ -533,7 +546,7 @@ class CentralFunctions():
                                 answerStack.pop()
                                 i -= 1
                                 continue
-                            elif answer == 'Q':
+                            elif answer.upper() == 'Q':
                                 print(100*'=')
                                 menu(self.functions)
                                 exit()
@@ -547,8 +560,9 @@ class CentralFunctions():
                         break
                     if answers[0] in vol_data['First name'].values and answers[1] in vol_data['Second name'].values:
                         print(f'\nHere is our record for {answers[0]} {answers[1]}: \n')
-                        print(
-                            f"{vol_data[(vol_data['First name'] == answers[0].title()) & (vol_data['Second name'] == answers[1].title())].to_string(index=False)}\n")
+                        df = vol_data[(vol_data['First name'] == answers[0].title()) & (vol_data['Second name'] == answers[1].title())]
+                        print(tabulate(df, headers='keys', tablefmt='psql', showindex=False))
+                        #print(f"{vol_data[(vol_data['First name'] == answers[0].title()) & (vol_data['Second name'] == answers[1].title())].to_string(index=False)}\n")
                     else:
                         print(Fore.RED + f'\nThere is no volunteer with the name {answers[0]} {answers[1]}\n')
                         print(Style.RESET_ALL)
@@ -577,10 +591,11 @@ class CentralFunctions():
             print('[Q] to quit\n')
             
             if self.current_user == 'admin':
-                print(list_of_refugees)
+                print(tabulate(list_of_refugees, headers='keys', tablefmt='psql', showindex=False))
             else:
-                print(list_of_refugees.loc[list_of_refugees['Camp ID']==self.camp_of_user])
-                
+                df = list_of_refugees.loc[list_of_refugees['Camp ID']==self.camp_of_user]
+                print(tabulate(df, headers='keys', tablefmt='psql', showindex=False))
+                                
             iD = input('\nPlease choose Family ID you would like to ammend: ')
             if iD.upper() == 'Q' or iD.upper() == 'B':
                 print(100*'=')
@@ -623,7 +638,8 @@ class CentralFunctions():
                 while counter < len(operations):
                     i = operations[counter]
                     if i == 3:
-                        print('\n',camps_df)
+                        print('')
+                        print(tabulate(camps_df, headers='keys', tablefmt='psql', showindex=False))
 
                     change = input(f'\nPlease select new value for {list_of_refugees.columns[i]}: ')
                     
@@ -633,7 +649,6 @@ class CentralFunctions():
                         exit()
                     elif change.upper() == 'B':
                         if counter == 0:
-                            print('BUIG BRUH')
                             break
                         counter -= 1
                         continue
@@ -671,8 +686,9 @@ class CentralFunctions():
                     continue
                 break
             
-            print('\n')
-            print(list_of_refugees.loc[list_of_refugees['Family ID'] == iD])
+            print('')
+            df = list_of_refugees.loc[list_of_refugees['Family ID'] == iD]
+            print(tabulate(df, headers='keys', tablefmt='psql', showindex=False))
 
             while True:
                 commit = input('\nCommit changes? [y]/[n] ')
@@ -722,7 +738,7 @@ class CentralFunctions():
             print("\nChoose emergency for which you want to see the summary.")
             print('Expected Inputs:\n'+
                 '\t>Emergency ID\n')
-            print(*countries_camps, sep='\n')
+            print(tabulate(self.camps_db[["Emergency ID"]], headers='keys', tablefmt='psql', showindex=False))
             choose_emergency = input("\nChoose emergency for which you want to see the summary: ").upper()
             if choose_emergency == "Q" or choose_emergency == "B":
                 print(100 * '=')
@@ -747,28 +763,27 @@ class CentralFunctions():
 
         while True:
             user_input = input("\nChoose interaction: ")
-            
+            print('')
             if user_input == '1':
                 country_refugees = self.refugee_db.loc[self.refugee_db['Camp ID'].str.contains(choose_emergency+'-', case=False)]
-                print('\n',country_refugees)
+                print(tabulate(country_refugees, headers='keys', tablefmt='psql', showindex=False))
 
             elif user_input == "2":
                 number_of_refugee = int(self.camps_db[self.camps_db["Emergency ID"] == choose_emergency]['Number of refugees'].values[0])
-                print(f"\nNumber of refugees in {choose_emergency} = {number_of_refugee}")
+                print(f"Number of refugees in {choose_emergency} = {number_of_refugee}")
 
             elif user_input == "3":
                 camp_id = self.camps_db[self.camps_db["Emergency ID"] == choose_emergency]['Camp ID'].values[0]
                 count_refugees = self.refugee_db[self.refugee_db["Camp ID"] == camp_id]['Camp ID'].count()
-                print(f"\nNumber of families for camp {camp_id} = {count_refugees}")
+                print(f"Number of families for camp {camp_id} = {count_refugees}")
 
             elif user_input == "4":
                 camps = list(self.camps_db.loc[self.camps_db['Number of refugees'] != '','Camp ID'])
                 for i in camps:
                     no_of_families = str(int(self.camps_db.loc[self.camps_db['Camp ID'] != 'AU1-1','Number of refugees'].values[0]))
                     refugees_in_camp = self.refugee_db.loc[self.refugee_db['Camp ID'] == i]
-                    print("\n\tCamp " + i + " --> " + no_of_families + " family/families")
-                    print('\n',refugees_in_camp)
-                    print(100*'-')
+                    print("\n\tCamp " + i + " --> " + no_of_families + " family/families\n")
+                    print(tabulate(refugees_in_camp, headers='keys', tablefmt='psql', showindex=False))
                     
             elif user_input.upper() == 'B' or user_input.upper() == 'Q':
                 print(100*'=')
@@ -804,7 +819,7 @@ class Admin(CentralFunctions):
         Automatically assigns emergency ID and upon commit adds new emergency to emergency_database.csv 
         '''
         print(100*'=')
-        print('Please input information about your emergency')
+        print('\nPlease input information about your emergency')
         print('Expected Inputs:\n' +
               '\t>Country\n' +
               '\t>Type of emergency\n' +
@@ -849,17 +864,16 @@ class Admin(CentralFunctions):
                                     answer, "%Y-%m-%d").strftime("%d/%m/%Y")
                                 break
                             except:
-                                print(
-                                    'Please enter a day of valid format [YYYY-MM-DD]: ')
+                                print('Please enter a day of valid format [YYYY-MM-DD]: ')
                                 continue
                     else:
                         answer = input(questionStack[i])
 
-                    if answer == 'B':
+                    if answer.upper() == 'B':
                         answerStack.pop()
                         i -= 1
                         continue
-                    elif answer == 'Q':
+                    elif answer.upper() == 'Q':
                         print(100*'=')
                         menu(self.functions)
                         exit()
@@ -881,10 +895,9 @@ class Admin(CentralFunctions):
                 new_no_index = 1
             emergency_id = country_code + str(new_no_index)
 
-            emergency_db.loc[len(emergency_db.index)] = [
-                emergency_id, answers[0], answers[1], answers[2], answers[3], None]
-
-            print('\n', emergency_db.iloc[-1])
+            emergency_db.loc[len(emergency_db.index)] = [emergency_id, answers[0], answers[1], answers[2], answers[3], None]
+            print('')
+            print(tabulate(self.emergencies_db.tail(1), headers='keys', tablefmt='psql', showindex=False))
             while True:
                 commit = input('\nCommit changes? [y]/[n] ')
                 if commit == 'y' or commit == 'n':
@@ -908,18 +921,18 @@ class Admin(CentralFunctions):
         emergency_db = self.emergencies_db.copy()
         print(100*'=')
         while True:
-            print('Please specify which emergency you would like to close')
+            print('\nPlease specify which emergency you would like to close')
             print('Expected Inputs:\n' +
                   '\t>Emergency ID\n')
             print('[B] to go back')
             print('[Q] to quit\n')
-            print(emergency_db)
+            print(tabulate(emergency_db, headers='keys', tablefmt='psql', showindex=False))
 
             while True:
                 ID = input('\nPlease provide the emergency ID: ').upper()
                 if ID in list(emergency_db['Emergency ID']):
                     break
-                elif ID == 'Q' or ID == 'B':
+                elif ID.upper() == 'Q' or ID.upper() == 'B':
                     print(100*'=')
                     menu(self.functions)
                     exit()
@@ -927,9 +940,9 @@ class Admin(CentralFunctions):
                     print('Please provide valid ID')
                     continue
 
-            emergency_db.loc[emergency_db['Emergency ID'] == ID,
-                             'Close date'] = datetime.date.today().strftime("%d/%m/%Y")
-            print(emergency_db.loc[emergency_db['Emergency ID'] == ID])
+            emergency_db.loc[emergency_db['Emergency ID'] == ID, 'Close date'] = datetime.date.today().strftime("%d/%m/%Y")
+            df = emergency_db.loc[emergency_db['Emergency ID'] == ID]
+            print(tabulate(df, headers='keys', tablefmt='psql', showindex=False))            
             while True:
                 commit = input('\nCommit changes? [y]/[n] ')
                 if commit == 'y' or commit == 'n':
@@ -953,23 +966,23 @@ class Admin(CentralFunctions):
         self.count_ref_vol()
         camp_db = self.camps_db.copy()
         print(100*'=')
-        print("Select which camp's capacity needs to be altered")
+        print("\nSelect which camp's capacity needs to be altered")
         print('Expected Inputs:\n' +
               '\t>Emergency ID\n')
         print('[B] to go back')
         print('[Q] to quit\n')
-        print(camp_db)
+        print(tabulate(camp_db, headers='keys', tablefmt='psql', showindex=False))
 
         while True:
             while True:
                 choose_camp = input(
                     "\nChoose camp for which you want to edit: ").upper()
-                if choose_camp in list(camp_db['Camp ID']) or choose_camp == 'Q' or choose_camp == 'B':
+                if choose_camp in list(camp_db['Camp ID']) or choose_camp.upper() == 'Q' or choose_camp.upper() == 'B':
                     break
                 else:
                     print('Please select a valid camp')
                     continue
-            if choose_camp == 'Q' or choose_camp == 'B':
+            if choose_camp.upper() == 'Q' or choose_camp.upper() == 'B':
                 print(100*'=')
                 menu(self.functions)
                 exit()
@@ -978,7 +991,7 @@ class Admin(CentralFunctions):
 
             while True:
                 cap = input("\nState new capacity: ")
-                if cap == 'B' or cap == 'Q':
+                if cap.upper() == 'B' or cap.upper() == 'Q':
                     break
                 else:
                     try:
@@ -987,23 +1000,23 @@ class Admin(CentralFunctions):
                         if camp_db.loc[camp_db['Camp ID'] == choose_camp]['Number of refugees'].values[0] != '':
                             limit = int(camp_db.loc[camp_db['Camp ID'] == choose_camp]['Number of refugees'])
                         if cap < limit:
-                            print(
-                                'Your new capacity is lower than current number of refugees.')
+                            print('Your new capacity is lower than current number of refugees.')
                             continue
                         else:
                             break
                     except:
                         print('Your input needs to be an integer')
                         continue
-            if cap == 'B':
+            if cap.upper() == 'B':
                 continue
-            elif cap == 'Q':
+            elif cap.upper() == 'Q':
                 print(100*'=')
                 menu(self.functions)
                 exit()
 
             camp_db.loc[camp_db['Camp ID'] == choose_camp, 'Capacity'] = cap
-            print(camp_db.loc[camp_db['Camp ID'] == choose_camp])
+            df = camp_db.loc[camp_db['Camp ID'] == choose_camp]
+            print(tabulate(df, headers='keys', tablefmt='psql', showindex=False))
 
             while True:
                 commit = input('\nCommit changes? [y]/[n] ')
@@ -1057,10 +1070,10 @@ class Admin(CentralFunctions):
                             continue
                         break
                     username = inpt
-                    if inpt == 'B':
+                    if inpt.upper() == 'B':
                         self.write_volunteer()
                         exit()
-                    if inpt == 'Q':
+                    if inpt.upper() == 'Q':
                         print(100*'=')
                         menu(self.functions)
                         exit()
@@ -1070,9 +1083,9 @@ class Admin(CentralFunctions):
                     global password
                     inpt = input('\nSet a password: ')
                     password = inpt
-                    if inpt == 'B':
+                    if inpt.upper() == 'B':
                         return -1
-                    elif inpt == 'Q':
+                    elif inpt.upper() == 'Q':
                         print(100*'=')
                         menu(self.functions)
                         exit()
@@ -1089,10 +1102,10 @@ class Admin(CentralFunctions):
                         print('[Q] to quit')
                         user_input = input('\nChoose interaction: ')
                         if user_input == '1':
-                            print(camps_df)
+                            print(tabulate(camps_df, headers='keys', tablefmt='psql', showindex=False))
                         elif user_input == '2':
                             pass
-                        elif user_input == 'B' or user_input == 'Q':
+                        elif user_input.upper() == 'B' or user_input.upper() == 'Q':
                             break
                         else:
                             print('Invalid input.')
@@ -1104,9 +1117,9 @@ class Admin(CentralFunctions):
                         camp = user_input
                         break
 
-                    if user_input == 'B':
+                    if user_input.upper() == 'B':
                         return -1
-                    elif user_input == 'Q':
+                    elif user_input.upper() == 'Q':
                         print(100*'=')
                         menu(self.functions)
                         exit()
@@ -1118,11 +1131,9 @@ class Admin(CentralFunctions):
                 while counter < len(inputs):
                     counter += inputs[counter]()
 
-                vol_df.loc[len(vol_df.index)] = [
-                    username, '', '', '', camp, '']
-                users_df.loc[len(users_df.index)] = [
-                    username, password, 'volunteer', 'TRUE', '']
-                print(users_df.tail(1))
+                vol_df.loc[len(vol_df.index)] = [username, '', '', '', camp, '']
+                users_df.loc[len(users_df.index)] = [username, password, 'volunteer', 'TRUE', '']
+                print(tabulate(users_df.tail(1), headers='keys', tablefmt='psql', showindex=False))
                 while True:
                     commit = input('\nCommit changes? [y]/[n] ')
                     if commit == 'y' or commit == 'n':
@@ -1161,7 +1172,7 @@ class Admin(CentralFunctions):
                         '\nPlease select the number of new volunteers you wish to create: ')
                     try:
                         no_of_new_users = int(no_of_new_users)
-                        if no_of_new_users == 'Q':
+                        if no_of_new_users.upper() == 'Q':
                             print(100*'=')
                             menu(self.functions)
                             exit()
@@ -1169,16 +1180,17 @@ class Admin(CentralFunctions):
                         print('Your input needs to be an integer')
                         continue
                     while True:
-                        print('\n',camps_df)
+                        print('')
+                        print(tabulate(camps_df, headers='keys', tablefmt='psql', showindex=False))
                         camp = input('\nEnter camp ID: ')
                         if camp not in camps_exist:
                             print('Invalid Camp ID.')
                             continue
                         else:
                             break
-                    if camp == 'B':
+                    if camp.upper() == 'B':
                         continue
-                    elif no_of_new_users == 'Q':
+                    elif no_of_new_users.upper() == 'Q':
                         menu(self.functions)
                         exit()
                     else:
@@ -1190,8 +1202,9 @@ class Admin(CentralFunctions):
                         'Volunteer'+str(new_usr_index+i), '', '', '', camp, '']
                     users_df.loc[len(users_df.index)] = [
                         'Volunteer'+str(new_usr_index+i), '111', 'volunteer', 'TRUE', '']
-
-                print(users_df.tail(no_of_new_users))
+                    
+                df = users_df.tail(no_of_new_users)
+                print(tabulate(df, headers='keys', tablefmt='psql', showindex=False))
                 while True:
                     commit = input('\nCommit changes? [y]/[n] ')
                     if commit == 'y' or commit == 'n':
@@ -1322,7 +1335,7 @@ class Admin(CentralFunctions):
         counter = 0
         self.count_ref_vol()
         print(100*'=')
-        print('Please provide details of the new camp')
+        print('\nPlease provide details of the new camp')
         print('Expected Inputs:\n' +
               '\t>Country\n' +
               '\t>Emergency ID\n' +
@@ -1341,7 +1354,7 @@ class Admin(CentralFunctions):
                 global country
                 while True:
                     country = input("\nEnter country name: ")
-                    if country == 'B' or country == 'Q':
+                    if country.upper() == 'B' or country.upper() == 'Q':
                         print(100*'=')
                         menu(self.functions)
                         exit()
@@ -1355,15 +1368,15 @@ class Admin(CentralFunctions):
 
             def assign_emergency():
                 global emergency
-                emergencies_in_country = emergency_df.loc[emergency_df['Emergency ID'].str.contains(
-                    country_id, case=False)]
+                emergencies_in_country = emergency_df.loc[emergency_df['Emergency ID'].str.contains(country_id, case=False)]
                 if len(emergencies_in_country.index) >= 1:
-                    print('\n', emergencies_in_country)
+                    print('')
+                    print(tabulate(emergencies_in_country, headers='keys', tablefmt='psql', showindex=False))
                 while True:
                     if len(emergencies_in_country.index) > 1:
                         emergency = input(
                             '\nPlease select which emergency you would like to assign your camp to: ')
-                        if emergency == 'B' or emergency == 'Q':
+                        if emergency.upper() == 'B' or emergency.upper() == 'Q':
                             break
                         if emergency in list(emergencies_in_country['Emergency ID']):
                             break
@@ -1374,9 +1387,9 @@ class Admin(CentralFunctions):
                         emergency = list(
                             emergencies_in_country['Emergency ID'])[0]
                         break
-                if emergency == 'B':
+                if emergency.upper() == 'B':
                     return -1
-                elif emergency == 'Q':
+                elif emergency.upper() == 'Q':
                     print(100*'=')
                     menu(self.functions)
                     exit()
@@ -1387,15 +1400,15 @@ class Admin(CentralFunctions):
                 global capacity
                 while True:
                     capacity = input("\nEnter maximum camp capacity:")
-                    if capacity == 'B' or emergency == 'Q':
+                    if capacity.upper() == 'B' or emergency.upper() == 'Q':
                         break
                     if capacity.isdigit() == False:
                         print('Please enter an integer.')
                         continue
                     break
-                if capacity == 'B':
+                if capacity.upper() == 'B':
                     return -1
-                elif capacity == 'Q':
+                elif capacity.upper() == 'Q':
                     print(100*'=')
                     menu(self.functions)
                     exit()
@@ -1418,7 +1431,7 @@ class Admin(CentralFunctions):
             camps_df.loc[len(camps_df.index)] = [
                 new_ID, country, '', capacity, emergency, '']
 
-            print(camps_df.tail(1))
+            print(tabulate(camps_df.tail(1), headers='keys', tablefmt='psql', showindex=False))
             while True:
                 commit = input('\nCommit changes? [y]/[n] ')
                 if commit == 'y' or commit == 'n':
@@ -1483,8 +1496,7 @@ class Volunteer(CentralFunctions):
 
             while True:
                 print(100 * '=')
-                print(
-                    'Please select which information you would like to change about yourself.')
+                print('\nPlease select which information you would like to change about yourself.')
                 print('Input a digit to change the correpsonding piece of information.')
                 print('E.g. input "1" to change your first name.\n' +
                       '[1] - First name\n' +
@@ -1499,12 +1511,11 @@ class Volunteer(CentralFunctions):
                 user_input = input("\nChoose interaction: ")
 
                 if user_input == '1':
-                    print(
-                        f"Currently, your first name is set to {current_name}.")
+                    print(f"Currently, your first name is set to {current_name}.")
                     while True:
                         inpt = input("\nEnter new first name: ")
                         inpt = inpt.capitalize()
-                        if inpt == 'B' or inpt == 'Q':
+                        if inpt.upper() == 'B' or inpt.upper() == 'Q':
                             break
                         elif not inpt.isalpha():
                             print("Please enter a valid name.")
@@ -1513,12 +1524,11 @@ class Volunteer(CentralFunctions):
                         break
 
                 elif user_input == '2':
-                    print(
-                        f"Currently, your second name is set to {current_second_name}.")
+                    print(f"Currently, your second name is set to {current_second_name}.")
                     while True:
                         inpt = input("\nEnter new second name: ")
                         inpt = inpt.capitalize()
-                        if inpt == 'B' or inpt == 'Q':
+                        if inpt.upper() == 'B' or inpt.upper() == 'Q':
                             break
                         elif not inpt.isalpha():
                             print("Please enter a valid name.")
@@ -1528,12 +1538,11 @@ class Volunteer(CentralFunctions):
                             break
 
                 elif user_input == '3':
-                    print(
-                        f"Currently, your phone number is set to +{current_phone}.")
+                    print(f"Currently, your phone number is set to +{current_phone}.")
                     while True:
                         inpt = input(
                             "\nEnter new phone number in the format +44(0)_______: ")
-                        if inpt == 'B' or inpt == 'Q':
+                        if inpt.upper() == 'B' or inpt.upper() == 'Q':
                             break
                         elif not inpt.isnumeric():
                             print("Please enter a valid phone number.")
@@ -1546,17 +1555,15 @@ class Volunteer(CentralFunctions):
                             break
 
                 elif user_input == '4':
-                    print(
-                        f"Currently, your availability is set to {current_availability}.")
+                    print(f"Currently, your availability is set to {current_availability}.")
                     while True:
                         inpt = input("\nEnter new availability: ")
-                        if inpt == 'B' or inpt == 'Q':
+                        if inpt.upper() == 'B' or inpt.upper() == 'Q':
                             break
                         elif not inpt.isnumeric():
                             print("Invalid input.")
                         elif int(inpt) > 48:
-                            print(
-                                "Availability exceeds maximum weekly working hours (48h).")
+                            print("Availability exceeds maximum weekly working hours (48h).")
                         else:
                             current_availability = inpt
                             break
@@ -1586,7 +1593,7 @@ class Volunteer(CentralFunctions):
                             email_sender, email_receiver, mail.as_string())
                     while True:
                         inpt = input("\nInput here the OTP: ")
-                        if inpt == 'B' or inpt == 'Q':
+                        if inpt.upper() == 'B' or inpt.upper() == 'Q':
                             break
                         elif otp != inpt:
                             print("Please enter valid OTP.")
@@ -1594,14 +1601,12 @@ class Volunteer(CentralFunctions):
                             break
                     while True:
                         inpt = input("\nType your new password: ")
-                        if inpt == 'B' or inpt == 'Q':
+                        if inpt.upper() == 'B' or inpt.upper() == 'Q':
                             break
                         elif password == inpt:
-                            print(
-                                "Sorry but your password can't be the same as the previous one.")
+                            print("Sorry but your password can't be the same as the previous one.")
                         elif len(inpt) < 8:
-                            print(
-                                "Sorry but your password needs to be at least 8 characters long.")
+                            print("Sorry but your password needs to be at least 8 characters long.")
                         else:
                             password = inpt
                             break
@@ -1611,7 +1616,7 @@ class Volunteer(CentralFunctions):
                     while True:
                         inpt = input("\nEnter new email: ")
                         inpt = inpt.capitalize()
-                        if inpt == 'B' or inpt == 'Q':
+                        if inpt.upper() == 'B' or inpt.upper() == 'Q':
                             break
                         elif check_email(inpt):
                             print("Please enter a valid email address.")
@@ -1623,9 +1628,9 @@ class Volunteer(CentralFunctions):
                     print('Invalid input. Please select from the options above.')
                     continue
 
-                if inpt == 'B':
+                if inpt.upper() == 'B':
                     continue
-                elif inpt == 'Q' or user_input == 'B' or user_input == 'Q':
+                elif inpt.upper() == 'Q' or user_input.upper() == 'B' or user_input.upper() == 'Q':
                     print(100*'=')
                     menu(self.functions)
                     exit()
@@ -1635,10 +1640,14 @@ class Volunteer(CentralFunctions):
                 users_df.loc[users_df['username'] == self.current_user, [
                     'password', 'email']] = (password, current_email)
 
-                print(
-                    '\n', vol_df.loc[vol_df['Username'] == self.current_user])
-                print(users_df.loc[users_df['username'] == self.current_user, [
-                      'username', 'password', 'email']])
+                print('')
+                df = vol_df.loc[vol_df['Username'] == self.current_user]
+                print(tabulate(df, headers='keys', tablefmt='psql', showindex=False))
+                print('')
+                df = users_df.loc[users_df['username'] == self.current_user, ['username', 'password', 'email']]
+                print(tabulate(df, headers='keys', tablefmt='psql', showindex=False))
+                # print('\n', vol_df.loc[vol_df['Username'] == self.current_user])
+                # print(users_df.loc[users_df['username'] == self.current_user, ['username', 'password', 'email']])
 
                 while True:
                     commit = input('\nCommit changes? [y]/[n] ')
@@ -1686,7 +1695,8 @@ class Volunteer(CentralFunctions):
             print('[B] to go back')
             print('[Q] to quit\n')
 
-            print(vol_df.loc[vol_df['Username'] == self.current_user])
+            df = vol_df.loc[vol_df['Username'] == self.current_user]
+            print(tabulate(df, headers='keys', tablefmt='psql', showindex=False))
             questions = ['\nEnter first name: ', '\nEnter second name: ',
                          '\nEnter phone number in the format [+44(0)_______]:', '\nEnter availability: ',
                          '\nEnter your email', '\nEnter your new password (over 8 characters long)']
@@ -1699,20 +1709,19 @@ class Volunteer(CentralFunctions):
                     if i == 0 or i == 1:
                         while True:
                             answer = input(questionStack[i])
-                            if answer == 'B':
+                            if answer.upper() == 'B':
                                 if i == 0:
                                     print(100*'=')
                                     menu(self.functions)
                                     exit()
                                 answerStack.pop()
                                 i -= 1
-                            elif answer == 'Q':
+                            elif answer.upper() == 'Q':
                                 print(100*'=')
                                 menu(self.functions)
                                 exit()
                             elif answer == '':
-                                answer = vol_df.iloc[vol_df.index[vol_df['Username']
-                                                                  == self.current_user][0], i+1]
+                                answer = vol_df.iloc[vol_df.index[vol_df['Username'] == self.current_user][0], i+1]
                             elif not answer.isalpha():
                                 print("Please enter a valid name.")
                                 continue
@@ -1720,12 +1729,12 @@ class Volunteer(CentralFunctions):
                     elif i == 2:
                         while True:
                             answer = input(questionStack[i])
-                            if answer == 'B':
+                            if answer.upper() == 'B':
                                 if i == 0:
                                     break
                                 answerStack.pop()
                                 i -= 1
-                            elif answer == 'Q':
+                            elif answer.upper() == 'Q':
                                 print(100*'=')
                                 menu(self.functions)
                                 exit()
@@ -1741,12 +1750,12 @@ class Volunteer(CentralFunctions):
                     elif i == 3:
                         while True:
                             answer = input(questionStack[i])
-                            if answer == 'B':
+                            if answer.upper() == 'B':
                                 if i == 0:
                                     break
                                 answerStack.pop()
                                 i -= 1
-                            elif answer == 'Q':
+                            elif answer.upper() == 'Q':
                                 print(100*'=')
                                 menu(self.functions)
                                 exit()
@@ -1756,50 +1765,47 @@ class Volunteer(CentralFunctions):
                                 print("Invalid input.")
                                 continue
                             elif int(answer) > 48:
-                                print(
-                                    "Availability exceeds maximum weekly working hours (48h).")
+                                print("Availability exceeds maximum weekly working hours (48h).")
                                 continue
                             break
                     elif i == 4:
                         while True:
                             answer = input(questionStack[i])
-                            if answer == 'B':
+                            if answer.upper() == 'B':
                                 if i == 0:
                                     break
                                 answerStack.pop()
                                 i -= 1
-                            elif answer == 'Q':
+                            elif answer.upper() == 'Q':
                                 print(100*'=')
                                 menu(self.functions)
                                 exit()
                             elif answer == '':
                                 answer = current_email
                             elif len(inpt) < 8:
-                                print(
-                                    "Sorry but your password needs to be at least 8 characters long.")
+                                print("Sorry but your password needs to be at least 8 characters long.")
                                 continue
                             break
                     elif i == 5:
                         while True:
                             answer = input(questionStack[i])
-                            if answer == 'B':
+                            if answer.upper() == 'B':
                                 if i == 0:
                                     break
                                 answerStack.pop()
                                 i -= 1
-                            elif answer == 'Q':
+                            elif answer.upper() == 'Q':
                                 print(100*'=')
                                 menu(self.functions)
                                 exit()
                             elif answer == '':
                                 answer = password
                             elif len(inpt) < 8:
-                                print(
-                                    "Sorry but your password needs to be at least 8 characters long.")
+                                print("Sorry but your password needs to be at least 8 characters long.")
                                 continue
                             break
 
-                    if answer == 'B':
+                    if answer.upper() == 'B':
                         continue
 
                     answerStack.append(answer)
@@ -1812,10 +1818,13 @@ class Volunteer(CentralFunctions):
                 vol_df.loc[vol_df['Username'] == self.current_user] = [
                     self.current_user, answers[0], answers[1], answers[2], self.camp_of_user, answers[3]]
 
-                print(
-                    '\n', vol_df.loc[vol_df['Username'] == self.current_user])
-                print(users_df.loc[users_df['username'] == self.current_user, [
-                      'username', 'password', 'email']])
+                print('')
+                df = vol_df.loc[vol_df['Username'] == self.current_user]
+                print(tabulate(df, headers='keys', tablefmt='psql', showindex=False))
+                print('')
+                df = users_df.loc[users_df['username'] == self.current_user, ['username', 'password', 'email']]
+                print(tabulate(df, headers='keys', tablefmt='psql', showindex=False))
+                
                 while True:
                     commit = input('\nCommit changes? [y]/[n] ')
                     if commit == 'y' or commit == 'n':
@@ -1832,297 +1841,6 @@ class Volunteer(CentralFunctions):
                     answers = []
                     continue
             print(100*'=')
-
-    # def amend_self_info(self):
-    #     '''
-    #     Allows volunteer user to input their name, surname, phone number and availability.
-    #     '''
-    #     print(100 * '=')
-    #     print('Please select which information you would like to change about yourself.')
-    #     print('Possible interactions:\n' +
-    #           '[1] - First name\n' +
-    #           '[2] - Family name\n' +
-    #           '[3] - Phone number\n' +
-    #           '[4] - Availability\n' +
-    #           '[5] - Change password\n')
-    #     while True:
-    #         print('[Q] to go back to main menu')
-    #         user_input = input("Choose interaction:")
-    #         if user_input == '1':
-    #             current_name = self.vol_db[self.vol_db["Username"] == self.current_user]["First name"].values[0]
-    #             print(f"Currently, your first name is set to {current_name}.")
-    #             while True:
-    #                 new_name = input("Enter new first name:")
-    #                 new_name = new_name.capitalize()
-    #                 if not new_name.isalpha():
-    #                     print("Please enter a valid name.")
-    #                 else:
-    #                     break
-    #             while True:
-    #                 user_input = input("To confirm change of data, enter [Y]. To go back to the menu without saving this change, enter [B]:").lower()
-    #                 if user_input == "y":
-    #                     self.vol_db.loc[self.vol_db["Username"] == self.current_user, "First name"] = new_name
-    #                     self.vol_db.to_csv("volunteer_database.csv",index=False)
-    #                     print(f"First name has been set to {new_name}.")
-    #                     break
-    #                 elif user_input == "b":
-    #                     print(100 * '=')
-    #                     menu(self.functions)
-    #                     exit()
-    #                 else:
-    #                     print("Invalid input.")
-    #         elif user_input == '2':
-    #             current_second_name = self.vol_db[self.vol_db["Username"] == self.current_user]["Second name"].values[0]
-    #             print(f"Currently, your second name is set to {current_second_name}.")
-    #             while True:
-    #                 new_second_name = input("Enter new second name:")
-    #                 new_second_name = new_second_name.capitalize()
-    #                 if not new_second_name.isalpha():
-    #                     print("Please enter a valid name.")
-    #                 else:
-    #                     break
-    #             while True:
-    #                 user_input = input("To confirm change of data, enter [Y]. To go back to the menu without saving this change, enter [B]:").lower()
-    #                 if user_input == "y":
-    #                     self.vol_db.loc[self.vol_db["Username"] == self.current_user, "Second name"] = new_second_name
-    #                     self.vol_db.to_csv("volunteer_database.csv",index=False)
-    #                     print(f"Second name has been set to {new_second_name}.")
-    #                     break
-    #                 elif user_input == "b":
-    #                     print(100 * '=')
-    #                     menu(self.functions)
-    #                     exit()
-    #                 else:
-    #                     print("Invalid input.")
-    #         elif user_input == '3':
-    #             current_phone = str(self.vol_db[self.vol_db["Username"] == self.current_user]["Phone"].values[0])
-    #             print(f"Currently, your phone number is set to +{current_phone}.")
-    #             while True:
-    #                 new_phone = input(
-    #                     "Enter new phone number in the format +44_______:")
-    #                 if not new_phone.isnumeric():
-    #                     print("Please enter a valid phone number.")
-    #                 elif len(new_phone) != 9:
-    #                     print("Invalid format.")
-    #                 elif new_phone[:2] != "44":
-    #                     print("Invalid format.")
-    #                 else:
-    #                     break
-    #             while True:
-    #                 user_input = input("To confirm change of data, enter [Y]. To go back to the menu without saving this change, enter [B]:").lower()
-    #                 if user_input == "y":
-    #                     # new_phone = f"+{str(new_phone)}"
-    #                     self.vol_db.loc[self.vol_db["Username"] == self.current_user, "Phone"] = new_phone
-    #                     self.vol_db.to_csv("volunteer_database.csv",index=False)
-    #                     print(f"Phone number has been set to +{new_phone}.")
-    #                     break
-    #                 elif user_input == "b":
-    #                     print(100 * '=')
-    #                     menu(self.functions)
-    #                     exit()
-    #                 else:
-    #                     print("Invalid input.")
-    #         elif user_input == '4':
-    #             current_availability = self.vol_db[self.vol_db["Username"] == self.current_user]["Availability"].values[0]
-    #             print(f"Currently, your availability is set to {current_availability}.")
-    #             while True:
-    #                 new_availability = input("Enter new availability:")
-    #                 if not new_availability.isnumeric():
-    #                     print("Invalid input.")
-    #                 elif int(new_availability) > 48:
-    #                     print("Availability exceeds maximum weekly working hours (48h).")
-    #                 else:
-    #                     break
-    #             while True:
-    #                 user_input = input("To confirm change of data, enter [Y]. To go back to the menu without saving this change, enter [B]:").lower()
-    #                 if user_input == "y":
-    #                     new_availability= f"{new_availability}h"
-    #                     self.vol_db.loc[self.vol_db["Username"] == self.current_user, "Availability"] = new_availability
-    #                     self.vol_db.to_csv("volunteer_database.csv",index=False)
-    #                     print(f"Availability has been set to {new_availability}.")
-    #                     break
-    #                 elif user_input == "b":
-    #                     print(100 * '=')
-    #                     menu(self.functions)
-    #                     exit()
-    #                 else:
-    #                     print("Invalid input.")
-    #         elif user_input == '5':
-    #             print("Email with OTP to reset password was sent to you")
-    #             otp = ''.join([str(random.randint(0, 9)) for x in range(4)])
-    #             email_sender = "hemsystem1@gmail.com"
-    #             email_password = "asbwtshlldlaalld"
-    #             email_receiver = self.user_db[self.user_db["username"] == self.current_user]['email'].values[0]
-
-    #             subject = "OTP to reset password"
-    #             body = """Yours OTP to reset password is: {}""".format(str(otp))
-    #             mail = EmailMessage()
-    #             mail["From"] = email_sender
-    #             mail["To"] = email_receiver
-    #             mail["Subject"] = subject
-    #             mail.set_content(body)
-    #             context = ssl.create_default_context()
-
-    #             with smtplib.SMTP_SSL('smtp.gmail.com', 465, context=context) as smtp:
-    #                 smtp.login(email_sender, email_password)
-    #                 smtp.sendmail(email_sender, email_receiver, mail.as_string())
-    #             while True:
-    #                 otp_validation = input("Input here the OTP: ")
-    #                 if otp != otp_validation:
-    #                     print("Please enter valid OTP")
-    #                 else:
-    #                     break
-    #             while True:
-    #                 new_password = input("Type your new password: ")
-    #                 password = self.user_db[self.user_db["username"] == self.current_user]['password'].values[0]
-    #                 if password == new_password:
-    #                     print("Sorry but your password can't be the same as the previous one")
-    #                 elif len(new_password) < 8:
-    #                     print("Sorry but your password needs to be at least 8 characters long")
-    #                 else:
-    #                     while True:
-    #                         user_input = input("To confirm change of data, enter [Y]. To go back to the menu without saving this change, enter [B]:").lower()
-    #                         if user_input == "y":
-    #                             self.user_db.loc[self.user_db["username"] == self.current_user, 'password'] = new_password
-    #                             self.user_db.to_csv("user_database.csv",index=False)
-    #                             print("Password has been changed")
-    #                             break
-    #                         elif user_input == "b":
-    #                             print(100 * '=')
-    #                             menu(self.functions)
-    #                             exit()
-    #                         else:
-    #                             print("Invalid input.")
-    #                     break
-
-    #         elif user_input == "Q" or user_input == "q":
-    #             print(100 * '=')
-    #             menu(self.functions)
-    #             exit()
-    #         else:
-    #             print("Invalid input. Please select from the following options.")
-
-    # def amend_self_info(self):
-        '''
-        Allows volunteer user to input their name, surname, phone number and availability.
-        '''
-        print(100*'=')
-        print('Please select input or update any information about you.')
-        print("If you do NOT wish to change current value press ENTER during input.")
-        print('Expected Inputs:\n' +
-              '\t>First name\n' +
-              '\t>Family name\n' +
-              '\t>Phone number\n' +
-              '\t>Availability\n')
-        print('[B] to go back')
-        print('[Q] to quit\n')
-
-        vol_df = self.vol_db
-        print(vol_df.loc[vol_df['Username'] == self.current_user])
-        questions = ['\nEnter new first name: ', '\nEnter new second name: ',
-                     '\nEnter new phone number in the format [44_______]:', '\nEnter new availability: ']
-
-        def go_back(questionStack):
-            i = 0
-            answerStack = []
-
-            while i < len(questionStack):
-                if i == 0 or i == 1:
-                    while True:
-                        answer = input(questionStack[i])
-                        if answer == 'B':
-                            if i == 0:
-                                print(100*'=')
-                                menu(self.functions)
-                                exit()
-                            answerStack.pop()
-                            i -= 1
-                        elif answer == 'Q':
-                            print(100*'=')
-                            menu(self.functions)
-                            exit()
-                        elif answer == '':
-                            answer = vol_df.iloc[vol_df.index[vol_df['Username']
-                                                              == self.current_user][0], i+1]
-                        elif not answer.isalpha():
-                            print("Please enter a valid name.")
-                            continue
-                        break
-                elif i == 2:
-                    while True:
-                        answer = input(questionStack[i])
-                        if answer == 'B':
-                            if i == 0:
-                                break
-                            answerStack.pop()
-                            i -= 1
-                        elif answer == 'Q':
-                            print(100*'=')
-                            menu(self.functions)
-                            exit()
-                        elif answer == '':
-                            answer = vol_df.iloc[vol_df.index[vol_df['Username']
-                                                              == self.current_user][0], 3]
-                        elif not answer.isnumeric():
-                            print("Please enter a valid phone number.")
-                            continue
-                        elif len(answer) != 9 or answer[:2] != "44":
-                            print("Invalid format.")
-                            continue
-                        break
-                elif i == 3:
-                    while True:
-                        answer = input(questionStack[i])
-                        if answer == 'B':
-                            if i == 0:
-                                break
-                            answerStack.pop()
-                            i -= 1
-                        elif answer == 'Q':
-                            print(100*'=')
-                            menu(self.functions)
-                            exit()
-                        elif answer == '':
-                            answer = vol_df.iloc[vol_df.index[vol_df['Username']
-                                                              == self.current_user][0], 5]
-                        elif not answer.isnumeric():
-                            print("Invalid input.")
-                            continue
-                        elif int(answer) > 48:
-                            print(
-                                "Availability exceeds maximum weekly working hours (48h).")
-                            continue
-                        break
-                if answer == 'B':
-                    continue
-
-                answerStack.append(answer)
-                i += 1
-
-            return answerStack
-
-        while True:
-            answers = go_back(questions)
-            vol_df.loc[vol_df['Username'] == self.current_user] = [
-                self.current_user, answers[0], answers[1], answers[2], self.camp_of_user, answers[3]]
-
-            print('\n', vol_df.loc[vol_df['Username'] == self.current_user])
-            while True:
-                commit = input('\nCommit changes? [y]/[n] ')
-                if commit == 'y' or commit == 'n':
-                    break
-                else:
-                    print('Your input is not recognised')
-                    continue
-
-            if commit == 'y':
-                self.emergencies_db = vol_df.copy()
-                vol_df.to_csv('volunteer_database.csv', index=False)
-                break
-            else:
-                answers = []
-                continue
-        print(100*'=')
 
 
 def session_over_message():
@@ -2141,7 +1859,7 @@ def menu(functions):
             print(functions[str(i+1)]['message'])
         print('\n[Q] to end session')
         user_input = input('\nPlease select your interaction: ')
-        if user_input == 'Q':
+        if user_input.upper() == 'Q':
             session_over_message()
             exit()
         if user_input not in functions.keys():
