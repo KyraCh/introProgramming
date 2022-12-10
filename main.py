@@ -262,102 +262,144 @@ class CentralFunctions():
         Interactive method which allows to add new family to the list
         '''
         while True:
-            print('[Q] to go back to main menu')
-            name = input("State name of family's lead member: ")
-            if name == "q" or name == "Q":
+            refugee_df = self.refugee_db.copy()
+            print(100 * '=')
+            print('\nPlease provide details of the new refugee family.')
+            print('Expected Inputs:\n'+
+              '\t>Name of lead family member\n'+
+              '\t>Surname of lead family member\n'+
+              '\t>Mental state of the family\n'+
+              '\t>Physical state of the family\n'+
+              '\t>Number of family members')
+            if self.current_user == 'admin':
+                print('\t>Emergency\n'+
+              '\t>Camp')
+            print('\n[B] to go back')
+            print('[Q] to quit')
+            name = input("\nState name of family's lead member: ")
+            if name.upper() == "Q" or name.upper() == "B":
                 print(100 * '=')
                 menu(self.functions)
                 exit()
             while True:
-                print('[B] to go back to main menu')
-                surname = input("State surname of the family: ")
-                if surname == "b" or surname == "B":
+                surname = input("\nState surname of the family: ")
+                if surname.upper() == "B":
                     break
+                elif surname.upper() == "Q":
+                    print(100 * '=')
+                    menu(self.functions)
+                    exit()
                 if not name.isalpha() or not surname.isalpha():
-                    print("You can't use numbers for this input. Try again ")
+                    print("Invalid input.")
                 while True:
-                    print('[B] to go back to main menu')
                     mental_state = input(
-                        "Describe the mental state of the family: ")
-                    if mental_state == "b" or mental_state == "B":
+                        "\nDescribe the mental state of the family: ")
+                    if mental_state.upper() == "B":
                         break
+                    elif mental_state.upper() == "Q":
+                        print(100 * '=')
+                        menu(self.functions)
+                        exit()
                     while True:
                         physical_state = input(
-                            "Describe the physical state of the family: ")
-                        if physical_state == "b" or physical_state == "B":
+                            "\nDescribe the physical state of the family: ")
+                        if physical_state.upper() == "B":
                             break
+                        elif physical_state.upper() == "Q":
+                            print(100 * '=')
+                            menu(self.functions)
+                            exit()
                         while True:
-                            print('[Q] to go back to main menu')
                             no_of_members = (
-                                input("Type the number of family members: "))
+                                input("\nType the number of family members: "))
                             if no_of_members == "b" or no_of_members == "B":
                                 break
+                            elif no_of_members.upper() == "Q":
+                                print(100 * '=')
+                                menu(self.functions)
+                                exit()
                             try:
                                 no_of_members = int(no_of_members)
 
                             except ValueError:
                                 print("It has to be an integer")
 
-                            if self.current_user == 'adm':
+                            if self.current_user == 'admin':
                                 emergency_options = self.emergencies_db["Emergency ID"]
-                                print(*emergency_options, sep='\n')
+                                print('\n',*emergency_options, sep='\n')
                                 emergency_list = self.emergencies_db["Emergency ID"].tolist(
                                 )
                                 while True:
-                                    print('[B] to go back to main menu')
-                                    emergency_id = input("Choose emergency: ")
+                                    emergency_id = input("\nChoose emergency: ")
                                     if emergency_id == 'b' or emergency_id == "B":
                                         break
-                                    elif emergency_id not in emergency_list:
-                                        print("Invalid input for emergency")
-                                    camp_id = self.refugee_db.loc[self.refugee_db['Camp ID'].str.contains(
-                                        emergency_id, case=False)]['Camp ID']
-                                    camp_id_list = camp_id.tolist()
-                                    print(*set(camp_id), sep='\n')
-                                    while True:
-                                        print('[B] to go back to main menu')
-                                        camp_choice = input(
-                                            "Choose a camp to which you want to assign family: ")
-                                        if camp_choice not in camp_id_list:
-                                            print(
-                                                "You have to choose from a list of available camps!")
-                                        elif camp_choice == "b" or camp_choice == "B":
-                                            break
-
-                                        family_count = len(self.refugee_db.loc[self.refugee_db['Camp ID'].str.contains(
-                                            camp_choice, case=False)]) + 1
-                                        family_id = str(
-                                            family_count) + camp_choice
-                                        self.refugee_db.loc[len(self.refugee_db)] = [family_id, name, surname, camp_choice,
-                                                                                     mental_state, physical_state,
-                                                                                     no_of_members]
-                                        self.refugee_db.to_csv(
-                                            "refugee_db.csv", index=False)
-                                        self.save(self.refugee_db,
-                                                  'refugee_database.csv')
-                                        print("New refugee family was created")
+                                    elif emergency_id.upper() == "Q":
                                         print(100 * '=')
                                         menu(self.functions)
                                         exit()
+                                    elif emergency_id not in emergency_list:
+                                        print("Invalid input for emergency")
+                                        continue
+                                    camp_id = refugee_df.loc[refugee_df['Camp ID'].str.contains(
+                                        emergency_id, case=False)]['Camp ID']
+                                    camp_id_list = camp_id.tolist()
+                                    print('\n',*set(camp_id), sep='\n')
+                                    while True:
+                                        camp_choice = input(
+                                            "\nChoose a camp to which you want to assign family: ")
+                                        if camp_choice.upper() == "B":
+                                            break
+                                        elif camp_choice.upper() == "Q":
+                                            print(100 * '=')
+                                            menu(self.functions)
+                                            exit()
+                                        elif camp_choice not in camp_id_list:
+                                            print("You have to choose from a list of available camps!")
+                                            continue
+                                        
+                                        family_count = len(refugee_df.loc[refugee_df['Camp ID'].str.contains(
+                                            camp_choice, case=False)]) + 1
+                                        family_id = str(
+                                            family_count) + camp_choice
+                                        break
+                                    break
+
                             else:
                                 camp_choice = self.vol_db[self.vol_db['Camp ID']
                                                           == self.camp_of_user]['Camp ID'].values[0]
-                                family_count = len(self.refugee_db.loc[self.refugee_db['Camp ID'].str.contains(
+                                family_count = len(refugee_df.loc[refugee_df['Camp ID'].str.contains(
                                     camp_choice, case=False)]) + 1
                                 family_id = str(family_count) + camp_choice
+                                
+                            
+                            break
+                        break
+                    break
+                break
+        
+            refugee_df.loc[len(refugee_df)] = [family_id, name, surname, camp_choice, mental_state, physical_state, no_of_members]
+            print(refugee_df.tail(1))
+            while True:
+                commit = input('\nCommit changes? [y]/[n] ')
+                if commit == 'y' or commit == 'n':
+                    break
+                else:
+                    print('Your input is not recognised')
+                    continue
+            
+            if commit == 'y':
+                self.refugee_db = refugee_df.copy()
+                refugee_df.to_csv('refugee_database.csv', index=False)
+                break
+            else:
+                continue
 
-                                self.refugee_db.loc[len(self.refugee_db)] = [
-                                    family_id, name, surname, camp_choice, mental_state, physical_state, no_of_members]
-                                self.refugee_db.to_csv(
-                                    "refugee_db.csv", index=False)
-                                self.save(self.refugee_db,
-                                          'refugee_database.csv')
-                                print("New refugee family was created")
-                                print(100 * '=')
-                                menu(self.functions)
-                                exit()
+        print(100 * '=')
 
     def call_camps(self):
+        print(100*'=')
+        print('\nChoose an interaction by typing the corresponding number.')
+        print('Example: type "1" to view comprehensive data on all refugee camps.\n')
         print("[1] - List of all camps")
         print("[2] - total number of camps")
         print("[3] - Number of volunteers in each camp")
@@ -367,58 +409,71 @@ class CentralFunctions():
         print("[7] - Number of active camps")
         print("[8] - Number of inactive camps")
         print("[9] - Number of camps by emergency type")
-        print("Choose [Q] if you want exit this summary")
-
+        print('\n[B] to go back')
+        print('[Q] to quit')
+        
+        self.count_ref_vol()
         while True:
 
-            user_input = input("Choose interaction: ")
+            user_input = input("\nChoose interaction: ")
             local_db = self.camps_db.merge(
                 self.emergencies_db, on='Emergency ID', how='inner')
 
             if user_input == '1':
-                print("See camp list: \n", self.camps_db)
+                print("\nSee camp list: \n", self.camps_db)
             elif user_input == "2":
-                print("Number of camps: ", len(self.camps_db.index))
+                print("\nNumber of camps: ", len(self.camps_db.index))
             elif user_input == "3":
-                print("Number of volunteers per camp: \n",
+                print("\nNumber of volunteers per camp: \n",
                       self.vol_db.groupby(by=self.vol_db['Camp ID']).size())
             elif user_input == "4":
-                print("Number of refugees per camp: \n",
+                print("\nNumber of refugees per camp: \n",
                       self.refugee_db.groupby(by=self.refugee_db['Camp ID']).size())
             elif user_input == "5":
-                print("Capacity by camp: \n", self.camps_db['Capacity'])
+                print("\nCapacity by camp: \n", self.camps_db[['Camp ID','Capacity']])
             elif user_input == "6":
-                print("Camps in each area: \n", self.camps_db.groupby(
+                print("\nCamps in each area: \n", self.camps_db.groupby(
                     by=self.camps_db['Location']).size())
             elif user_input == '7':
-                print(local_db['Close date'].isnull().sum())
+                print('\nNumber of active camps: ', len(local_db[local_db['Close date'] == '']))
+                print(local_db[local_db['Close date'] == ''])
             elif user_input == '8':
-                print(local_db['Close date'].count())
+                print('\nNumber of inactive camps: ',len(local_db[local_db['Close date'] != '']))
+                print(local_db[local_db['Close date'] != ''])
             elif user_input == '9':
                 print(self.emergencies_db.groupby(
                     by=self.emergencies_db['Type']).size())
-            else:
+            elif user_input.upper() == 'B' or user_input.upper() == 'Q':
                 break
+            else:
+                print('Invalid input')
+            continue
+        
+        print(100*'=')
 
     def call_volunteers(self):
+        self.count_ref_vol()
         while True:
             vol_data = self.vol_db.copy()
             camp_data = self.camps_db.copy()
-            print("\nEnter [1] to view all volunteer data\n"
-                  "Enter [2] to see volunteer data by camp\n"
-                  "Enter [3] to see total number of volunteers\n"
-                  "Enter [4] to see number of volunteers by camp\n"
-                  "Enter [5] to check if the volunteer exists\n"
-                  "Enter [6] to go back\n")
-            choose_action = input('Enter here: ')
+            print(100*'=')
+            print('\nChoose an interaction by typing the corresponding number.')
+            print('Example: type "1" to view comprehensive data on all volunteers.\n')
+            print("[1] - view all volunteer data\n"
+                  "[2] - see volunteer data by camp\n"
+                  "[3] - see total number of volunteers\n"
+                  "[4] - see number of volunteers by camp\n"
+                  "[5] - check if the volunteer exists\n")
+            print('[B] to go back')
+            print('[Q] to quit')
+            choose_action = input('\nEnter here: ')
             if choose_action == '1':
                 print(f"\n{vol_data}")
             elif choose_action == '2':
                 while True:
                     print('\nList of Camp IDs: ')
                     print(camp_data['Camp ID'].to_string(index=False))
-                    print('\nEnter [B] to go back. ')
-                    choose_camp = input('Enter a Camp ID: ')
+                    choose_camp = input('\nEnter a Camp ID: ')
                     if choose_camp.upper() == 'B':
                         break
                     elif choose_camp in vol_data['Camp ID'].values:
@@ -429,19 +484,19 @@ class CentralFunctions():
             elif choose_action == '3':
                 print(f"There are {len(vol_data)} volunteers")
             elif choose_action == '4':
-                while True:
-                    print('\nList of Camp IDs: ')
-                    print(camp_data['Camp ID'].to_string(index=False))
-                    print('\nEnter [B] to go back. ')
-                    choose_camp = input('Enter a Camp ID: ')
-                    if choose_camp.upper() == 'B':
-                        break
-                    elif choose_camp in vol_data['Camp ID'].values:
-                        lst1 = [item for item in vol_data['Camp ID'] if item == choose_camp]
-                        print(f"\nThere are {len(lst1)} volunteers in {choose_camp}.")
-                    else:
-                        print(Fore.RED + '\nInvalid Camp ID. Try again.')
-                        print(Style.RESET_ALL)
+                print(camp_data[['Camp ID','Number of volunteers']])
+                # while True:
+                #     print('\nList of Camp IDs: ')
+                #     print(camp_data['Camp ID'].to_string(index=False))
+                #     choose_camp = input('Enter a Camp ID: ')
+                #     if choose_camp.upper() == 'B':
+                #         break
+                #     elif choose_camp in vol_data['Camp ID'].values:
+                #         lst1 = [item for item in vol_data['Camp ID'] if item == choose_camp]
+                #         print(f"\nThere are {len(lst1)} volunteers in {choose_camp}.")
+                #     else:
+                #         print(Fore.RED + '\nInvalid Camp ID. Try again.')
+                #         print(Style.RESET_ALL)
             elif choose_action == '5':
                 while True:
                     def go_back(questionStack):
@@ -451,7 +506,9 @@ class CentralFunctions():
                             if i == 0:
                                 while True:
                                     answer = input(questionStack[i])
-                                    if answer.isnumeric():
+                                    if answer.upper() == 'B' or answer.upper() == 'Q':
+                                        break
+                                    elif answer.isnumeric():
                                         print(Fore.RED + 'First Name cannot include a number. Try again.')
                                         print(Style.RESET_ALL)
                                         continue
@@ -460,7 +517,9 @@ class CentralFunctions():
                             elif i == 1:
                                 while True:
                                     answer = input(questionStack[i])
-                                    if answer.isnumeric():
+                                    if answer.upper() == 'B' or answer.upper() == 'Q':
+                                        break
+                                    elif answer.isnumeric():
                                         print(Fore.RED + 'Last Name cannot include a number. Try again.')
                                         print(Style.RESET_ALL)
                                         continue
@@ -470,19 +529,22 @@ class CentralFunctions():
                                 answer = input(questionStack[i])
                             if answer.upper() == 'B':
                                 if i == 0:
-                                    print(100 * '=')
-                                    menu(self.functions)
-                                    exit()
+                                    break
                                 answerStack.pop()
                                 i -= 1
                                 continue
+                            elif answer == 'Q':
+                                print(100*'=')
+                                menu(self.functions)
+                                exit()
                             answerStack.append(answer)
                             i += 1
                         return answerStack
-
-                    print('\nAt any point enter [B] to go back.')
                     questions = ['\nEnter First Name: ', 'Enter Last Name: ']
                     answers = go_back(questions)
+                    
+                    if len(answers) == 0:
+                        break
                     if answers[0] in vol_data['First name'].values and answers[1] in vol_data['Second name'].values:
                         print(f'\nHere is our record for {answers[0]} {answers[1]}: \n')
                         print(
@@ -490,111 +552,144 @@ class CentralFunctions():
                     else:
                         print(Fore.RED + f'\nThere is no volunteer with the name {answers[0]} {answers[1]}\n')
                         print(Style.RESET_ALL)
-            elif choose_action == '6':
+                if len(answers) == 0:
+                    continue
+            elif choose_action.upper() == 'Q' or choose_action.upper() == 'B':
                 print(100 * '=')
                 menu(self.functions)
                 exit()
             else:
                 print(Fore.RED + '\nInvalid action. Try again.')
                 print(Style.RESET_ALL)
+        print(100*'=')
 
     def amend_refugee_profile(self):
         '''
         Interactive method which allows one to amend information about a refugee.
+        ### TRY THE METHODS-IN-A-LIST TECHNIQUE. ###
         '''
-        list_of_refugees = self.refugee_db.copy()
-
-        print('AMEND REFUGEE PROFILE')
-        print('-'*25)
-        print("Type 'q' to quit the process at any moment (progress won't be saved)")
-
         while True:
+            list_of_refugees = self.refugee_db.copy()
+            camps_df = self.camps_db.copy()
+            print(100*'=')
+            print('\nPlease select which refugee profile you would like to ammend\n')
+            print('[B] to go back')
+            print('[Q] to quit\n')
+            
+            if self.current_user == 'admin':
+                print(list_of_refugees)
+            else:
+                print(list_of_refugees.loc[list_of_refugees['Camp ID']==self.camp_of_user])
+                
             iD = input('\nPlease choose Family ID you would like to ammend: ')
-            if iD == 'q':
-                break
+            if iD.upper() == 'Q' or iD.upper() == 'B':
+                print(100*'=')
+                menu(self.functions)
+                exit()
             if iD not in list(list_of_refugees['Family ID']):
                 print('Please enter valid Family ID')
                 continue
-            if self.current_user == 'vol':
-                if iD[-2:] != self.camp_of_user:
-                    print('Please choose a refugee from your camp')
-                    continue
-            print('\n')
-            print('-'*25)
-            print(
-                f'Please Choose which values you would like to ammend for family {iD}.')
-            print(
-                'Input indices corresponding to value you wish to ammend separated by commas ",".')
-            print(
-                'eg: "1,2" for amending "Lead Family Member Name" and "Lead Family Member Surname".\n')
-            print('[1] - "Lead Family Member Name"')
-            print('[2] - "Lead Family Member Surname"')
-            print('[3] - "Camp ID"')
-            print('[4] - "Mental State"')
-            print('[5] - "Physical State"')
-            print('[6] - "No. Of Family Members"\n')
 
             while True:
-                ops = input('Indices: ')
-                if ops == 'q':
+                print(f'\nPlease Choose which values you would like to ammend for family {iD}.')
+                print('Input indices corresponding to value you wish to ammend separated by commas ",".')
+                print('eg: "1,2" for amending "Lead Family Member Name" and "Lead Family Member Surname".\n')
+                print('[1] - "Lead Family Member Name"')
+                print('[2] - "Lead Family Member Surname"')
+                print('[3] - "Camp of Refugee"')
+                print('[4] - "Mental State"')
+                print('[5] - "Physical State"')
+                print('[6] - "No. Of Family Members"\n')
+                counter = 0
+                while True:
+                    inpt = input('Indices: ')
+                    if inpt.upper() == 'Q':
+                        print(100*'=')
+                        menu(self.functions)
+                        exit()
+                    elif inpt.upper() == 'B':
+                        self.amend_refugee_profile()
+                    try:
+                        operations = [int(i) for i in inpt.split(',')]
+                    except:
+                        print('Please input valid indices\n')
+                        continue
+                    check = [not (i < 1 or i > 6) for i in operations]
+                    if any(i is False for i in check):
+                        print('Please input valid indices\n')
+                        continue
                     break
-                try:
-                    ops = [int(i) for i in ops.split(',')]
-                except:
-                    print('Please input valid indices\n')
+
+                while counter < len(operations):
+                    i = operations[counter]
+                    if i == 3:
+                        print('\n',camps_df)
+
+                    change = input(f'\nPlease select new value for {list_of_refugees.columns[i]}: ')
+                    
+                    if change.upper() == 'Q':
+                        print(100*'=')
+                        menu(self.functions)
+                        exit()
+                    elif change.upper() == 'B':
+                        if counter == 0:
+                            print('BUIG BRUH')
+                            break
+                        counter -= 1
+                        continue
+                    
+                    if i == 3:
+                        camps = []
+                        for i in list(list_of_refugees['Family ID']):
+                            for chr in i:
+                                if chr.isalpha():
+                                    temp = i.index(chr)
+                                    camps.append(i[temp:])
+                                    break
+                        if change in camps:
+                            index = []
+                            for i in list(list_of_refugees.loc[list_of_refugees['Camp ID']==change]['Family ID']):
+                                for chr in i:
+                                    if chr.isalpha():
+                                        temp = i.index(chr)
+                                        index.append(i[:temp])
+                                        break
+                                new_index = str(int(max(index))+1)
+                            
+                            list_of_refugees.loc[list_of_refugees['Family ID'] == iD,'Family ID']  = new_index + change
+                            iD = new_index + change
+                            counter += 1
+                            continue
+                        else:
+                            list_of_refugees.loc[list_of_refugees['Family ID'] == iD,'Family ID'] = '1' + change
+                            iD = '1' + change
+                            counter += 1
+                            continue
+                    counter += 1
+                    list_of_refugees.at[list_of_refugees.index[list_of_refugees['Family ID'] == iD][0], list_of_refugees.columns[i]] = change
+                if change.upper() == 'B':
                     continue
-                check = [not (i < 1 or i > 6) for i in ops]
-                if any(i is False for i in check):
-                    print('Please input valid indices\n')
-                    continue
                 break
-
-            if ops == 'q':
-                break
-
-            for i in ops:
-                change = input(
-                    f'\nPlease select new value for {list_of_refugees.columns[i]}: ')
-                if change == 'q':
-                    list_of_refugees = self.refugee_db
-                    break
-                if i == 3:
-                    if change in [i[1:] for i in list(list_of_refugees['Family ID'])]:
-                        new_index = str(
-                            max([int(i[0]) for i in list(list_of_refugees['Family ID']) if change in i])+1)
-                        list_of_refugees.at[list_of_refugees.index[list_of_refugees['Family ID']
-                                                                   == iD][0], 'Family ID'] = new_index + change
-                        iD = new_index + change
-                    else:
-                        list_of_refugees.at[list_of_refugees.index[list_of_refugees['Family ID']
-                                                                   == iD][0], 'Family ID'] = '1' + change
-                        iD = '1' + change
-
-                list_of_refugees.at[list_of_refugees.index[list_of_refugees['Family ID']
-                                                           == iD][0], list_of_refugees.columns[i]] = change
-
-            if change == 'q':
-                break
-
+            
             print('\n')
             print(list_of_refugees.loc[list_of_refugees['Family ID'] == iD])
 
-            if input('\nCommit changes? y/n ') == 'n':
-                continue
+            while True:
+                commit = input('\nCommit changes? [y]/[n] ')
+                if commit == 'y' or commit == 'n':
+                    break
+                else:
+                    print('Your input is not recognised')
+                    continue
+
+            if commit == 'y':
+                self.refugee_db = list_of_refugees.copy()
+                list_of_refugees.to_csv('refugee_database.csv', index=False)
+                break
             else:
-                if not self.save(list_of_refugees, 'refugee_database.csv'):
-                    print(
-                        'The file is currently opened. Please close the file to save.')
+                continue
 
-                    # not convinced this is the most efficient way to go about this --> open to feedback
-                    while not self.save(list_of_refugees, 'refugee_database.csv'):
-                        pass
-                print('Changes commited')
-
-            self.refugee_db = list_of_refugees
-            break
-
-    def count_ref_vol(self):  # what is the purpose of this method?
+    def count_ref_vol(self):  # what is the purpose of this method? - count refugees and volunteers and update camps_db - Fedor
         '''
         Counts the number of volunteers in each camp and the number of refugees in each camp, after which it updates the camp_database.csv with correct numbers.
         '''
@@ -612,71 +707,78 @@ class CentralFunctions():
             camp_df.loc[camp_df['Camp ID'] == i,
                         'Number of refugees'] = count_ref[i]
 
-        self.camps_df = camp_df.copy()
+        self.camps_db = camp_df.copy()
         camp_df.to_csv('camp_database.csv', index=False)
 
     def call_no_of_refugees(self):
         '''Reads the file and prints out the general list of families in a system with
-        some summary about them by sating the number of refugees, their mental and physical
+        some summary about them by stating the number of refugees, their mental and physical
         state per each camp and gives information about each family that is assigned to certain camp.
         Secondly, the method call no of refugees now will only show you camp details of only the one that you are assigned to.
         Unless you are admin then you can see evrything '''
-
-        if self.current_user == "adm":
+        print(100*'=')    
+        if self.current_user == "admin":
             countries_camps = self.camps_db["Emergency ID"]
+            print("\nChoose emergency for which you want to see the summary.")
+            print('Expected Inputs:\n'+
+                '\t>Emergency ID\n')
             print(*countries_camps, sep='\n')
-            choose_emergency = input(
-                "\nChoose emergency for which you want to see the summary:").upper()
-
+            choose_emergency = input("\nChoose emergency for which you want to see the summary: ").upper()
+            if choose_emergency == "Q" or choose_emergency == "B":
+                print(100 * '=')
+                menu(self.functions)
+                exit()
             while choose_emergency not in set(countries_camps):
-                choose_emergency = input(
-                    "\nChoose emergency for which you want to see the summary:").upper()
+                
+                choose_emergency = input("\nChoose emergency for which you want to see the summary: ").upper()
 
         else:
             volunteer_campID = self.camp_of_user
-            choose_emergency = self.camps_db[self.camps_db["Camp ID"]
-                                             == volunteer_campID]["Emergency ID"].values[0]
+            choose_emergency = self.camps_db[self.camps_db["Camp ID"] == volunteer_campID]["Emergency ID"].values[0]
+            
+        print('\nChoose an interaction by typing the corresponding number.')
+        print('Example: type "1" to view comprehensive data on all refugee profiles.\n')
         print("[1] - List of all refugees for all camps")
-        print(
-            "[2] - Total number of refugees in chosen camp")
+        print("[2] - Total number of refugees in chosen camp")
         print("[3] - Number of families in each camp")
-        print("[4] - Total summary for each camp")
-        print("Choose Quit if you want exit this summary")
+        print("[4] - Total summary for each camp\n")
+        print('[B] to go back')
+        print('[Q] to quit')
 
         while True:
-            user_input = input("Choose interaction: ")
+            user_input = input("\nChoose interaction: ")
+            
             if user_input == '1':
-                country_refugees = self.camps_db[self.camps_db["Emergency ID"]
-                                                 == choose_emergency]
-                print(country_refugees)
+                country_refugees = self.refugee_db.loc[self.refugee_db['Camp ID'].str.contains(choose_emergency+'-', case=False)]
+                print('\n',country_refugees)
 
             elif user_input == "2":
-                number_of_refugee = self.camps_db[self.camps_db["Emergency ID"]
-                                                  == choose_emergency]['Number of refugees']
-                print("Number of refugee in {}: ".format(
-                    choose_emergency), *number_of_refugee, sep='\n')
+                number_of_refugee = int(self.camps_db[self.camps_db["Emergency ID"] == choose_emergency]['Number of refugees'].values[0])
+                print(f"\nNumber of refugees in {choose_emergency} = {number_of_refugee}")
 
             elif user_input == "3":
-                camp_id = self.camps_db[self.camps_db["Emergency ID"]
-                                        == choose_emergency]['Camp ID'].values[0]
-                count_camps = self.refugee_db[self.refugee_db["Camp ID"] == camp_id]['Camp ID'].count(
-                )
-                print("Number of families for camp {}:".format(choose_emergency))
-                print(count_camps)
-                # print(*count_camps, sep='\n')
+                camp_id = self.camps_db[self.camps_db["Emergency ID"] == choose_emergency]['Camp ID'].values[0]
+                count_refugees = self.refugee_db[self.refugee_db["Camp ID"] == camp_id]['Camp ID'].count()
+                print(f"\nNumber of families for camp {camp_id} = {count_refugees}")
 
             elif user_input == "4":
-                camp_id = self.camps_db[self.camps_db["Emergency ID"]
-                                        == choose_emergency]['Camp ID'].values[0]
-                group_camps = self.refugee_db[self.refugee_db["Camp ID"] == camp_id].groupby(
-                    "Camp ID")
-                for name, camp in group_camps:
-                    print("Camp " + name + "->" +
-                          str(len(camp)) + " family/families")
-                    print(camp)
-            else:
-                break
+                camps = list(self.camps_db.loc[self.camps_db['Number of refugees'] != '','Camp ID'])
+                for i in camps:
+                    no_of_families = str(int(self.camps_db.loc[self.camps_db['Camp ID'] != 'AU1-1','Number of refugees'].values[0]))
+                    refugees_in_camp = self.refugee_db.loc[self.refugee_db['Camp ID'] == i]
+                    print("\n\tCamp " + i + " --> " + no_of_families + " family/families")
+                    print('\n',refugees_in_camp)
+                    print(100*'-')
+                    
+            elif user_input.upper() == 'B' or user_input.upper() == 'Q':
+                print(100*'=')
+                menu(self.functions)
+                exit()
 
+            else:
+                print('Invalid input')
+                continue
+            
 
 class Admin(CentralFunctions):
 
@@ -691,7 +793,8 @@ class Admin(CentralFunctions):
                           "7": {'method': self.write_volunteer,       'message': '[7] - Add new volunteer(s) profile(s)', },
                           "8": {'method': self.admin_volunteer_commands,'message': '[8] - Amend volunteer activation status.', },
                           "9": {'method': self.create_profile,        'message': '[9] - Create refugee profile', },
-                          "10": {'method': self.amend_refugee_profile,'message': '[10] - Amend refugee profile', }}
+                          "10": {'method': self.amend_refugee_profile,'message': '[10] - Amend refugee profile', },
+                          "11": {'method': self.call_no_of_refugees,'message': '[11] - See information about refugees', }}
         self.current_user = current_user
         self.camp_of_user = camp_of_user
 
@@ -722,7 +825,11 @@ class Admin(CentralFunctions):
                     if i == 0:
                         while True:
                             answer = input(questionStack[i])
-                            if answer in list(self.countries_db.index):
+                            if answer.upper() == 'B' or answer.upper() == 'Q':
+                                print(100*'=')
+                                menu(self.functions)
+                                exit()
+                            elif answer in list(self.countries_db.index):
                                 break
                             else:
                                 print('Please select valid country')
@@ -730,6 +837,12 @@ class Admin(CentralFunctions):
                     elif i == 3:
                         while True:
                             answer = input(questionStack[i])
+                            if answer.upper() == 'B':
+                                break
+                            elif answer.upper() == 'Q':
+                                print(100*'=')
+                                menu(self.functions)
+                                exit()
                             try:
                                 datetime.date.fromisoformat(answer)
                                 answer = datetime.datetime.strptime(
@@ -743,10 +856,6 @@ class Admin(CentralFunctions):
                         answer = input(questionStack[i])
 
                     if answer == 'B':
-                        if i == 0:
-                            print(100*'=')
-                            menu(self.functions)
-                            exit()
                         answerStack.pop()
                         i -= 1
                         continue
@@ -841,6 +950,7 @@ class Admin(CentralFunctions):
         '''
         Allows user to change the capacity of one of the camps. Selection by camp ID.
         '''
+        self.count_ref_vol()
         camp_db = self.camps_db.copy()
         print(100*'=')
         print("Select which camp's capacity needs to be altered")
@@ -873,13 +983,16 @@ class Admin(CentralFunctions):
                 else:
                     try:
                         cap = int(cap)
-                        if cap < int(camp_db.loc[camp_db['Camp ID'] == choose_camp]['Number of refugees']):
+                        limit = 0
+                        if camp_db.loc[camp_db['Camp ID'] == choose_camp]['Number of refugees'].values[0] != '':
+                            limit = int(camp_db.loc[camp_db['Camp ID'] == choose_camp]['Number of refugees'])
+                        if cap < limit:
                             print(
                                 'Your new capacity is lower than current number of refugees.')
                             continue
                         else:
                             break
-                    except ValueError:
+                    except:
                         print('Your input needs to be an integer')
                         continue
             if cap == 'B':
@@ -917,6 +1030,7 @@ class Admin(CentralFunctions):
         Or automatic creation of multiple volunteer accounts from the same camp can be made which have automatically generated usernames in form "Volunteer"+index
             INPUTS: number of volunteers desired, camp of volunteers
         '''
+        self.count_ref_vol()
         vol_df = self.vol_db.copy()
         users_df = self.user_db.copy()
         camps_df = self.camps_db.copy()
@@ -924,11 +1038,11 @@ class Admin(CentralFunctions):
         camps_exist = list(camps_df['Camp ID'])
         self.quit = False
         print(100*'=')
-        print('Please select how would you like to create a new volunteer profile')
+        print('\nPlease select how would you like to create a new volunteer profile\n')
         print('[1] - manual input')
-        print('[2] - automatic creation')
+        print('[2] - automatic creation\n')
         print('[B] to go back')
-        print('[Q] to quit')
+        print('[Q] to quit\n')
 
         def manual():
             counter = 0
@@ -943,7 +1057,10 @@ class Admin(CentralFunctions):
                             continue
                         break
                     username = inpt
-                    if inpt == 'Q' or inpt == 'B':
+                    if inpt == 'B':
+                        self.write_volunteer()
+                        exit()
+                    if inpt == 'Q':
                         print(100*'=')
                         menu(self.functions)
                         exit()
@@ -965,9 +1082,9 @@ class Admin(CentralFunctions):
                 def assign_camp():
                     global camp
                     while True:
-                        print('\nSet camp:')
+                        print('\nSet camp:\n')
                         print('[1] - View camp summary information')
-                        print('[2] - Assign camp')
+                        print('[2] - Assign camp\n')
                         print('[B] to go back')
                         print('[Q] to quit')
                         user_input = input('\nChoose interaction: ')
@@ -1052,6 +1169,7 @@ class Admin(CentralFunctions):
                         print('Your input needs to be an integer')
                         continue
                     while True:
+                        print('\n',camps_df)
                         camp = input('\nEnter camp ID: ')
                         if camp not in camps_exist:
                             print('Invalid Camp ID.')
@@ -1093,6 +1211,10 @@ class Admin(CentralFunctions):
 
         while True:
             user_input = input('Choose interaction: ')
+            if user_input.upper() == 'B' or user_input.upper() == 'Q':
+                print(100*'=')
+                menu(self.functions)
+                exit()
             if user_input == '1' or user_input == '2':
                 break
             else:
@@ -1306,7 +1428,7 @@ class Admin(CentralFunctions):
                     continue
 
             if commit == 'y':
-                self.camps_df = camps_df.copy()
+                self.camps_db = camps_df.copy()
                 camps_df.to_csv('camp_database.csv', index=False)
                 break
             else:
@@ -1323,7 +1445,8 @@ class Volunteer(CentralFunctions):
                           "2": {'method': self.call_camps,              'message': '[2] - See camp info', },
                           "3": {'method': self.call_volunteers,         'message': '[3] - See information about volunteers', },
                           "4": {'method': self.create_profile,          'message': '[4] - Create refugee profile', },
-                          "5": {'method': self.amend_refugee_profile,   'message': '[5] - Amend refugee profile', }}
+                          "5": {'method': self.amend_refugee_profile,   'message': '[5] - Amend refugee profile', },
+                          "6": {'method': self.call_no_of_refugees,     'message': '[6] - See information about refugees', }}
         self.current_user = current_user
         self.camp_of_user = camp_of_user
 
