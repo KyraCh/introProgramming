@@ -18,8 +18,10 @@ class CentralFunctions():
         self.vol_db = None
         self.refugee_db = None
         self.camps_db = None
-        self.countries_db = None
         self.emergencies_db = None
+        self.meals_db = None
+        self.countries_db = None
+        self.organisations_db = None
 
         fileCheckError = self.download_all_data()
 
@@ -116,10 +118,35 @@ class CentralFunctions():
             dataFailure = True
 
         try:
+            df = pd.read_csv('mealplans_database.csv')
+            df.dropna(how="all", inplace=True)
+            df.fillna('', inplace=True)
+            self.meals_db = df
+        except FileNotFoundError:
+            meals_db = {'Camp ID': [''], 'Total number of refugees': [''],
+                       'Meals per day': [''], 'Days': [''], 'Total meals': [''],
+                       'Price per meal': [''], 'Budget per day': [''], 'Total budget': ['']}
+            df = pd.DataFrame(meals_db)
+            df.set_index('Camp ID', inplace=True)
+            df.to_csv('mealplans_database.csv')
+            self.meals_db = df
+        except:
+            print("System couldn't read the camps meals database file.")
+            dataFailure = True
+
+
+        try:
             df = pd.read_csv("countries.csv", index_col='Country name')
             self.countries_db = df
         except:
             print("System couldn't read the countries database file.")
+            dataFailure = True
+        
+        try:
+            df = pd.read_csv('organisation_per_continent.csv')
+            self.organisations_db = df
+        except:
+            print("System couldn't read the Organisations per Continent database file.")
             dataFailure = True
 
         return dataFailure
@@ -714,14 +741,14 @@ class CentralFunctions():
         vol_df = self.vol_db.copy()
 
         count_vol = vol_df['Camp ID'].value_counts()
-        count_ref = refugee_df['Camp ID'].value_counts()
+        count_ref = refugee_df['Camp ID'].unique()
 
         for i in count_vol.index:
             camp_df.loc[camp_df['Camp ID'] == i,
                         'Number of volunteers'] = count_vol[i]
         for i in count_ref.index:
             camp_df.loc[camp_df['Camp ID'] == i,
-                        'Number of refugees'] = count_ref[i]
+                        'Number of refugees'] = refugee_df.loc[refugee_df['Camp ID'] == i]['No. Of Family Members'].sum(axis=0)
 
         self.camps_db = camp_df.copy()
         camp_df.to_csv('camp_database.csv', index=False)
@@ -793,23 +820,43 @@ class CentralFunctions():
             else:
                 print('Invalid input')
                 continue
-            
+
+    def call_help(self):
+        print(100*'=')
+        print('\nContacts of helpful organisations in emergency area:\n')
+
+        local_db = self.camps_db.merge(self.emergencies_db, on='Emergency ID', how='inner')
+        local_db_II = self.countries_db.reset_index().merge(self.organisations_db, on='Continent', how='left').set_index('Country name')
+        local_db_III = pd.merge(local_db_II,local_db, left_index=True, right_on='Location_x')
+        help = local_db_III.loc[local_db_III['Close date'] == '',['Emergency ID','Camp ID','Type','Name of non-profit organisation','Email','Website']]
+        if self.current_user == 'admin':
+            help = local_db_III.loc[local_db_III['Close date'] == '',['Location_x','Type','Name of non-profit organisation','Email','Website']].drop_duplicates()
+            print(tabulate(help, headers='keys', tablefmt='psql', showindex=False))
+            print('')
+        else:
+            help = local_db_III.loc[local_db_III['Close date'] == '',['Emergency ID','Camp ID','Type','Name of non-profit organisation','Email','Website']]
+            print(tabulate(help.loc[help['Camp ID']==self.camp_of_user], headers='keys', tablefmt='psql', showindex=False))
+            print('')
+        print(100*'=')
+
 
 class Admin(CentralFunctions):
 
     def __init__(self, current_user, camp_of_user):
         CentralFunctions.__init__(self,)
-        self.functions = {"1": {'method': self.create_emergency,      'message': '[1] - Add new Emergency', },
-                          "2": {'method': self.close_emergency,       'message': '[2] - Close Emergency', },
-                          "3": {'method': self.call_camps,            'message': '[3] - See camp info', },
-                          "4": {'method': self.write_camp,            'message': '[4] - Add new camp', },
-                          "5": {'method': self.amend_camp_capacity,   'message': '[5] - Amend capacity of a camp', },
-                          "6": {'method': self.call_volunteers,       'message': '[6] - See information about volunteers', },
-                          "7": {'method': self.write_volunteer,       'message': '[7] - Add new volunteer(s) profile(s)', },
-                          "8": {'method': self.admin_volunteer_commands,'message': '[8] - Amend volunteer activation status.', },
-                          "9": {'method': self.create_profile,        'message': '[9] - Create refugee profile', },
-                          "10": {'method': self.amend_refugee_profile,'message': '[10] - Amend refugee profile', },
-                          "11": {'method': self.call_no_of_refugees,'message': '[11] - See information about refugees', }}
+        self.functions = {"1": {'method': self.create_emergency,            'message': '[1] - Add new Emergency', },
+                          "2": {'method': self.close_emergency,             'message': '[2] - Close Emergency', },
+                          "3": {'method': self.call_camps,                  'message': '[3] - See camp info', },
+                          "4": {'method': self.write_camp,                  'message': '[4] - Add new camp', },
+                          "5": {'method': self.amend_camp_capacity,         'message': '[5] - Amend capacity of a camp', },
+                          "6": {'method': self.call_volunteers,             'message': '[6] - See information about volunteers', },
+                          "7": {'method': self.write_volunteer,             'message': '[7] - Add new volunteer(s) profile(s)', },
+                          "8": {'method': self.admin_volunteer_commands,    'message': '[8] - Amend volunteer activation status.', },
+                          "9": {'method': self.create_profile,              'message': '[9] - Create refugee profile', },
+                          "10": {'method': self.amend_refugee_profile,      'message': '[10] - Amend refugee profile', },
+                          "11": {'method': self.call_no_of_refugees,        'message': '[11] - See information about refugees', },
+                          "12": {'method': self.camp_finance,               'message': '[12] - Create meal plan for a camp', },
+                          "13": {'method': self.call_help,                  'message': '\n[h] - Contacts of local relief organisations', }}
         self.current_user = current_user
         self.camp_of_user = camp_of_user
 
@@ -1454,6 +1501,204 @@ class Admin(CentralFunctions):
                 continue
         print(100*'=')
 
+    def camp_finance(self):
+        '''
+        Allows admin to create meal plan for a camp.
+        '''
+
+        while True:
+            counter = 0
+            print(100*'=')
+            print('\nPlease select which camp you would like to create meal plan for.')
+            print('Expected Inputs:\n' +
+                '\t>Camp ID\n'+
+                '\t>Number of meals consumed per person\n'+
+                '\t>Average price per meal [£]\n'+
+                '\t>Number of days planned / Food budget [£]\n')
+            print('[B] to go back')
+            print('[Q] to quit\n')   
+            camps_df = self.camps_db.copy()
+            meals_df = self.meals_db.copy()
+            refugee_df = self.refugee_db.copy()
+
+            df = camps_df.loc[camps_df['Number of refugees'] != '']
+            print(tabulate(df, headers='keys', tablefmt='psql', showindex=False))
+            
+            def choose_camp():
+                while True:
+                    global index
+                    global camp_id
+                    inpt = input('\nPlease select camp: ')
+                    if inpt.upper() == 'B' or inpt.upper() == 'Q':
+                        print(100*'=')
+                        menu(self.functions)
+                        exit()
+                    if inpt not in list(camps_df['Camp ID']):
+                        print('Invalid input.')
+                        continue
+                    camp_id = inpt
+                    if camp_id not in list(meals_df['Camp ID']):
+                        meals_df.loc[len(meals_df)] = [camp_id,'','','','','','','']
+                    index = meals_df.index[meals_df['Camp ID'] == camp_id].values[0]
+                    return 1
+            
+            def assign_no_meals():
+                global camp_id
+                global index
+                while True:
+                    inpt = input('\nPlease input planned number of meals consumed per refugee: ')
+                    if inpt.upper() == 'Q':
+                        print(100*'=')
+                        menu(self.functions)
+                        exit()
+                    elif inpt.upper() == 'B':
+                        return -1
+                    try:
+                        inpt = int(inpt)
+                    except:
+                        print('Invalid input.')
+                        continue
+                    no_of_refugees = refugee_df.loc[refugee_df['Camp ID'] == camp_id]['No. Of Family Members'].sum(axis=0)
+                    meals_per_day = inpt * no_of_refugees
+                    meals_df.loc[index, ['Meals per day']] = [meals_per_day]
+                    meals_df.loc[index, ['Total number of refugees']] = [no_of_refugees]
+                    return 1
+
+            def assign_price_per_meal():
+                global price_per_meal
+                global index
+                while True:
+                    price_per_meal = input('\nPlease input average price per meal [£]: ')
+                    if price_per_meal.upper() == 'Q':
+                        print(100*'=')
+                        menu(self.functions)
+                        exit()
+                    elif price_per_meal.upper() == 'B':
+                        return -1
+                    if not price_per_meal.isdigit() and re.match(r'^-?\d+(?:\.\d+)$', price_per_meal) is None: # This check if inpt is neither integer nor float
+                        print('Invalid input.')
+                        continue
+                    meals_df.loc[index, ['Price per meal']] = [price_per_meal]
+                    return 1
+
+            def days_or_money():
+                global price_per_meal
+                global camp_id
+                global days
+                global index
+                print('\n[1] - Choose number of days planned\n'+
+                        '[2] - Choose total food budget available')
+                while True:
+                    choice = input('\nChoose interaction: ')
+                    if choice.upper() == 'Q':
+                        print(100*'=')
+                        menu(self.functions)
+                        exit()
+                    elif choice.upper() == 'B':
+                        return -1
+                    if choice not in ['1','2']:
+                        print('Invalid input')
+                        continue
+                    while True:
+                        days = 0
+                        budget = 0
+                        if choice == '1':
+                            days = input('\nInput number of days: ')
+                            if days.upper() == 'Q':
+                                print(100*'=')
+                                menu(self.functions)
+                                exit()
+                            elif days.upper() == 'B':
+                                break
+                            try:
+                                days = int(days)
+                            except:
+                                print('Invalid input.')
+                                continue
+                            break
+                        else:
+                            budget = input('\nInput your budget: ')
+                            if budget.upper() == 'Q':
+                                print(100*'=')
+                                menu(self.functions)
+                                exit()
+                            elif budget.upper() == 'B':
+                                break
+                            try:
+                                budget = int(budget)
+                            except:
+                                print('Invalid input.')
+                                continue
+                            break
+                    if type(days) == str or type(budget) == str:
+                        if days.upper() == 'B' or budget.upper() == 'B':
+                            continue
+                    break
+                
+                if choice == '1':
+                    
+                    meals_per_day = meals_df['Meals per day'][index]
+                    total_meals = float(days) * float(meals_per_day)
+                    budget_per_day = float(price_per_meal) * float(meals_per_day)
+                    total_budget = float(days) * float(budget_per_day)
+                    meals_df.loc[index, ['Days']] = [days]
+                    meals_df.loc[index, ['Total meals']] = [int(total_meals)]
+                    meals_df.loc[index, ['Price per meal']] = [price_per_meal]
+                    meals_df.loc[index, ['Budget per day']] = [budget_per_day]
+                    meals_df.loc[index, ['Total budget']] = [total_budget]
+                
+                else:
+                    
+                    meals_per_day = meals_df['Meals per day'][index]
+                    budget_per_day = float(price_per_meal) * float(meals_per_day)
+                    days = round((float(budget) / float(budget_per_day)))
+                    total_meals = float(days) * float(meals_per_day)
+                    print(total_meals)
+                    meals_df.loc[index, ['Days']] = [days]
+                    meals_df.loc[index, ['Total meals']] = [total_meals]
+                    meals_df.loc[index, ['Price per meal']] = [price_per_meal]
+                    meals_df.loc[index, ['Budget per day']] = [budget_per_day]
+                    meals_df.loc[index, ['Total budget']] = [budget]
+
+                return 1
+
+            inputs = [choose_camp, assign_no_meals, assign_price_per_meal, days_or_money]
+
+            while counter < len(inputs):
+                counter += inputs[counter]()
+            
+            print(tabulate(meals_df.loc[[index]], headers='keys', tablefmt='psql', showindex=False))
+
+            while True:
+                commit = input('\nCommit changes? [y]/[n] ')
+                if commit == 'y' or commit == 'n':
+                    break
+                else:
+                    print('Your input is not recognised')
+                    continue
+
+            if commit == 'y':
+                self.meals_db = meals_df.copy()
+                meals_df.to_csv('mealplans_database.csv', index=False)
+            else:
+                counter = 0
+                continue
+
+            while True:
+                repeat = input('\nWould you like to create meal plan for another camp? [y]/[n] ')
+                if repeat == 'y' or repeat == 'n':
+                    break
+                else:
+                    print('Your input is not recognised')
+                    continue
+            if repeat == 'n':
+                break
+            else:
+                counter = 0
+                continue
+
+        print(100*'=')
+
 
 class Volunteer(CentralFunctions):
 
@@ -1464,7 +1709,8 @@ class Volunteer(CentralFunctions):
                           "3": {'method': self.call_volunteers,         'message': '[3] - See information about volunteers', },
                           "4": {'method': self.create_profile,          'message': '[4] - Create refugee profile', },
                           "5": {'method': self.amend_refugee_profile,   'message': '[5] - Amend refugee profile', },
-                          "6": {'method': self.call_no_of_refugees,     'message': '[6] - See information about refugees', }}
+                          "6": {'method': self.call_no_of_refugees,     'message': '[6] - See information about refugees', },
+                          "7": {'method': self.call_help,               'message': '\n[h] - Contacts of local relief organisations', }}
         self.current_user = current_user
         self.camp_of_user = camp_of_user
 
@@ -1850,7 +2096,7 @@ class Volunteer(CentralFunctions):
 
 def session_over_message():
     print(100*'=')
-    print('\nSESSION OVER')
+    print('\nSESSION OVER\n')
     print(100*'=')
 
 
@@ -1862,11 +2108,13 @@ def menu(functions):
         print('Example: type "1" to a'+functions['1']['message'][7:]+'.\n')
         for i in range(len(functions.keys())):
             print(functions[str(i+1)]['message'])
-        print('\n[Q] to end session')
+        print('[Q] to end session')
         user_input = input('\nPlease select your interaction: ')
         if user_input.upper() == 'Q':
             session_over_message()
             exit()
+        elif user_input.upper() == 'H':
+            user_input = list(functions.keys())[-1]
         if user_input not in functions.keys():
             print('Please select valid input.')
             continue
