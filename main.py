@@ -1509,6 +1509,14 @@ class Admin(CentralFunctions):
         while True:
             counter = 0
             print(100*'=')
+            camps_df = self.camps_db.copy()
+            meals_df = self.meals_db.copy()
+            refugee_df = self.refugee_db.copy()
+            if len(meals_df['Camp ID']) != 0:
+                print("\nExisting Mealplans: \n")
+                print(tabulate(meals_df, headers='keys', tablefmt='psql', showindex=False))
+                print('')
+                
             print('\nPlease select which camp you would like to create meal plan for.')
             print('Expected Inputs:\n' +
                 '\t>Camp ID\n'+
@@ -1517,10 +1525,6 @@ class Admin(CentralFunctions):
                 '\t>Number of days planned / Food budget [£]\n')
             print('[B] to go back')
             print('[Q] to quit\n')   
-            camps_df = self.camps_db.copy()
-            meals_df = self.meals_db.copy()
-            refugee_df = self.refugee_db.copy()
-
             df = camps_df.loc[camps_df['Number of refugees'] != '']
             print(tabulate(df, headers='keys', tablefmt='psql', showindex=False))
             
