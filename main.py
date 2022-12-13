@@ -1724,18 +1724,12 @@ class Volunteer(CentralFunctions):
         If system detects no lack of an input it will launch a "flowing" version, otherwise it will launch
         "selective" version of this method.
         '''
-        current_name = self.vol_db[self.vol_db["Username"]
-                                   == self.current_user]["First name"].values[0]
-        current_second_name = self.vol_db[self.vol_db["Username"]
-                                          == self.current_user]["Second name"].values[0]
-        current_phone = str(
-            self.vol_db[self.vol_db["Username"] == self.current_user]["Phone"].values[0])
-        current_availability = self.vol_db[self.vol_db["Username"]
-                                           == self.current_user]["Availability"].values[0]
-        password = self.user_db[self.user_db["username"]
-                                == self.current_user]['password'].values[0]
-        current_email = self.user_db[self.user_db["username"]
-                                     == self.current_user]['email'].values[0]
+        current_name = self.vol_db[self.vol_db["Username"] == self.current_user]["First name"].values[0]
+        current_second_name = self.vol_db[self.vol_db["Username"] == self.current_user]["Second name"].values[0]
+        current_phone = str(self.vol_db[self.vol_db["Username"] == self.current_user]["Phone"].values[0])
+        current_availability = self.vol_db[self.vol_db["Username"] == self.current_user]["Availability"].values[0]
+        password = self.user_db[self.user_db["username"] == self.current_user]['password'].values[0]
+        current_email = self.user_db[self.user_db["username"] == self.current_user]['email'].values[0]
         vol_df = self.vol_db.copy()
         users_df = self.user_db.copy()
 
@@ -1865,6 +1859,8 @@ class Volunteer(CentralFunctions):
                         else:
                             password = inpt
                             break
+                        
+                    print(password)
 
                 elif user_input == '6':
                     print(f"Currently, your email is set to {current_email}.")
@@ -1890,10 +1886,9 @@ class Volunteer(CentralFunctions):
                     menu(self.functions)
                     exit()
 
-                vol_df.loc[vol_df['Username'] == self.current_user] = [self.current_user, current_name,
-                                                                       current_second_name, current_phone, self.camp_of_user, current_availability]
-                users_df.loc[users_df['username'] == self.current_user, [
-                    'password', 'email']] = (password, current_email)
+                print(password)
+                vol_df.loc[vol_df['Username'] == self.current_user] = [self.current_user, current_name, current_second_name, current_phone, self.camp_of_user, current_availability]
+                users_df.loc[users_df['username'] == self.current_user, ['password', 'email']] = [password, current_email]
 
                 print('')
                 df = vol_df.loc[vol_df['Username'] == self.current_user]
@@ -1914,7 +1909,9 @@ class Volunteer(CentralFunctions):
 
                 if commit == 'y':
                     self.vol_db = vol_df.copy()
+                    self.users_db = users_df.copy()
                     vol_df.to_csv('volunteer_database.csv', index=False)
+                    users_df.to_csv('user_database.csv', index=False)
                 else:
                     counter = 0
                     continue
