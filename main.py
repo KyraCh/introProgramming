@@ -741,7 +741,7 @@ class CentralFunctions():
         vol_df = self.vol_db.copy()
 
         count_vol = vol_df['Camp ID'].value_counts()
-        count_ref = refugee_df['Camp ID'].unique()
+        count_ref = refugee_df['Camp ID'].value_counts()
 
         for i in count_vol.index:
             camp_df.loc[camp_df['Camp ID'] == i,
