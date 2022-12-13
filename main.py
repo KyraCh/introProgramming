@@ -1866,7 +1866,7 @@ class Volunteer(CentralFunctions):
                             password = inpt
                             break
 
-                if user_input == '6':
+                elif user_input == '6':
                     print(f"Currently, your email is set to {current_email}.")
                     while True:
                         inpt = input("\nEnter new email: ")
