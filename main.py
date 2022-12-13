@@ -2103,6 +2103,17 @@ def session_over_message():
     print('\nSESSION OVER\n')
     print(100*'=')
 
+def login():
+    if __name__ == '__main__':
+        login = CentralFunctions()
+        login.users_login()
+        if login.current_user != 'admin':
+            vol = Volunteer(login.current_user, login.camp_of_user)
+            menu(vol.functions)
+        else:
+            adm = Admin(login.current_user, login.camp_of_user)
+            menu(adm.functions)
+
 
 def menu(functions):
     while True:
@@ -2113,10 +2124,15 @@ def menu(functions):
         for i in range(len(functions.keys())):
             print(functions[str(i+1)]['message'])
         print('[Q] to end session')
+        print('[#] to logout')
         user_input = input('\nPlease select your interaction: ')
         if user_input.upper() == 'Q':
             session_over_message()
             exit()
+        elif user_input == '#':
+            print('You logged out.')
+            print(100 * '=')
+            login()
         elif user_input.upper() == 'H':
             user_input = list(functions.keys())[-1]
         if user_input not in functions.keys():
@@ -2126,12 +2142,4 @@ def menu(functions):
         functions[user_input]['method']()
 
 
-if __name__ == '__main__':
-    login = CentralFunctions()
-    login.users_login()
-    if login.current_user != 'admin':
-        vol = Volunteer(login.current_user, login.camp_of_user)
-        menu(vol.functions)
-    else:
-        adm = Admin(login.current_user, login.camp_of_user)
-        menu(adm.functions)
+login()
