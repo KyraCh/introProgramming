@@ -1,6 +1,6 @@
 username,password,email,role,activated
 admin,111,hemtest11@gmail.com,admin,True
-Volunteer1,111,hemtest11@gmail.com,volunteer,True
+Volunteer1,123456789,hemtest11@gmail.com,volunteer,True
 Volunteer2,111,hemtest11@gmail.com,volunteer,True
 Volunteer3,111,hemtest11@gmail.com,volunteer,True
 Volunteer4,111,hemtest11@gmail.com,volunteer,True
