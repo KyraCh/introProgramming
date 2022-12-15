@@ -37,85 +37,142 @@ class CentralFunctions():
 
         try:
             df = pd.read_csv('user_database.csv')
+
+            # Check all the requried indexes are in the file
+            for i in ['username', 'password', 'role', 'activated', 'email']:
+                if i not in df.columns:
+                    print(Fore.RED + f'Missing {i} index from user database.')
+                    print(Style.RESET_ALL)
+                    dataFailure = True
+
             df.dropna(how="all", inplace=True)
             df.fillna('', inplace=True)
             df['password'] = df['password'].astype(str)
             self.user_db = df
+
+        # If the file does not exist
         except FileNotFoundError:
             user_db = {'username': ['admin'], 'password': [
-                '111'], 'role': ['admin'], 'activated': [True], 'email': ['hemtest11@gmail.com']}
+                '111'], 'role': ['admin'], 'activated': ['TRUE'], 'email': ['hemtest11@gmail.com']}
             df = pd.DataFrame(user_db)
             df['password'] = df['password'].astype(str)
             df.to_csv('user_database.csv',index=False)
             self.user_db = df
-        except:
-            print("System couldn't read your user database file.")
+
+        # If the file is empty
+        except pd.errors.EmptyDataError:
+            print(Fore.RED + "Your user database file is currently empty.")
+            print(Style.RESET_ALL)
             dataFailure = True
 
         try:
             df = pd.read_csv('volunteer_database.csv')
+            
+            for i in ['Username', 'First name', 'Second name', 'Phone', 'Camp ID', 'Availability']:
+                if i not in df.columns:
+                    print(Fore.RED + f'Missing {i} index from volunteer database.')
+                    print(Style.RESET_ALL)
+                    dataFailure = True
+
             df.dropna(how="all", inplace=True)
             df.fillna('', inplace=True)
             self.vol_db = df
+
         except FileNotFoundError:
-            vol_db = {'Username': [''], 'First name': [''], 'Second name': [
-                ''], 'Phone': [''], 'Camp ID': [''], 'Availability': ['']}
+            vol_db = {'Username': [''], 'First name': [''], 'Second name': [''],'Phone':[''], 'Camp ID': [''], 'Avability': ['']}
             df = pd.DataFrame(vol_db)
             df.to_csv('volunteer_database.csv',index=False)
             self.vol_db = df
-        except:
-            print("System couldn't read your volunteer database file.")
+
+        except pd.errors.EmptyDataError:
+            print(Fore.RED + "Your volunteer database file is currently empty.")
+            print(Style.RESET_ALL)
             dataFailure = True
 
         try:
             df = pd.read_csv('refugee_database.csv')
+            
+            for i in ['Family ID', 'Lead Family Member Name', 'Lead Family Member Surname', 'Camp ID', 'Mental State', 'Physical State', 'No. Of Family Members']:
+                if i not in df.columns:
+                    print(Fore.RED + f'Missing {i} index from refugee database.')
+                    print(Style.RESET_ALL)
+                    dataFailure = True
+            
             df.dropna(how="all", inplace=True)
             df.fillna('', inplace=True)
             self.refugee_db = df
+
         except FileNotFoundError:
+
             refugee_db = {'Family ID': [''], 'Lead Family Member Name': [''], 'Lead Family Member Surname': [
                 ''], 'Camp ID': [''], 'Mental State': [''], 'Physical State': [''], 'No. Of Family Members': ['']}
             df = pd.DataFrame(refugee_db)
             df.to_csv('refugee_database.csv',index=False)
             self.refugee_db = df
-        except:
-            print("System couldn't read your refugees database file.")
+
+        except pd.errors.EmptyDataError:
+            print(Fore.RED + "Your refugee database file is currently empty.")
+            print(Style.RESET_ALL)
             dataFailure = True
 
         try:
             df = pd.read_csv('camp_database.csv')
+            for i in ['Camp ID', 'Location', 'Number of volunteers', 'Capacity','Emergency ID', 'Number of refugees']:
+                if i not in df.columns:
+                    print(Fore.RED + f'Missing {i} index from user database.')
+                    print(Style.RESET_ALL)
+                    dataFailure = True
+            
             df.dropna(how="all", inplace=True)
             df.fillna('', inplace=True)
             self.camps_db = df
         except FileNotFoundError:
-            camps_db = {'Camp ID': [''], 'Location': [''], 'Number of volunteers': [''], 'Capacity': [''], 'Emergency ID': [''], 'Number of refugees': ['']} 
+            camps_db = {'Camp ID': [''], 'Location': [''], 'Number of volunteers': [''], 'Capacity': [''], 'Emergency ID': [''], 'Number of refugees': ['']}
             df = pd.DataFrame(camps_db)
             df.to_csv('camp_database.csv',index=False)
             self.camps_db = df
-        except:
-            print("System couldn't read your camplist database file.")
+        except pd.errors.EmptyDataError:
+            print(Fore.RED + "Your camplist database file is currently empty.")
+            print(Style.RESET_ALL)
             dataFailure = True
 
         try:
             df = pd.read_csv('emergency_database.csv')
+            
+            for i in ['Emergency ID', 'Location', 'Type', 'Description', 'Start date', 'Close date']:
+                if i not in df.columns:
+                    print(Fore.RED + f'Missing {i} index from emergency database.')
+                    print(Style.RESET_ALL)
+                    dataFailure = True
+
             df.dropna(how="all", inplace=True)
             df.fillna('', inplace=True)
             self.emergencies_db = df
+
         except FileNotFoundError:
             emergencies_db = {'Emergency ID': [''], 'Location': [''], 'Type': [
                 ''], 'Description': [''], 'Start date': [''], 'Close date': ['']}
             df = pd.DataFrame(emergencies_db)
             df.to_csv('emergency_database.csv',index=False)
             self.emergencies_db = df
-        except:
-            print("System couldn't read your camplist database file.")
+        except pd.errors.EmptyDataError:
+            print(Fore.RED + "Your emergency database file is currently empty.")
+            print(Style.RESET_ALL)
             dataFailure = True
 
         try:
             df = pd.read_csv('mealplans_database.csv')
+
+            for i in ['Camp ID', 'Total number of refugees', 'Meals per day', 'Days', 'Total meals', 'Price per meal', 'Budget per day', 'Total budget']:
+                if i not in df.columns:
+                    print(Fore.RED + f'Missing {i} index from mealplans database.')
+                    print(Style.RESET_ALL)
+                    dataFailure = True
+
             df.dropna(how="all", inplace=True)
             df.fillna('', inplace=True)
             self.meals_db = df
+            
         except FileNotFoundError:
             meals_db = {'Camp ID': [''], 'Total number of refugees': [''],
                        'Meals per day': [''], 'Days': [''], 'Total meals': [''],
@@ -123,23 +180,27 @@ class CentralFunctions():
             df = pd.DataFrame(meals_db)
             df.to_csv('mealplans_database.csv',index=False)
             self.meals_db = df
-        except:
-            print("System couldn't read the camps meals database file.")
+
+        except pd.errors.EmptyDataError:
+            print(Fore.RED + "Your meal plans database file is currently empty.")
+            print(Style.RESET_ALL)
             dataFailure = True
 
 
         try:
             df = pd.read_csv(".sys_countries.csv", index_col='Country name')
             self.countries_db = df
-        except:
-            print("System couldn't read the countries database file.")
+        except pd.errors.EmptyDataError:
+            print(Fore.RED + "Your .sys_countries database file is currently empty.")
+            print(Style.RESET_ALL)
             dataFailure = True
         
         try:
             df = pd.read_csv('.sys_organisation_per_continent.csv')
             self.organisations_db = df
-        except:
-            print("System couldn't read the Organisations per Continent database file.")
+        except pd.errors.EmptyDataError:
+            print(Fore.RED + "Your .sys_organisation_per_continent database file is currently empty.")
+            print(Style.RESET_ALL)
             dataFailure = True
 
         return dataFailure
@@ -936,18 +997,17 @@ class Admin(CentralFunctions):
                          '\nPlease enter start date of the emergency [YYYY-MM-DD]: ']
             answers = go_back(questions)
             country_code = country_dict[answers[0]]['Country code']
-            
-            if (emergency_db['Emergency ID'] == '').all():
-                new_no_index = 1
-            elif (True in list(emergency_db['Emergency ID'].str.contains(country_code, case=False))):
-                new_no_index = int(emergency_db.loc[emergency_db['Emergency ID'].str.contains(country_code, case=False)].iloc[-1]['Emergency ID'][2:]) + 1
+
+            if True in list(emergency_db['Emergency ID'].str.contains(country_code, case=False)):
+                new_no_index = int(emergency_db.loc[emergency_db['Emergency ID'].str.contains(
+                    country_code, case=False)].iloc[-1]['Emergency ID'][2:]) + 1
             else:
                 new_no_index = 1
             emergency_id = country_code + str(new_no_index)
 
             emergency_db.loc[len(emergency_db.index)] = [emergency_id, answers[0], answers[1], answers[2], answers[3], None]
             print('')
-            print(tabulate(emergency_db.tail(1), headers='keys', tablefmt='psql', showindex=False))
+            print(tabulate(self.emergencies_db.tail(1), headers='keys', tablefmt='psql', showindex=False))
             while True:
                 commit = input('\nCommit changes? [y]/[n] ')
                 if commit == 'y' or commit == 'n':
@@ -1396,8 +1456,8 @@ class Admin(CentralFunctions):
               '\t>Emergency ID\n' +
               '\t>Camp capacity\n')
         print('[B] to go back')
-        print('[Q] to quit\n')
-        print(tabulate(self.emergencies_db, headers='keys', tablefmt='psql', showindex=False))
+        print('[Q] to quit')
+
         while True:
 
             camps_df = self.camps_db.copy()
@@ -1416,7 +1476,7 @@ class Admin(CentralFunctions):
                     # and country_id in list(emergency_df['Emergency ID']):
                     if country in countries.keys():
                         country_id = countries[country]['Country code']
-                        if True in list(emergency_df['Emergency ID'].str.contains(country_id, case=False)):
+                        if True in list(emergency_df['Emergency ID'].str.contains('PK', case=False)):
                             break
                     print('Please select country with an existing emergency.')
                 return 1
@@ -1454,7 +1514,7 @@ class Admin(CentralFunctions):
             def assign_capacity():
                 global capacity
                 while True:
-                    capacity = input("\nEnter maximum camp capacity: ")
+                    capacity = input("\nEnter maximum camp capacity:")
                     if capacity.upper() == 'B' or emergency.upper() == 'Q':
                         break
                     if capacity.isdigit() == False:
@@ -1478,15 +1538,13 @@ class Admin(CentralFunctions):
                     break
             if self.quit == True:
                 break
-            
-            if (camps_df['Camp ID'] == '').all():
-                new_camp_index = 1
-            else:
-                new_camp_index = len(camps_df.loc[camps_df['Camp ID'].str.contains(emergency, case=False)].index)+1
 
+            new_camp_index = len(
+                camps_df.loc[camps_df['Camp ID'].str.contains(emergency, case=False)].index)+1
             new_ID = emergency + '-' + str(new_camp_index)
 
-            camps_df.loc[len(camps_df.index)] = [new_ID, country, '', capacity, emergency, '']
+            camps_df.loc[len(camps_df.index)] = [
+                new_ID, country, '', capacity, emergency, '']
 
             print(tabulate(camps_df.tail(1), headers='keys', tablefmt='psql', showindex=False))
             while True:
@@ -1746,7 +1804,7 @@ class Volunteer(CentralFunctions):
             else:
                 return False
         
-        if '' not in self.vol_db.loc[self.vol_db['Username'] == self.current_user].values[0]:
+        if '' not in list(self.vol_db.loc[self.vol_db['Username'] == self.current_user]):
 
             while True:
                 print(100 * '=')
@@ -1874,11 +1932,6 @@ class Volunteer(CentralFunctions):
                         
                     print(password)
 
-                elif user_input.upper() == 'B' or user_input.upper() == 'Q':
-                    print(100*'=')
-                    menu(self.functions)
-                    exit()
-
                 elif user_input == '6':
                     print(f"Currently, your email is set to {current_email}.")
                     while True:
@@ -1886,7 +1939,7 @@ class Volunteer(CentralFunctions):
                         inpt = inpt.capitalize()
                         if inpt.upper() == 'B' or inpt.upper() == 'Q':
                             break
-                        elif not check_email(inpt):
+                        elif check_email(inpt):
                             print("Please enter a valid email address.")
                             continue
                         current_email = inpt
@@ -1898,7 +1951,7 @@ class Volunteer(CentralFunctions):
 
                 if inpt.upper() == 'B':
                     continue
-                elif inpt.upper() == 'Q':
+                elif inpt.upper() == 'Q' or user_input.upper() == 'B' or user_input.upper() == 'Q':
                     print(100*'=')
                     menu(self.functions)
                     exit()
@@ -1968,7 +2021,7 @@ class Volunteer(CentralFunctions):
             print(tabulate(df, headers='keys', tablefmt='psql', showindex=False))
             questions = ['\nEnter first name: ', '\nEnter second name: ',
                          '\nEnter phone number in the format [+[country code](0)_______]:', '\nEnter availability: ',
-                         '\nEnter your email: ', '\nEnter your new password (over 8 characters long): ']
+                         '\nEnter your email', '\nEnter your new password (over 8 characters long)']
 
             def go_back(questionStack):
                 i = 0
@@ -2012,7 +2065,7 @@ class Volunteer(CentralFunctions):
                             elif not answer.isnumeric():
                                 print("Please enter a valid phone number.")
                                 continue
-                            elif len(answer) != 10:
+                            elif len(answer) != 9 or answer[:2] != "44":
                                 print("Invalid format.")
                                 continue
                             break
@@ -2051,8 +2104,8 @@ class Volunteer(CentralFunctions):
                                 exit()
                             elif answer == '':
                                 answer = current_email
-                            elif not check_email(answer):
-                                print("Please enter a valid email address.")
+                            elif len(inpt) < 8:
+                                print("Sorry but your password needs to be at least 8 characters long.")
                                 continue
                             break
                     elif i == 5:
@@ -2069,7 +2122,7 @@ class Volunteer(CentralFunctions):
                                 exit()
                             elif answer == '':
                                 answer = password
-                            elif len(answer) < 8:
+                            elif len(inpt) < 8:
                                 print("Sorry but your password needs to be at least 8 characters long.")
                                 continue
                             break
@@ -2084,10 +2137,8 @@ class Volunteer(CentralFunctions):
 
             while True:
                 answers = go_back(questions)
-                df = vol_df.loc[vol_df['Username'] == self.current_user]
-                print([self.current_user, answers[0], answers[1], answers[2], self.camp_of_user, answers[3]])
-                vol_df.loc[vol_df['Username'] == self.current_user, list(df.columns)] = [self.current_user, answers[0], answers[1], answers[2], self.camp_of_user, answers[3]]
-                users_df.loc[users_df['username'] == self.current_user, ['password', 'email']] = [answers[5], answers[4]]
+                vol_df.loc[vol_df['Username'] == self.current_user] = [
+                    self.current_user, answers[0], answers[1], answers[2], self.camp_of_user, answers[3]]
 
                 print('')
                 df = vol_df.loc[vol_df['Username'] == self.current_user]
