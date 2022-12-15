@@ -1754,7 +1754,7 @@ class Volunteer(CentralFunctions):
                 return True
             else:
                 return False
-
+        
         if '' not in list(self.vol_db.loc[self.vol_db['Username'] == self.current_user]):
 
             while True:
@@ -1770,6 +1770,13 @@ class Volunteer(CentralFunctions):
                       '[6] - Change email')
                 print('\n[B] to go back')
                 print('[Q] to quit')
+
+                print('')
+                df = vol_df.loc[vol_df['Username'] == self.current_user]
+                print(tabulate(df, headers='keys', tablefmt='psql', showindex=False))
+                print('')
+                df = users_df.loc[users_df['username'] == self.current_user, ['username', 'password', 'email']]
+                print(tabulate(df, headers='keys', tablefmt='psql', showindex=False))
 
                 user_input = input("\nChoose interaction: ")
 
