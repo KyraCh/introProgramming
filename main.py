@@ -70,7 +70,7 @@ class CentralFunctions():
             
             for i in ['Username', 'First name', 'Second name', 'Phone', 'Camp ID', 'Availability']:
                 if i not in df.columns:
-                    print(Fore.RED + f'Missing {i} index from user database.')
+                    print(Fore.RED + f'Missing {i} index from volunteer database.')
                     print(Style.RESET_ALL)
                     dataFailure = True
 
@@ -94,7 +94,7 @@ class CentralFunctions():
             
             for i in ['Family ID', 'Lead Family Member Name', 'Lead Family Member Surname', 'Camp ID', 'Mental State', 'Physical State', 'No. Of Family Members']:
                 if i not in df.columns:
-                    print(Fore.RED + f'Missing {i} index from user database.')
+                    print(Fore.RED + f'Missing {i} index from refugee database.')
                     print(Style.RESET_ALL)
                     dataFailure = True
             
@@ -127,8 +127,7 @@ class CentralFunctions():
             df.fillna('', inplace=True)
             self.camps_db = df
         except FileNotFoundError:
-            camps_db = {'Emergency ID': [''], 'Type of emergency': [''], 'Description': [''], 'Location': [''], 'Start date': [
-                ''], 'Close date': [''], 'Number of refugees': [''], 'Camp ID': [''], 'No Of Volounteers': [''], 'Capacity': ['']}
+            camps_db = {'Camp ID': [''], 'Location': [''], 'Number of volunteers': [''], 'Capacity': [''], 'Emergency ID': [''], 'Number of refugees': ['']}
             df = pd.DataFrame(camps_db)
             df.to_csv('camp_database.csv',index=False)
             self.camps_db = df
@@ -139,9 +138,17 @@ class CentralFunctions():
 
         try:
             df = pd.read_csv('emergency_database.csv')
+            
+            for i in ['Emergency ID', 'Location', 'Type', 'Description', 'Start date', 'Close date']:
+                if i not in df.columns:
+                    print(Fore.RED + f'Missing {i} index from emergency database.')
+                    print(Style.RESET_ALL)
+                    dataFailure = True
+
             df.dropna(how="all", inplace=True)
             df.fillna('', inplace=True)
             self.emergencies_db = df
+
         except FileNotFoundError:
             emergencies_db = {'Emergency ID': [''], 'Location': [''], 'Type': [
                 ''], 'Description': [''], 'Start date': [''], 'Close date': ['']}
@@ -155,6 +162,13 @@ class CentralFunctions():
 
         try:
             df = pd.read_csv('mealplans_database.csv')
+
+            for i in ['Camp ID', 'Total number of refugees', 'Meals per day', 'Days', 'Total meals', 'Price per meal', 'Budget per day', 'Total budget']:
+                if i not in df.columns:
+                    print(Fore.RED + f'Missing {i} index from mealplans database.')
+                    print(Style.RESET_ALL)
+                    dataFailure = True
+
             df.dropna(how="all", inplace=True)
             df.fillna('', inplace=True)
             self.meals_db = df
