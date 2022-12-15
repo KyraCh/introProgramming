@@ -1008,7 +1008,8 @@ class Admin(CentralFunctions):
 
             emergency_db.loc[len(emergency_db.index)] = [emergency_id, answers[0], answers[1], answers[2], answers[3], None]
             print('')
-            print(tabulate(self.emergencies_db.tail(1), headers='keys', tablefmt='psql', showindex=False))
+            print(tabulate(emergency_db.tail(1), headers='keys', tablefmt='psql', showindex=False))
+            
             while True:
                 commit = input('\nCommit changes? [y]/[n] ')
                 if commit == 'y' or commit == 'n':
@@ -1973,9 +1974,7 @@ class Volunteer(CentralFunctions):
                 print('')
                 df = users_df.loc[users_df['username'] == self.current_user, ['username', 'password', 'email']]
                 print(tabulate(df, headers='keys', tablefmt='psql', showindex=False))
-                # print('\n', vol_df.loc[vol_df['Username'] == self.current_user])
-                # print(users_df.loc[users_df['username'] == self.current_user, ['username', 'password', 'email']])
-
+                
                 while True:
                     commit = input('\nCommit changes? [y]/[n] ')
                     if commit == 'y' or commit == 'n':
@@ -2131,7 +2130,7 @@ class Volunteer(CentralFunctions):
                                 exit()
                             elif answer == '':
                                 answer = password
-                            elif len(inpt) < 8:
+                            elif len(answer) < 8:
                                 print("Sorry but your password needs to be at least 8 characters long.")
                                 continue
                             break
