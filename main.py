@@ -79,8 +79,8 @@ class CentralFunctions():
             self.vol_db = df
 
         except FileNotFoundError:
-            vol_db = {'Username': [''], 'First name': [''], 'Second name': [
-                ''], 'Phone': [''], 'Camp ID': [''], 'Availability': ['']}
+            vol_db = {'Username': [''], 'First name': [''], 'Second name': [''], 'Phone': [''], 'Camp ID': [''], 'Availability': ['']}
+            df = pd.DataFrame(vol_db)
             df.to_csv('volunteer_database.csv',index=False)
             self.vol_db = df
 
@@ -1862,8 +1862,8 @@ class Volunteer(CentralFunctions):
                 elif user_input == '3':
                     print(f"Currently, your phone number is set to +{current_phone}.")
                     while True:
-                        inpt = input(
-                            "\nEnter new phone number in the format +[country code](0)_______: ")
+                        country_code = self.countries_db.loc[self.countries_db['Country code'] == self.camp_of_volunteer[:2], 'Country Phone Codes'].values[0]
+                        inpt = input(f"\nEnter new phone number in the format +[{country_code}](0)_______: ")
                         if inpt.upper() == 'B' or inpt.upper() == 'Q':
                             break
                         elif not inpt.isnumeric():
@@ -1873,7 +1873,7 @@ class Volunteer(CentralFunctions):
                             print("Invalid format.")
                             continue
                         else:
-                            current_phone = inpt
+                            current_phone = str(inpt)
                             break
 
                 elif user_input == '4':
