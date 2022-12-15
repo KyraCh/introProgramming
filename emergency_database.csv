@@ -1,11 +1,2 @@
 Emergency ID,Location,Type,Description,Start date,Close date
-AU1,Australia,Bushfire,Description,01/09/2019,01/03/2020
-PK1,Pakistan,Flooding,Description ,01/06/2022,
-LBN1,Lebanon,Flooding,Description ,01/10/2019,02/01/2020
-PK2,Pakistan,Bushfire,Description,10/09/2019,20/10/2019
-AU2,Australia,Bushfire,Description,06/06/2022,02/12/2022
-AM1,Armenia,Earthquake,Description,01/11/2022,
-BS1,Bahamas,Flooding,Description,01/07/2021,12/12/2021
-FJ1,Fiji,Earthquake,Description,01/07/2022,
-GT1,Guatemala,Bushfire,Description,01/02/2022,
-GT2,Guatemala,Flooding,Description,01/04/2022,
+PT1,Portugal,Smelly man,It's Mevrick,01/01/0001,

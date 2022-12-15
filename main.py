@@ -377,10 +377,11 @@ class CentralFunctions():
                                             print("You have to choose from a list of available camps!")
                                             continue
                                         
-                                        family_count = len(refugee_df.loc[refugee_df['Camp ID'].str.contains(
-                                            camp_choice, case=False)]) + 1
-                                        family_id = str(
-                                            family_count) + camp_choice
+                                        if (refugee_df['Camp ID'] == '').all():
+                                            family_id = '1' + camp_choice
+                                        else:
+                                            family_count = len(refugee_df.loc[refugee_df['Camp ID'].str.contains(camp_choice, case=False)]) + 1
+                                            family_id = str(family_count) + camp_choice
                                         break
                                     if camp_choice.upper() == "B":
                                         continue
