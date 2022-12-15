@@ -509,7 +509,7 @@ class CentralFunctions():
         while True:
 
             user_input = input("\nChoose interaction: ")
-            local_db = self.camps_db.merge(self.emergencies_db, on='Emergency ID', how='inner')
+            local_db = self.camps_db.merge(self.emergencies_db, on='Current Emergency', how='inner')
 
             if user_input == '1':
                 df = self.camps_db
