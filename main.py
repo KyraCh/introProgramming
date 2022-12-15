@@ -287,6 +287,7 @@ class CentralFunctions():
         Interactive method which allows to add new family to the list
         '''
         while True:
+            refugee_df = self.refugee_db.copy()
             print(100 * '=')
             print('\nPlease provide details of the new refugee family.')
             print('Expected Inputs:\n'+
@@ -298,126 +299,126 @@ class CentralFunctions():
             if self.current_user == 'admin':
                 print('\t>Emergency\n'+
               '\t>Camp')
+            print('\n[B] to go back')
             print('[Q] to quit')
-            name = input("State name of family's lead member: ").capitalize()
-            if name == "Q":
+            name = input("\nState name of family's lead member: ")
+            if name.upper() == "Q" or name.upper() == "B":
                 print(100 * '=')
                 menu(self.functions)
                 exit()
             while True:
-                print('[B] to go back to main menu')
-                surname = input("State surname of the family: ").capitalize()
-                if surname == "B":
+                surname = input("\nState surname of the family: ")
+                if surname.upper() == "B":
                     break
+                elif surname.upper() == "Q":
+                    print(100 * '=')
+                    menu(self.functions)
+                    exit()
                 if not name.isalpha() or not surname.isalpha():
-                    print("You can't use numbers for this input. Try again ")
+                    print("Invalid input.")
                 while True:
-                    print('[B] to go back to main menu')
-                    mental_state = input("Describe the mental state of the family: ").capitalize()
-                    if mental_state == "B":
+                    mental_state = input(
+                        "\nDescribe the mental state of the family: ")
+                    if mental_state.upper() == "B":
                         break
+                    elif mental_state.upper() == "Q":
+                        print(100 * '=')
+                        menu(self.functions)
+                        exit()
                     while True:
-                        physical_state = input("Describe the physical state of the family: ").capitalize()
-                        if physical_state == "B":
+                        physical_state = input(
+                            "\nDescribe the physical state of the family: ")
+                        if physical_state.upper() == "B":
                             break
+                        elif physical_state.upper() == "Q":
+                            print(100 * '=')
+                            menu(self.functions)
+                            exit()
                         while True:
-                            print('[B] to go back to main menu')
-                            no_of_members = (input("Type the number of family members: "))
+                            no_of_members = (
+                                input("\nType the number of family members: "))
                             if no_of_members == "b" or no_of_members == "B":
                                 break
+                            elif no_of_members.upper() == "Q":
+                                print(100 * '=')
+                                menu(self.functions)
+                                exit()
                             try:
                                 no_of_members = int(no_of_members)
+
                             except ValueError:
                                 print("It has to be an integer")
-                                continue
+
                             if self.current_user == 'admin':
-                                emergency_options = self.emergencies_db[["Emergency ID"]]
-                                print(tabulate(emergency_options, headers='keys', tablefmt='psql', showindex=False))
-                                # print(*emergency_options, sep='\n')
+                                df = self.emergencies_db[["Emergency ID"]]
+                                print(tabulate(df, headers='keys', tablefmt='psql', showindex=False))
                                 emergency_list = self.emergencies_db["Emergency ID"].tolist()
                                 while True:
-                                    print('[B] to go back to main menu')
-                                    emergency_id = input("Choose emergency: ")
-                                    if emergency_id == 'b' or emergency_id == "B":
+                                    emergency_id = input("\nChoose emergency: ")
+                                    if emergency_id.upper() == "B":
                                         break
-                                    elif emergency_id not in emergency_list:
-                                        print("Invalid input for emergency")
-                                    camp_id = self.camps_db.loc[self.camps_db['Camp ID'].str.contains(emergency_id, case=False)]['Camp ID']
-                                    camp_id_list = camp_id.tolist()
-                                    if len(camp_id_list) == 0:
-                                        print("Chosen emergency doesn't have camp yet.")
-                                        print("Choose interaction [4] to add new camp.")
+                                    elif emergency_id.upper() == "Q":
                                         print(100 * '=')
                                         menu(self.functions)
                                         exit()
-                                    else:
-                                        # print(tabulate(camp_id,headers='firstrow')) HERE CHANGE PLEASE 
-                                        print(*set(camp_id), sep='\n')
-                                        while True:
-                                            print('[B] to go back to main menu')
-                                            camp_choice = input("Choose a camp to which you want to assign family: ")
-                                            if camp_choice not in camp_id_list:
-                                                print(
-                                                    "You have to choose from a list of available camps!")
-                                            elif camp_choice == "b" or camp_choice == "B":
-                                                break
-                                            else:
-                                                break
-
-                                        family_count = len(self.refugee_db.loc[self.refugee_db['Camp ID'].str.contains(camp_choice, case=False)]) + 1
-                                        family_id = str(family_count) + camp_choice
-                                        while True:
-                                            commit = input('\nCommit changes? [y]/[n] ')
-                                            if commit == 'y':
-                                                self.refugee_db.loc[len(self.refugee_db)] = [family_id, name, surname,
-                                                                                             camp_choice,
-                                                                                             mental_state,
-                                                                                             physical_state,
-                                                                                             no_of_members]
-                                                self.refugee_db.to_csv("refugee_db.csv", index=False)
-                                                self.save(self.refugee_db, 'refugee_database.csv')
-                                                print("New refugee family was created")
-                                                print(100 * '=')
-                                                menu(self.functions)
-                                                exit()
-                                            if commit == 'n':
-                                                print("Family was not added. ")
-                                                print(100 * '=')
-                                                menu(self.functions)
-                                                exit()
-                                            else:
-                                                print('Your input is not recognised')
-                                                continue
+                                    elif emergency_id not in emergency_list:
+                                        print("Invalid input for emergency")
+                                        continue
+                                    df = self.refugee_db.loc[self.refugee_db['Camp ID'].str.contains('AU1', case=False)][['Camp ID']]
+                                    df.drop_duplicates(subset = 'Camp ID', inplace = True)
+                                    camp_id_list = df['Camp ID']
+                                    print(tabulate(df, headers='keys', tablefmt='psql', showindex=False))
+                                    while True:
+                                        camp_choice = input(
+                                            "\nChoose a camp to which you want to assign family: ")
+                                        if camp_choice.upper() == "B":
+                                            break
+                                        elif camp_choice.upper() == "Q":
+                                            print(100 * '=')
+                                            menu(self.functions)
+                                            exit()
+                                        elif camp_choice not in camp_id_list:
+                                            print("You have to choose from a list of available camps!")
+                                            continue
+                                        
+                                        family_count = len(refugee_df.loc[refugee_df['Camp ID'].str.contains(
+                                            camp_choice, case=False)]) + 1
+                                        family_id = str(
+                                            family_count) + camp_choice
+                                        break
+                                    break
 
                             else:
                                 camp_choice = self.vol_db[self.vol_db['Camp ID']
                                                           == self.camp_of_user]['Camp ID'].values[0]
-                                family_count = len(self.refugee_db.loc[self.refugee_db['Camp ID'].str.contains(
+                                family_count = len(refugee_df.loc[refugee_df['Camp ID'].str.contains(
                                     camp_choice, case=False)]) + 1
                                 family_id = str(family_count) + camp_choice
-                                while True:
-                                    while True:
-                                        commit = input('\nCommit changes? [y]/[n] ')
-                                        if commit == 'y':
-                                            self.refugee_db.loc[len(self.refugee_db)] = [family_id, name, surname,
-                                                                                         camp_choice,
-                                                                                         mental_state,
-                                                                                         physical_state,
-                                                                                         no_of_members]
-                                            self.refugee_db.to_csv("refugee_db.csv", index=False)
-                                            self.save(self.refugee_db, 'refugee_database.csv')
-                                            print("New refugee family was created")
-                                            print(100 * '=')
-                                            menu(self.functions)
-                                            exit()
-                                        if commit == 'n':
-                                            print("Family was not added. ")
-                                            print(100 * '=')
-                                            menu(self.functions)
-                                            exit()
-                                        else:
-                                            print('Your input is not recognised')
-                                            continue
+                                
+                            
+                            break
+                        break
+                    break
+                break
+        
+            refugee_df.loc[len(refugee_df)] = [family_id, name, surname, camp_choice, mental_state, physical_state, no_of_members]
+            print(tabulate(refugee_df.tail(1), headers='keys', tablefmt='psql', showindex=False))
+            while True:
+                commit = input('\nCommit changes? [y]/[n] ')
+                if commit == 'y' or commit == 'n':
+                    break
+                else:
+                    print('Your input is not recognised')
+                    continue
+            
+            if commit == 'y':
+                self.refugee_db = refugee_df.copy()
+                refugee_df.to_csv('refugee_database.csv', index=False)
+                break
+            else:
+                continue
+
+        print(100 * '=')
 
     def call_camps(self):
         print(100*'=')
