@@ -348,6 +348,7 @@ class CentralFunctions():
 
                             except ValueError:
                                 print("It has to be an integer")
+                                continue
 
                             if self.current_user == 'admin':
                                 while True:
