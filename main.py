@@ -439,9 +439,9 @@ class CentralFunctions():
         print('\nChoose an interaction by typing the corresponding number.')
         print('Example: type "1" to view comprehensive data on all refugee camps.\n')
         print("[1] - List of all camps")
-        print("[2] - total number of camps")
+        print("[2] - Total number of camps")
         print("[3] - Number of volunteers in each camp")
-        print("[4] - number of refugees in each camp")
+        print("[4] - Number of refugees in each camp")
         print("[5] - Capacity by camp")
         print("[6] - Number of camps in each area")
         print("[7] - Number of active camps")
@@ -480,10 +480,14 @@ class CentralFunctions():
                 print("\nCamps for each disaster:")
                 print(tabulate(df, headers='keys', tablefmt='psql', showindex=False))
             elif user_input == '7':
+                local_db = local_db[['Camp ID', 'Emergency ID', 'Location_x', 'Capacity', 'Number of volunteers', 'Number of refugees', 'Type', 'Description', 'Start date', 'Close date']]
+                local_db.rename(columns={"Location_x": "Location"}, inplace=True)
                 print('\nNumber of active camps: ', len(local_db[local_db['Close date'] == '']))
                 df = local_db[local_db['Close date'] == '']
                 print(tabulate(df, headers='keys', tablefmt='psql', showindex=False))
             elif user_input == '8':
+                local_db = local_db[['Camp ID', 'Emergency ID', 'Location_x', 'Capacity', 'Number of volunteers', 'Number of refugees', 'Type', 'Description', 'Start date', 'Close date']]
+                local_db.rename(columns={"Location_x": "Location"}, inplace=True)
                 print('\nNumber of inactive camps: ',len(local_db[local_db['Close date'] != '']))
                 df = local_db[local_db['Close date'] != '']
                 print(tabulate(df, headers='keys', tablefmt='psql', showindex=False))
@@ -508,11 +512,11 @@ class CentralFunctions():
             print(100*'=')
             print('\nChoose an interaction by typing the corresponding number.')
             print('Example: type "1" to view comprehensive data on all volunteers.\n')
-            print("[1] - view all volunteer data\n"
-                  "[2] - see volunteer data by camp\n"
-                  "[3] - see total number of volunteers\n"
-                  "[4] - see number of volunteers by camp\n"
-                  "[5] - check if the volunteer exists\n")
+            print("[1] - View all volunteer data\n"
+                  "[2] - See volunteer data by camp\n"
+                  "[3] - See total number of volunteers\n"
+                  "[4] - See number of volunteers by camp\n"
+                  "[5] - Check if the volunteer exists\n")
             print('[B] to go back')
             print('[Q] to quit')
             choose_action = input('\nEnter here: ')
@@ -530,7 +534,6 @@ class CentralFunctions():
                     elif choose_camp in vol_data['Camp ID'].values:
                         df = self.vol_db.loc[self.vol_db['Camp ID'] == choose_camp]
                         print(tabulate(df, headers='keys', tablefmt='psql', showindex=False))
-                        #print(f"\n{vol_data[vol_data['Camp ID'] == choose_camp].to_string(index=False)}\n")
                     else:
                         print(Fore.RED + '\nInvalid Camp ID. Try again.')
                         print(Style.RESET_ALL)
@@ -539,18 +542,6 @@ class CentralFunctions():
             elif choose_action == '4':
                 df = camp_data[['Camp ID','Number of volunteers']]
                 print(tabulate(df, headers='keys', tablefmt='psql', showindex=False))
-                # while True:
-                #     print('\nList of Camp IDs: ')
-                #     print(camp_data['Camp ID'].to_string(index=False))
-                #     choose_camp = input('Enter a Camp ID: ')
-                #     if choose_camp.upper() == 'B':
-                #         break
-                #     elif choose_camp in vol_data['Camp ID'].values:
-                #         lst1 = [item for item in vol_data['Camp ID'] if item == choose_camp]
-                #         print(f"\nThere are {len(lst1)} volunteers in {choose_camp}.")
-                #     else:
-                #         print(Fore.RED + '\nInvalid Camp ID. Try again.')
-                #         print(Style.RESET_ALL)
             elif choose_action == '5':
                 while True:
                     def go_back(questionStack):
@@ -594,7 +585,7 @@ class CentralFunctions():
                             answerStack.append(answer)
                             i += 1
                         return answerStack
-                    questions = ['\nEnter First Name: ', 'Enter Last Name: ']
+                    questions = ['\nEnter First Name: ', '\nEnter Last Name: ']
                     answers = go_back(questions)
                     
                     if len(answers) == 0:
@@ -714,11 +705,13 @@ class CentralFunctions():
                             list_of_refugees.loc[list_of_refugees['Family ID'] == iD,'Family ID']  = new_index + change
                             iD = new_index + change
                             counter += 1
+                            list_of_refugees.loc[list_of_refugees['Family ID'] == iD,'Camp ID']  = change
                             continue
                         else:
                             list_of_refugees.loc[list_of_refugees['Family ID'] == iD,'Family ID'] = '1' + change
                             iD = '1' + change
                             counter += 1
+                            list_of_refugees.loc[list_of_refugees['Family ID'] == iD,'Camp ID']  = change
                             continue
                     counter += 1
                     list_of_refugees.at[list_of_refugees.index[list_of_refugees['Family ID'] == iD][0], list_of_refugees.columns[i]] = change
@@ -772,7 +765,8 @@ class CentralFunctions():
         state per each camp and gives information about each family that is assigned to certain camp.
         Secondly, the method call no of refugees now will only show you camp details of only the one that you are assigned to.
         Unless you are admin then you can see evrything '''
-        print(100*'=')    
+        print(100*'=')  
+        self.count_ref_vol()  
         if self.current_user == "admin":
             print("\nChoose emergency for which you want to see the summary.")
             print("Below are all emergencies with non-zero refugee populations.")
@@ -821,9 +815,9 @@ class CentralFunctions():
             elif user_input == "4":
                 camps = list(self.camps_db.loc[self.camps_db['Number of refugees'] != '','Camp ID'])
                 for i in camps:
-                    no_of_families = str(int(self.camps_db.loc[self.camps_db['Camp ID'] != 'AU1-1','Number of refugees'].values[0]))
+                    no_of_refugees = str(int(self.camps_db.loc[self.camps_db['Camp ID'] == i,'Number of refugees'].values[0]))
                     refugees_in_camp = self.refugee_db.loc[self.refugee_db['Camp ID'] == i]
-                    print("\n\tCamp " + i + " --> " + no_of_families + " family/families\n")
+                    print("\n\tCamp " + i + " --> " + no_of_refugees + " refugees.\n")
                     print(tabulate(refugees_in_camp, headers='keys', tablefmt='psql', showindex=False))
                     
             elif user_input.upper() == 'B' or user_input.upper() == 'Q':
@@ -865,7 +859,7 @@ class Admin(CentralFunctions):
                           "5": {'method': self.amend_camp_capacity,         'message': '[5] - Amend capacity of a camp', },
                           "6": {'method': self.call_volunteers,             'message': '[6] - See information about volunteers', },
                           "7": {'method': self.write_volunteer,             'message': '[7] - Add new volunteer(s) profile(s)', },
-                          "8": {'method': self.admin_volunteer_commands,    'message': '[8] - Amend volunteer activation status.', },
+                          "8": {'method': self.admin_volunteer_commands,    'message': '[8] - Amend volunteer activation status', },
                           "9": {'method': self.create_profile,              'message': '[9] - Create refugee profile', },
                           "10": {'method': self.amend_refugee_profile,      'message': '[10] - Amend refugee profile', },
                           "11": {'method': self.call_no_of_refugees,        'message': '[11] - See information about refugees', },
@@ -1233,7 +1227,7 @@ class Admin(CentralFunctions):
                         '\nPlease select the number of new volunteers you wish to create: ')
                     try:
                         no_of_new_users = int(no_of_new_users)
-                        if no_of_new_users.upper() == 'Q':
+                        if type(no_of_new_users) == str and no_of_new_users.upper() == 'Q':
                             print(100*'=')
                             menu(self.functions)
                             exit()
@@ -1251,7 +1245,7 @@ class Admin(CentralFunctions):
                             break
                     if camp.upper() == 'B':
                         continue
-                    elif no_of_new_users.upper() == 'Q':
+                    elif type(no_of_new_users) == str and no_of_new_users.upper() == 'Q':
                         menu(self.functions)
                         exit()
                     else:
@@ -1811,7 +1805,7 @@ class Volunteer(CentralFunctions):
                     print(f"Currently, your phone number is set to +{current_phone}.")
                     while True:
                         inpt = input(
-                            "\nEnter new phone number in the format +44(0)_______: ")
+                            "\nEnter new phone number in the format +[country code](0)_______: ")
                         if inpt.upper() == 'B' or inpt.upper() == 'Q':
                             break
                         elif not inpt.isnumeric():
@@ -1971,7 +1965,7 @@ class Volunteer(CentralFunctions):
             df = vol_df.loc[vol_df['Username'] == self.current_user]
             print(tabulate(df, headers='keys', tablefmt='psql', showindex=False))
             questions = ['\nEnter first name: ', '\nEnter second name: ',
-                         '\nEnter phone number in the format [+44(0)_______]:', '\nEnter availability: ',
+                         '\nEnter phone number in the format [+[country code](0)_______]:', '\nEnter availability: ',
                          '\nEnter your email', '\nEnter your new password (over 8 characters long)']
 
             def go_back(questionStack):
