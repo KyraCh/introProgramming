@@ -21,7 +21,7 @@ class CentralFunctions():
         self.camps_db = None
         self.countries_db = None
         self.emergencies_db = None
-
+        self.supply_db = None
         fileCheckError = self.download_all_data()
 
         if fileCheckError:
@@ -121,6 +121,23 @@ class CentralFunctions():
             self.countries_db = df
         except:
             print("System couldn't read the countries database file.")
+            dataFailure = True
+
+        try:
+            df = pd.read_csv("supplies.csv", index_col='Camp ID')
+            df.dropna(how="all", inplace=True)
+            df.fillna('', inplace=True)
+            self.supply_db= df
+        except FileNotFoundError:
+            supply_db = {'Camp ID': [''], 'Band aids': [''], 'Painkillers': [
+                ''], 'Medicine for anxiety and panic attacks': [''], 'Towels': [''], 'Blankets': [''],
+                         'Surgical Gloves': ['']}
+            df = pd.DataFrame(supply_db)
+            df.set_index('Camp ID', inplace=True)
+            df.to_csv('supplies.csv')
+            self.supply_db= df
+        except:
+            print("System couldn't read your supply database file.")
             dataFailure = True
 
         return dataFailure
@@ -1359,7 +1376,9 @@ class Volunteer(CentralFunctions):
                           "2": {'method': self.call_camps,              'message': '[2] - See camp info', },
                           "3": {'method': self.call_volunteers,         'message': '[3] - See information about volunteers', },
                           "4": {'method': self.create_profile,          'message': '[4] - Create refugee profile', },
-                          "5": {'method': self.amend_refugee_profile,   'message': '[5] - Amend refugee profile', }}
+                          "5": {'method': self.amend_refugee_profile,   'message': '[5] - Amend refugee profile', },
+                          "6": {'method': self.supply_summary,          'message': '[6] - Check supply summary', }
+                          }
         self.current_user = current_user
         self.camp_of_user = camp_of_user
 
@@ -1741,8 +1760,40 @@ class Volunteer(CentralFunctions):
                     answers = []
                     continue
             print(100 * '=')
+    def supply_summary(self):
+        volunteer_campID = self.camp_of_user
+        # choose_emergency = self.camps_db[self.camps_db["Camp ID"] == volunteer_campID]["Camp ID"].values[0]
+        print("[1] - Total summary of supplies for the camp {}".format(volunteer_campID))
+        print("[2] - Amend number of supplies")
+        ans = input("\nChoose interaction: ")
 
+        if ans == "1":
+            supply_summary = self.supply_db.loc[volunteer_campID]
+            print(supply_summary)
+            # print(tabulate(supply_summary, headers='keys', tablefmt='psql', showindex=False))
+            print('[Q] to quit')
+            next = input("Choose [Q] to go back to main menu ").capitalize()
+            if next == "Q":
+                print(100 * '=')
+                menu(self.functions)
+                exit()
+        if ans == "2":
+            print('\nPlease select which information about supply you would like to change.')
+            print('Input a digit to change the corresponding piece of information.')
+            print('E.g. input "1" to change the number of band aids.\n' +
+                  '[1] - Band Aids\n' +
+                  '[2] - Painkillers\n' +
+                  '[3] - Medicine for anxiety and panic attacks\n' +
+                  '[4] - Towels\n' +
+                  '[5] - Blankets\n' +
+                  '[6] - Surgical Gloves')
+            print('\n[B] to go back')
+            print('[Q] to quit')
 
+            user_input = input("\nChoose interaction: ")
+            if user_input == "1":
+                bandaids = self.supply_db[self.supply_db['Camp ID'] == volunteer_campID]['Band Aids'].values[0]
+                print("Current number of Band Aids is {}".format(bandaids))
 def session_over_message():
     print(100*'=')
     print('\nSESSION OVER')
