@@ -53,7 +53,7 @@ class CentralFunctions():
         # If the file does not exist
         except FileNotFoundError:
             user_db = {'username': ['admin'], 'password': [
-                '111'], 'role': ['admin'], 'activated': ['TRUE'], 'email': ['hemtest11@gmail.com']}
+                '111'], 'role': ['admin'], 'activated': [True], 'email': ['hemtest11@gmail.com']}
             df = pd.DataFrame(user_db)
             df['password'] = df['password'].astype(str)
             df.to_csv('user_database.csv',index=False)
@@ -79,8 +79,8 @@ class CentralFunctions():
             self.vol_db = df
 
         except FileNotFoundError:
-            vol_db = {'Username': [''], 'First name': [''], 'Second name': [''],'Phone':[''], 'Camp ID': [''], 'Avability': ['']}
-            df = pd.DataFrame(vol_db)
+            vol_db = {'Username': [''], 'First name': [''], 'Second name': [
+                ''], 'Phone': [''], 'Camp ID': [''], 'Availability': ['']}
             df.to_csv('volunteer_database.csv',index=False)
             self.vol_db = df
 
@@ -127,7 +127,7 @@ class CentralFunctions():
             df.fillna('', inplace=True)
             self.camps_db = df
         except FileNotFoundError:
-            camps_db = {'Camp ID': [''], 'Location': [''], 'Number of volunteers': [''], 'Capacity': [''], 'Emergency ID': [''], 'Number of refugees': ['']}
+            camps_db = {'Camp ID': [''], 'Location': [''], 'Number of volunteers': [''], 'Capacity': [''], 'Emergency ID': [''], 'Number of refugees': ['']} 
             df = pd.DataFrame(camps_db)
             df.to_csv('camp_database.csv',index=False)
             self.camps_db = df
@@ -998,9 +998,10 @@ class Admin(CentralFunctions):
             answers = go_back(questions)
             country_code = country_dict[answers[0]]['Country code']
 
-            if True in list(emergency_db['Emergency ID'].str.contains(country_code, case=False)):
-                new_no_index = int(emergency_db.loc[emergency_db['Emergency ID'].str.contains(
-                    country_code, case=False)].iloc[-1]['Emergency ID'][2:]) + 1
+            if (emergency_db['Emergency ID'] == '').all():
+                new_no_index = 1
+            elif (True in list(emergency_db['Emergency ID'].str.contains(country_code, case=False))):
+                new_no_index = int(emergency_db.loc[emergency_db['Emergency ID'].str.contains(country_code, case=False)].iloc[-1]['Emergency ID'][2:]) + 1
             else:
                 new_no_index = 1
             emergency_id = country_code + str(new_no_index)
@@ -1456,7 +1457,8 @@ class Admin(CentralFunctions):
               '\t>Emergency ID\n' +
               '\t>Camp capacity\n')
         print('[B] to go back')
-        print('[Q] to quit')
+        print('[Q] to quit\n')
+        print(tabulate(self.emergencies_db, headers='keys', tablefmt='psql', showindex=False))
 
         while True:
 
@@ -1476,7 +1478,7 @@ class Admin(CentralFunctions):
                     # and country_id in list(emergency_df['Emergency ID']):
                     if country in countries.keys():
                         country_id = countries[country]['Country code']
-                        if True in list(emergency_df['Emergency ID'].str.contains('PK', case=False)):
+                        if True in list(emergency_df['Emergency ID'].str.contains(country_id, case=False)):
                             break
                     print('Please select country with an existing emergency.')
                 return 1
@@ -1489,8 +1491,7 @@ class Admin(CentralFunctions):
                     print(tabulate(emergencies_in_country, headers='keys', tablefmt='psql', showindex=False))
                 while True:
                     if len(emergencies_in_country.index) > 1:
-                        emergency = input(
-                            '\nPlease select which emergency you would like to assign your camp to: ')
+                        emergency = input('\nPlease select which emergency you would like to assign your camp to: ')
                         if emergency.upper() == 'B' or emergency.upper() == 'Q':
                             break
                         if emergency in list(emergencies_in_country['Emergency ID']):
@@ -1514,7 +1515,7 @@ class Admin(CentralFunctions):
             def assign_capacity():
                 global capacity
                 while True:
-                    capacity = input("\nEnter maximum camp capacity:")
+                    capacity = input("\nEnter maximum camp capacity: ")
                     if capacity.upper() == 'B' or emergency.upper() == 'Q':
                         break
                     if capacity.isdigit() == False:
@@ -1539,12 +1540,13 @@ class Admin(CentralFunctions):
             if self.quit == True:
                 break
 
-            new_camp_index = len(
-                camps_df.loc[camps_df['Camp ID'].str.contains(emergency, case=False)].index)+1
+            if (camps_df['Camp ID'] == '').all():
+                new_camp_index = 1
+            else:
+                new_camp_index = len(camps_df.loc[camps_df['Camp ID'].str.contains(emergency, case=False)].index)+1
             new_ID = emergency + '-' + str(new_camp_index)
 
-            camps_df.loc[len(camps_df.index)] = [
-                new_ID, country, '', capacity, emergency, '']
+            camps_df.loc[len(camps_df.index)] = [new_ID, country, '', capacity, emergency, '']
 
             print(tabulate(camps_df.tail(1), headers='keys', tablefmt='psql', showindex=False))
             while True:
@@ -1804,7 +1806,7 @@ class Volunteer(CentralFunctions):
             else:
                 return False
         
-        if '' not in list(self.vol_db.loc[self.vol_db['Username'] == self.current_user]):
+        if '' not in self.vol_db.loc[self.vol_db['Username'] == self.current_user].values[0]:
 
             while True:
                 print(100 * '=')
@@ -1939,11 +1941,16 @@ class Volunteer(CentralFunctions):
                         inpt = inpt.capitalize()
                         if inpt.upper() == 'B' or inpt.upper() == 'Q':
                             break
-                        elif check_email(inpt):
+                        elif not check_email(inpt):
                             print("Please enter a valid email address.")
                             continue
                         current_email = inpt
                         break
+                
+                elif user_input.upper() == 'B' or user_input.upper() == 'Q':
+                    print(100*'=')
+                    menu(self.functions)
+                    exit()
 
                 else:
                     print('Invalid input. Please select from the options above.')
@@ -1951,7 +1958,7 @@ class Volunteer(CentralFunctions):
 
                 if inpt.upper() == 'B':
                     continue
-                elif inpt.upper() == 'Q' or user_input.upper() == 'B' or user_input.upper() == 'Q':
+                elif inpt.upper() == 'Q':
                     print(100*'=')
                     menu(self.functions)
                     exit()
@@ -2021,7 +2028,7 @@ class Volunteer(CentralFunctions):
             print(tabulate(df, headers='keys', tablefmt='psql', showindex=False))
             questions = ['\nEnter first name: ', '\nEnter second name: ',
                          '\nEnter phone number in the format [+[country code](0)_______]:', '\nEnter availability: ',
-                         '\nEnter your email', '\nEnter your new password (over 8 characters long)']
+                         '\nEnter your email: ', '\nEnter your new password (over 8 characters long): ']
 
             def go_back(questionStack):
                 i = 0
@@ -2065,7 +2072,7 @@ class Volunteer(CentralFunctions):
                             elif not answer.isnumeric():
                                 print("Please enter a valid phone number.")
                                 continue
-                            elif len(answer) != 9 or answer[:2] != "44":
+                            elif len(answer) != 10:
                                 print("Invalid format.")
                                 continue
                             break
@@ -2104,7 +2111,9 @@ class Volunteer(CentralFunctions):
                                 exit()
                             elif answer == '':
                                 answer = current_email
-                            elif len(inpt) < 8:
+                            elif not check_email(answer):
+                                print("Please enter a valid email address.")
+                            elif len(answer) < 8:
                                 print("Sorry but your password needs to be at least 8 characters long.")
                                 continue
                             break
@@ -2137,8 +2146,11 @@ class Volunteer(CentralFunctions):
 
             while True:
                 answers = go_back(questions)
-                vol_df.loc[vol_df['Username'] == self.current_user] = [
-                    self.current_user, answers[0], answers[1], answers[2], self.camp_of_user, answers[3]]
+
+                df = vol_df.loc[vol_df['Username'] == self.current_user]
+                print([self.current_user, answers[0], answers[1], answers[2], self.camp_of_user, answers[3]])
+                vol_df.loc[vol_df['Username'] == self.current_user, list(df.columns)] = [self.current_user, answers[0], answers[1], answers[2], self.camp_of_user, answers[3]]
+                users_df.loc[users_df['username'] == self.current_user, ['password', 'email']] = [answers[5], answers[4]]
 
                 print('')
                 df = vol_df.loc[vol_df['Username'] == self.current_user]
@@ -2171,15 +2183,14 @@ def session_over_message():
     print(100*'=')
 
 def login():
-    if __name__ == '__main__':
-        login = CentralFunctions()
-        login.users_login()
-        if login.current_user != 'admin':
-            vol = Volunteer(login.current_user, login.camp_of_user)
-            menu(vol.functions)
-        else:
-            adm = Admin(login.current_user, login.camp_of_user)
-            menu(adm.functions)
+    login = CentralFunctions()
+    login.users_login()
+    if login.current_user != 'admin':
+        vol = Volunteer(login.current_user, login.camp_of_user)
+        menu(vol.functions)
+    else:
+        adm = Admin(login.current_user, login.camp_of_user)
+        menu(adm.functions)
 
 
 def menu(functions):
