@@ -606,7 +606,6 @@ class CentralFunctions():
     def amend_refugee_profile(self):
         '''
         Interactive method which allows one to amend information about a refugee.
-        ### TRY THE METHODS-IN-A-LIST TECHNIQUE. ###
         '''
         while True:
             list_of_refugees = self.refugee_db.copy()
@@ -760,18 +759,19 @@ class CentralFunctions():
         Unless you are admin then you can see evrything '''
         print(100*'=')    
         if self.current_user == "admin":
-            countries_camps = self.camps_db["Emergency ID"]
             print("\nChoose emergency for which you want to see the summary.")
+            print("Below are all emergencies with non-zero refugee populations.")
             print('Expected Inputs:\n'+
                 '\t>Emergency ID\n')
-            print(tabulate(self.camps_db[["Emergency ID"]], headers='keys', tablefmt='psql', showindex=False))
+            df = self.camps_db.loc[self.camps_db['Number of refugees']!='',["Emergency ID"]].drop_duplicates(subset=["Emergency ID"])
+            countries_camps = set(df["Emergency ID"])
+            print(tabulate(df, headers='keys', tablefmt='psql', showindex=False))
             choose_emergency = input("\nChoose emergency for which you want to see the summary: ").upper()
             if choose_emergency == "Q" or choose_emergency == "B":
                 print(100 * '=')
                 menu(self.functions)
                 exit()
             while choose_emergency not in set(countries_camps):
-                
                 choose_emergency = input("\nChoose emergency for which you want to see the summary: ").upper()
 
         else:
@@ -2137,5 +2137,5 @@ def menu(functions):
         print(100*'=')
         functions[user_input]['method']()
 
-
-login()
+if __name__ == '__main__':
+    login()
