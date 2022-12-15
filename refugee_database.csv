@@ -1,9 +1,31 @@
 Family ID,Lead Family Member Name,Lead Family Member Surname,Camp ID,Mental State,Physical State,No. Of Family Members
-4AU1-1,Kate,Collins,AU1-1,good,wonderful,3
-1AU1-2,Khan,Samuel,AU1-2,good,bad,4
-2AU1-1,Mark,Brown,AU1-1,bad,bad,2
-3AU1-1,Michael,Smith,AU1-1,good,good,3
-2AU1-2,Sam,Roberts,AU1-2,bad,good,5
-3AU1-2,Sophie,Jones,AU1-2,bad,bad,2
-1AU1-3,George,Green,AU1-3,Good,Good,10
-1PK1-1,James,Naker,PK1-1,good,good,10
+1AU1-1,Mary,Collins,AU1-1,Good,Needed hospitalization. Son lost a leg,3
+1AU1-2,Khan,Samuel,AU1-2,Good,Needed hospitalization and child with broken leg and arm,4
+2AU1-1,Mark,Brown,AU1-1,Gave some pills for panic attack,Needed hospitalization,2
+3AU1-1,Michael,Smith,AU1-1,Good,Good,3
+2AU1-2,Sam,Roberts,AU1-2,Gave some pills for panic attack,Good,5
+3AU1-2,Sophie,Jones,AU1-2,Needed help from therapist,Needed hospitalization,2
+4AU1-1,Bob,Smith,AU1-1,Relatively fine,Needed hospitalization for a son,3
+5AU1-1,Mark,Brown,AU1-1,Gave some pills for panic attack,Fine,1
+1PK1-1,Mike,Smith,PK1-1,Needed help from therapist,Blood tests done,1
+6AU1-1,Sophie,Mark,AU1-1,Fine,Broken left leg,1
+2PK1-1,Bob,Smith,PK1-1,Fine,Broken both legs,1
+1AM1-1,Karen,Yellow,AM1-1,Needed help from therapist,Broken left leg,1
+2AM1-1,Angie,Blue,AM1-1,Fine,Broken right leg,1
+3AM1-1,Rob,Grass,AM1-1,Needed help from therapist,Broken left arm,1
+4AM1-1,Alex,Smith,AM1-1,Fine,Good,3
+5AM1-1,Mike,Austin,AM1-1,Fine,Broken left arm,1
+1FJ1-1,Henry,Styles,FJ1-1,Needed help from therapist,Broken left arm and left leg,1
+2FJ1-1,Harry,Roberts,FJ1-1,Fine,Needed hospitalization,5
+3FJ1-1,Zara,McDonald,FJ1-1,Needed help from therapist,Needed hospitalization,2
+4FJ1-1,Gabriel,Brown,FJ1-1,Gave some pills for panic attack,Needed hospitalization,3
+5FJ1-1,Nicole,Allan,FJ1-1,Needed help from therapist,Needed hospitalization,4
+6FJ1-1,Max,Butler,FJ1-1,Gave some pills for panic attack,Needed hospitalization for a husband,2
+7FJ1-1,Betty,Hamilton,FJ1-1,Needed help from therapist,Needed hospitalization for a wife,2
+1GT1-1,Lily,James,GT1-1,Gave some pills for panic attack,Needed hospitalization,3
+2GT1-1,Nico,Green,GT1-1,Fine,Needed hospitalization for a son,3
+3GT1-1,Carmen,Snow,GT1-1,Gave some pills for panic attack,Needed hospitalization for a wife,2
+1GT2-1,Sophie,White,GT2-1,Needed help from therapist,Fine,2
+2GT2-1,Michael,Dixon,GT2-1,Needed help from therapist,Needed hospitalization for a wife,2
+3GT2-1,Samuel,Holmes,GT2-1,Gave some pills for panic attack,Fine,3
+4GT2-1,Camilla,Michael,GT2-1,Needed help from therapist,Needed hospitalization for a son,3
