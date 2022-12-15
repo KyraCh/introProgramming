@@ -305,14 +305,14 @@ class CentralFunctions():
                 menu(self.functions)
                 exit()
             while True:
-                print('[B] to go back to main menu')
+                print('[B] to go back to previous input')
                 surname = input("State surname of the family: ").capitalize()
                 if surname == "B":
                     break
                 if not name.isalpha() or not surname.isalpha():
                     print("You can't use numbers for this input. Try again ")
                 while True:
-                    print('[B] to go back to main menu')
+                    print('[B] to go back to previous input')
                     mental_state = input("Describe the mental state of the family: ").capitalize()
                     if mental_state == "B":
                         break
@@ -321,7 +321,7 @@ class CentralFunctions():
                         if physical_state == "B":
                             break
                         while True:
-                            print('[B] to go back to main menu')
+                            print('[B] to go back to previous input')
                             no_of_members = (input("Type the number of family members: "))
                             if no_of_members == "b" or no_of_members == "B":
                                 break
@@ -336,7 +336,7 @@ class CentralFunctions():
                                 # print(*emergency_options, sep='\n')
                                 emergency_list = self.emergencies_db["Emergency ID"].tolist()
                                 while True:
-                                    print('[B] to go back to main menu')
+                                    print('[B] to go back to previous input')
                                     emergency_id = input("Choose emergency: ")
                                     if emergency_id == 'b' or emergency_id == "B":
                                         break
@@ -351,10 +351,10 @@ class CentralFunctions():
                                         menu(self.functions)
                                         exit()
                                     else:
-                                        # print(tabulate(camp_id,headers='firstrow')) HERE CHANGE PLEASE 
+                                        # print(tabulate(camp_id,headers='firstrow'))
                                         print(*set(camp_id), sep='\n')
                                         while True:
-                                            print('[B] to go back to main menu')
+                                            print('[B] to go back to previous input')
                                             camp_choice = input("Choose a camp to which you want to assign family: ")
                                             if camp_choice not in camp_id_list:
                                                 print(
@@ -367,13 +367,14 @@ class CentralFunctions():
                                         family_count = len(self.refugee_db.loc[self.refugee_db['Camp ID'].str.contains(camp_choice, case=False)]) + 1
                                         family_id = str(family_count) + camp_choice
                                         while True:
+                                            self.refugee_db.loc[len(self.refugee_db)] = [family_id, name, surname,
+                                                                                         camp_choice,
+                                                                                         mental_state, physical_state,
+                                                                                         no_of_members]
+                                            print(tabulate(self.refugee_db.tail(1), headers='keys', tablefmt='psql',
+                                                           showindex=False))
                                             commit = input('\nCommit changes? [y]/[n] ')
                                             if commit == 'y':
-                                                self.refugee_db.loc[len(self.refugee_db)] = [family_id, name, surname,
-                                                                                             camp_choice,
-                                                                                             mental_state,
-                                                                                             physical_state,
-                                                                                             no_of_members]
                                                 self.refugee_db.to_csv("refugee_db.csv", index=False)
                                                 self.save(self.refugee_db, 'refugee_database.csv')
                                                 print("New refugee family was created")
@@ -382,9 +383,7 @@ class CentralFunctions():
                                                 exit()
                                             if commit == 'n':
                                                 print("Family was not added. ")
-                                                print(100 * '=')
-                                                menu(self.functions)
-                                                exit()
+                                                self.create_profile()
                                             else:
                                                 print('Your input is not recognised')
                                                 continue
@@ -397,13 +396,12 @@ class CentralFunctions():
                                 family_id = str(family_count) + camp_choice
                                 while True:
                                     while True:
+                                        self.refugee_db.loc[len(self.refugee_db)] = [family_id, name, surname, camp_choice,
+                                                                           mental_state, physical_state, no_of_members]
+                                        print(tabulate(self.refugee_db.tail(1), headers='keys', tablefmt='psql',
+                                                       showindex=False))
                                         commit = input('\nCommit changes? [y]/[n] ')
                                         if commit == 'y':
-                                            self.refugee_db.loc[len(self.refugee_db)] = [family_id, name, surname,
-                                                                                         camp_choice,
-                                                                                         mental_state,
-                                                                                         physical_state,
-                                                                                         no_of_members]
                                             self.refugee_db.to_csv("refugee_db.csv", index=False)
                                             self.save(self.refugee_db, 'refugee_database.csv')
                                             print("New refugee family was created")
@@ -412,13 +410,10 @@ class CentralFunctions():
                                             exit()
                                         if commit == 'n':
                                             print("Family was not added. ")
-                                            print(100 * '=')
-                                            menu(self.functions)
-                                            exit()
+                                            self.create_profile()
                                         else:
                                             print('Your input is not recognised')
                                             continue
-
     def call_camps(self):
         print(100*'=')
         print('\nChoose an interaction by typing the corresponding number.')
