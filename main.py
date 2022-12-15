@@ -2025,8 +2025,9 @@ class Volunteer(CentralFunctions):
 
             df = vol_df.loc[vol_df['Username'] == self.current_user]
             print(tabulate(df, headers='keys', tablefmt='psql', showindex=False))
+            country_code = self.countries_db.loc[self.countries_db['Country code'] == self.camp_of_volunteer[:2], 'Country Phone Codes'].values[0]
             questions = ['\nEnter first name: ', '\nEnter second name: ',
-                         '\nEnter phone number in the format [+[country code](0)_______]:', '\nEnter availability: ',
+                         f'\nEnter phone number in the format [+[{country_code}](0)_______]:', '\nEnter availability: ',
                          '\nEnter your email: ', '\nEnter your new password (over 8 characters long): ']
 
             def go_back(questionStack):
