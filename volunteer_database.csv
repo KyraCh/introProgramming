@@ -1,13 +1,13 @@
 Username,First name,Second name,Phone,Camp ID,Availability
 Volunteer1,Kate,Yellow,442234567,AU1-1,15h
-Volunteer2,Jane,Smith ,449876543,AU1-1,40h
-Volunteer3,Meghan,Brown ,441312456,AU1-2,10h
+Volunteer2,Jane,Smith,449876543,AU1-1,40h
+Volunteer3,Meghan,Brown,441312456,AU1-2,10h
 Volunteer4,Sam ,Richards,446745891,AU1-1,30h
-Volunteer5,Amber,Robinson ,448967124,AU1-2,17h
+Volunteer5,Amber,Robinson,448967124,AU1-2,17h
 Volunteer6,Alex,Gold,445689541,AU1-2,8h
 Volunteer7,Henry,Vincent,445897352,AU1-1,33h
-Volunteer8,Jessica ,Vincent,442356789,AU1-1,18h
-Volunteer9,George ,Thompson ,445612345,AU1-1,10h
+Volunteer8,Jessica,Vincent,442356789,AU1-1,18h
+Volunteer9,George,Thompson,445612345,AU1-1,10h
 Volunteer10,Emily,Jones,445612346,AU1-1,10h
 Volunteer11,Sophie,Taylor,445612347,AU1-1,10h
 Volunteer12,William,Owen,445612348,AU1-1,10h
@@ -42,3 +42,9 @@ Volunteer40,Greg,Barker,445612376,AU1-1,7h
 Volunteer41,Marcus,Walton,445612377,AU1-1,7h
 Volunteer42,Simone,Payne,445612378,AU1-1,7h
 Volunteer43,Sophie,Fox,445612379,AU1-2,7h
+Volunteer44,Hannah,Pink,445632374,AM1-1,20h
+Volunteer45,Lily,Green,445612485,AM1-1,5h
+Volunteer46,Nicole,Boots,449612376,FJ1-1,37h
+Volunteer47,Marcus,Smith,445112377,FJ1-1,23h
+Volunteer48,Simone,Brown,447612378,GT1-1,40h
+Volunteer49,Mark,Bloom,445612379,GT2-1,47h
