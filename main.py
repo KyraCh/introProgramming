@@ -45,9 +45,8 @@ class CentralFunctions():
             user_db = {'username': ['admin'], 'password': [
                 '111'], 'role': ['admin'], 'activated': ['TRUE'], 'email': ['hemtest11@gmail.com']}
             df = pd.DataFrame(user_db)
-            df.set_index('username', inplace=True)
             df['password'] = df['password'].astype(str)
-            df.to_csv('user_database.csv')
+            df.to_csv('user_database.csv',index=False)
             self.user_db = df
         except:
             print("System couldn't read your user database file.")
@@ -62,8 +61,7 @@ class CentralFunctions():
             vol_db = {'Username': [''], 'First name': [''], 'Second name': [
                 ''], 'Camp ID': [''], 'Avability': [''], 'Status': ['']}
             df = pd.DataFrame(vol_db)
-            df.set_index('Username', inplace=True)
-            df.to_csv('volunteer_database.csv')
+            df.to_csv('volunteer_database.csv',index=False)
             self.vol_db = df
         except:
             print("System couldn't read your volunteer database file.")
@@ -78,8 +76,7 @@ class CentralFunctions():
             refugee_db = {'Family ID': [''], 'Lead Family Member Name': [''], 'Lead Family Member Surname': [
                 ''], 'Camp ID': [''], 'Mental State': [''], 'Physical State': [''], 'No. Of Family Members': ['']}
             df = pd.DataFrame(refugee_db)
-            df.set_index('Family ID', inplace=True)
-            df.to_csv('refugee_database.csv')
+            df.to_csv('refugee_database.csv',index=False)
             self.refugee_db = df
         except:
             print("System couldn't read your refugees database file.")
@@ -94,8 +91,7 @@ class CentralFunctions():
             camps_db = {'Emergency ID': [''], 'Type of emergency': [''], 'Description': [''], 'Location': [''], 'Start date': [
                 ''], 'Close date': [''], 'Number of refugees': [''], 'Camp ID': [''], 'No Of Volounteers': [''], 'Capacity': ['']}
             df = pd.DataFrame(camps_db)
-            df.set_index('Emergency ID', inplace=True)
-            df.to_csv('camp_database.csv')
+            df.to_csv('camp_database.csv',index=False)
             self.camps_db = df
         except:
             print("System couldn't read your camplist database file.")
@@ -110,8 +106,7 @@ class CentralFunctions():
             emergencies_db = {'Emergency ID': [''], 'Location': [''], 'Type': [
                 ''], 'Description': [''], 'Start date': [''], 'Close date': ['']}
             df = pd.DataFrame(emergencies_db)
-            df.set_index('Emergency ID', inplace=True)
-            df.to_csv('emergency_database.csv')
+            df.to_csv('emergency_database.csv',index=False)
             self.emergencies_db = df
         except:
             print("System couldn't read your camplist database file.")
@@ -127,8 +122,7 @@ class CentralFunctions():
                        'Meals per day': [''], 'Days': [''], 'Total meals': [''],
                        'Price per meal': [''], 'Budget per day': [''], 'Total budget': ['']}
             df = pd.DataFrame(meals_db)
-            df.set_index('Camp ID', inplace=True)
-            df.to_csv('mealplans_database.csv')
+            df.to_csv('mealplans_database.csv',index=False)
             self.meals_db = df
         except:
             print("System couldn't read the camps meals database file.")
@@ -136,14 +130,14 @@ class CentralFunctions():
 
 
         try:
-            df = pd.read_csv("countries.csv", index_col='Country name')
+            df = pd.read_csv(".sys_countries.csv", index_col='Country name')
             self.countries_db = df
         except:
             print("System couldn't read the countries database file.")
             dataFailure = True
         
         try:
-            df = pd.read_csv('organisation_per_continent.csv')
+            df = pd.read_csv('.sys_organisation_per_continent.csv')
             self.organisations_db = df
         except:
             print("System couldn't read the Organisations per Continent database file.")
