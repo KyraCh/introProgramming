@@ -37,10 +37,20 @@ class CentralFunctions():
 
         try:
             df = pd.read_csv('user_database.csv')
+
+            # Check all the requried indexes are in the file
+            for i in ['username', 'password', 'role', 'activated', 'email']:
+                if i not in df.columns:
+                    print(Fore.RED + f'Missing {i} index from user database.')
+                    print(Style.RESET_ALL)
+                    dataFailure = True
+
             df.dropna(how="all", inplace=True)
             df.fillna('', inplace=True)
             df['password'] = df['password'].astype(str)
             self.user_db = df
+
+        # If the file does not exist
         except FileNotFoundError:
             user_db = {'username': ['admin'], 'password': [
                 '111'], 'role': ['admin'], 'activated': ['TRUE'], 'email': ['hemtest11@gmail.com']}
@@ -48,42 +58,71 @@ class CentralFunctions():
             df['password'] = df['password'].astype(str)
             df.to_csv('user_database.csv',index=False)
             self.user_db = df
-        except:
-            print("System couldn't read your user database file.")
+
+        # If the file is empty
+        except pd.errors.EmptyDataError:
+            print(Fore.RED + "Your user database file is currently empty.")
+            print(Style.RESET_ALL)
             dataFailure = True
 
         try:
             df = pd.read_csv('volunteer_database.csv')
+            
+            for i in ['Username', 'First name', 'Second name', 'Phone', 'Camp ID', 'Availability']:
+                if i not in df.columns:
+                    print(Fore.RED + f'Missing {i} index from user database.')
+                    print(Style.RESET_ALL)
+                    dataFailure = True
+
             df.dropna(how="all", inplace=True)
             df.fillna('', inplace=True)
             self.vol_db = df
+
         except FileNotFoundError:
-            vol_db = {'Username': [''], 'First name': [''], 'Second name': [
-                ''], 'Camp ID': [''], 'Avability': [''], 'Status': ['']}
+            vol_db = {'Username': [''], 'First name': [''], 'Second name': [''],'Phone':[''], 'Camp ID': [''], 'Avability': ['']}
             df = pd.DataFrame(vol_db)
             df.to_csv('volunteer_database.csv',index=False)
             self.vol_db = df
-        except:
-            print("System couldn't read your volunteer database file.")
+
+        except pd.errors.EmptyDataError:
+            print(Fore.RED + "Your volunteer database file is currently empty.")
+            print(Style.RESET_ALL)
             dataFailure = True
 
         try:
             df = pd.read_csv('refugee_database.csv')
+            
+            for i in ['Family ID', 'Lead Family Member Name', 'Lead Family Member Surname', 'Camp ID', 'Mental State', 'Physical State', 'No. Of Family Members']:
+                if i not in df.columns:
+                    print(Fore.RED + f'Missing {i} index from user database.')
+                    print(Style.RESET_ALL)
+                    dataFailure = True
+            
             df.dropna(how="all", inplace=True)
             df.fillna('', inplace=True)
             self.refugee_db = df
+
         except FileNotFoundError:
+
             refugee_db = {'Family ID': [''], 'Lead Family Member Name': [''], 'Lead Family Member Surname': [
                 ''], 'Camp ID': [''], 'Mental State': [''], 'Physical State': [''], 'No. Of Family Members': ['']}
             df = pd.DataFrame(refugee_db)
             df.to_csv('refugee_database.csv',index=False)
             self.refugee_db = df
-        except:
-            print("System couldn't read your refugees database file.")
+
+        except pd.errors.EmptyDataError:
+            print(Fore.RED + "Your refugee database file is currently empty.")
+            print(Style.RESET_ALL)
             dataFailure = True
 
         try:
             df = pd.read_csv('camp_database.csv')
+            for i in ['Camp ID', 'Location', 'Number of volunteers', 'Capacity','Emergency ID', 'Number of refugees']:
+                if i not in df.columns:
+                    print(Fore.RED + f'Missing {i} index from user database.')
+                    print(Style.RESET_ALL)
+                    dataFailure = True
+            
             df.dropna(how="all", inplace=True)
             df.fillna('', inplace=True)
             self.camps_db = df
@@ -93,8 +132,9 @@ class CentralFunctions():
             df = pd.DataFrame(camps_db)
             df.to_csv('camp_database.csv',index=False)
             self.camps_db = df
-        except:
-            print("System couldn't read your camplist database file.")
+        except pd.errors.EmptyDataError:
+            print(Fore.RED + "Your camplist database file is currently empty.")
+            print(Style.RESET_ALL)
             dataFailure = True
 
         try:
@@ -108,8 +148,9 @@ class CentralFunctions():
             df = pd.DataFrame(emergencies_db)
             df.to_csv('emergency_database.csv',index=False)
             self.emergencies_db = df
-        except:
-            print("System couldn't read your camplist database file.")
+        except pd.errors.EmptyDataError:
+            print(Fore.RED + "Your emergency database file is currently empty.")
+            print(Style.RESET_ALL)
             dataFailure = True
 
         try:
@@ -117,6 +158,7 @@ class CentralFunctions():
             df.dropna(how="all", inplace=True)
             df.fillna('', inplace=True)
             self.meals_db = df
+            
         except FileNotFoundError:
             meals_db = {'Camp ID': [''], 'Total number of refugees': [''],
                        'Meals per day': [''], 'Days': [''], 'Total meals': [''],
@@ -124,23 +166,27 @@ class CentralFunctions():
             df = pd.DataFrame(meals_db)
             df.to_csv('mealplans_database.csv',index=False)
             self.meals_db = df
-        except:
-            print("System couldn't read the camps meals database file.")
+
+        except pd.errors.EmptyDataError:
+            print(Fore.RED + "Your meal plans database file is currently empty.")
+            print(Style.RESET_ALL)
             dataFailure = True
 
 
         try:
             df = pd.read_csv(".sys_countries.csv", index_col='Country name')
             self.countries_db = df
-        except:
-            print("System couldn't read the countries database file.")
+        except pd.errors.EmptyDataError:
+            print(Fore.RED + "Your .sys_countries database file is currently empty.")
+            print(Style.RESET_ALL)
             dataFailure = True
         
         try:
             df = pd.read_csv('.sys_organisation_per_continent.csv')
             self.organisations_db = df
-        except:
-            print("System couldn't read the Organisations per Continent database file.")
+        except pd.errors.EmptyDataError:
+            print(Fore.RED + "Your .sys_organisation_per_continent database file is currently empty.")
+            print(Style.RESET_ALL)
             dataFailure = True
 
         return dataFailure
