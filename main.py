@@ -286,21 +286,21 @@ class CentralFunctions():
         '''
         Interactive method which allows to add new family to the list
         '''
+        print(100 * '=')
+        print('\nPlease provide details of the new refugee family.')
+        print('Expected Inputs:\n'+
+            '\t>Name of lead family member\n'+
+            '\t>Surname of lead family member\n'+
+            '\t>Mental state of the family\n'+
+            '\t>Physical state of the family\n'+
+            '\t>Number of family members')
+        if self.current_user == 'admin':
+            print('\t>Emergency\n'+
+            '\t>Camp')
+        print('\n[B] to go back')
+        print('[Q] to quit')
         while True:
             refugee_df = self.refugee_db.copy()
-            print(100 * '=')
-            print('\nPlease provide details of the new refugee family.')
-            print('Expected Inputs:\n'+
-              '\t>Name of lead family member\n'+
-              '\t>Surname of lead family member\n'+
-              '\t>Mental state of the family\n'+
-              '\t>Physical state of the family\n'+
-              '\t>Number of family members')
-            if self.current_user == 'admin':
-                print('\t>Emergency\n'+
-              '\t>Camp')
-            print('\n[B] to go back')
-            print('[Q] to quit')
             name = input("\nState name of family's lead member: ")
             if name.upper() == "Q" or name.upper() == "B":
                 print(100 * '=')
@@ -337,7 +337,7 @@ class CentralFunctions():
                         while True:
                             no_of_members = (
                                 input("\nType the number of family members: "))
-                            if no_of_members == "b" or no_of_members == "B":
+                            if no_of_members.upper() == "B":
                                 break
                             elif no_of_members.upper() == "Q":
                                 print(100 * '=')
@@ -350,10 +350,10 @@ class CentralFunctions():
                                 print("It has to be an integer")
 
                             if self.current_user == 'admin':
-                                df = self.emergencies_db[["Emergency ID"]]
-                                print(tabulate(df, headers='keys', tablefmt='psql', showindex=False))
-                                emergency_list = self.emergencies_db["Emergency ID"].tolist()
                                 while True:
+                                    df = self.emergencies_db[["Emergency ID"]]
+                                    emergency_list = self.emergencies_db["Emergency ID"].tolist()
+                                    print(tabulate(df, headers='keys', tablefmt='psql', showindex=False))
                                     emergency_id = input("\nChoose emergency: ")
                                     if emergency_id.upper() == "B":
                                         break
@@ -364,13 +364,15 @@ class CentralFunctions():
                                     elif emergency_id not in emergency_list:
                                         print("Invalid input for emergency")
                                         continue
-                                    df = self.refugee_db.loc[self.refugee_db['Camp ID'].str.contains('AU1', case=False)][['Camp ID']]
+                                    df = self.camps_db.loc[self.camps_db['Camp ID'].str.contains(emergency_id, case=False)][['Camp ID']]
                                     df.drop_duplicates(subset = 'Camp ID', inplace = True)
-                                    camp_id_list = df['Camp ID']
-                                    print(tabulate(df, headers='keys', tablefmt='psql', showindex=False))
+                                    camp_id_list = list(df['Camp ID'])
+                                    if len(camp_id_list) == 0:
+                                        print("!There are no camps in this emergency.")
+                                        continue
                                     while True:
-                                        camp_choice = input(
-                                            "\nChoose a camp to which you want to assign family: ")
+                                        print(tabulate(df, headers='keys', tablefmt='psql', showindex=False))
+                                        camp_choice = input("\nChoose a camp to which you want to assign family: ")
                                         if camp_choice.upper() == "B":
                                             break
                                         elif camp_choice.upper() == "Q":
@@ -386,21 +388,32 @@ class CentralFunctions():
                                         family_id = str(
                                             family_count) + camp_choice
                                         break
+                                    if camp_choice.upper() == "B":
+                                        continue
                                     break
+                                if emergency_id.upper() == "B":
+                                    continue
+                                break
 
                             else:
                                 camp_choice = self.vol_db[self.vol_db['Camp ID']
                                                           == self.camp_of_user]['Camp ID'].values[0]
                                 family_count = len(refugee_df.loc[refugee_df['Camp ID'].str.contains(
                                     camp_choice, case=False)]) + 1
-                                family_id = str(family_count) + camp_choice
-                                
-                            
+                                family_id = str(family_count) + camp_choice      
+
                             break
+                        if type(no_of_members) == str and no_of_members.upper() == "B":
+                            continue
                         break
+                    if physical_state.upper() == "B":
+                        continue
                     break
+                if mental_state.upper() == "B":
+                    continue
                 break
-        
+            if surname.upper() == "B":
+                continue
             refugee_df.loc[len(refugee_df)] = [family_id, name, surname, camp_choice, mental_state, physical_state, no_of_members]
             print(tabulate(refugee_df.tail(1), headers='keys', tablefmt='psql', showindex=False))
             while True:
