@@ -828,8 +828,7 @@ class CentralFunctions():
             else:
                 continue
 
-    def count_ref_vol(
-            self):  # what is the purpose of this method? - count refugees and volunteers and update camps_db - Fedor
+    def count_ref_vol(self):  # what is the purpose of this method? - count refugees and volunteers and update camps_db - Fedor
         '''
         Counts the number of volunteers in each camp and the number of refugees in each camp, after which it updates the camp_database.csv with correct numbers.
         '''
@@ -1552,7 +1551,6 @@ class Admin(CentralFunctions):
                         print(100 * '=')
                         menu(self.functions)
                         exit()
-                    # and country_id in list(emergency_df['Emergency ID']):
                     if country in countries.keys():
                         country_id = countries[country]['Country code']
                         if True in list(emergency_df['Emergency ID'].str.contains(country_id, case=False)):
@@ -1601,6 +1599,10 @@ class Admin(CentralFunctions):
                         break
                     if capacity.isdigit() == False:
                         print(Fore.RED + '\nPlease enter an integer.\n')
+                        print(Style.RESET_ALL)
+                        continue
+                    elif int(capacity) <= 0:
+                        print(Fore.RED + '\nCapacity must be larger than zero.\n')
                         print(Style.RESET_ALL)
                         continue
                     break
@@ -1919,10 +1921,10 @@ class Volunteer(CentralFunctions):
                 print('[Q] to quit')
 
                 print('')
-                df = vol_df.loc[vol_df['Username'] == self.current_user]
+                df = self.vol_db.loc[self.vol_db['Username'] == self.current_user]
                 print(tabulate(df, headers='keys', tablefmt='psql', showindex=False))
                 print('')
-                df = users_df.loc[users_df['username'] == self.current_user, ['username', 'password', 'email']]
+                df = self.user_db.loc[self.user_db['username'] == self.current_user, ['username', 'password', 'email']]
                 print(tabulate(df, headers='keys', tablefmt='psql', showindex=False))
 
                 user_input = input("\nChoose interaction: ")
