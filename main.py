@@ -1,6 +1,9 @@
 import pandas as pd
 # import matplotlib.pyplot as plt
 import numpy as np
+import webbrowser
+import os
+import folium
 import datetime
 from tabulate import tabulate
 import re
@@ -8,7 +11,7 @@ import smtplib
 import random
 from email.message import EmailMessage
 import ssl
-from colorama import Fore, Back, Style
+from colorama import Fore, Style
 
 
 class CentralFunctions():
@@ -49,8 +52,7 @@ class CentralFunctions():
             df.to_csv('user_database.csv', index=False)
             self.user_db = df
         except:
-            print(Fore.RED + '\nSystem could not read your user database file.\n')
-            print(Style.RESET_ALL)
+            print("System couldn't read your user database file.")
             dataFailure = True
 
         try:
@@ -65,8 +67,7 @@ class CentralFunctions():
             df.to_csv('volunteer_database.csv', index=False)
             self.vol_db = df
         except:
-            print(Fore.RED + '\nSystem could not read your user database file.\n')
-            print(Style.RESET_ALL)
+            print("System couldn't read your volunteer database file.")
             dataFailure = True
 
         try:
@@ -81,8 +82,7 @@ class CentralFunctions():
             df.to_csv('refugee_database.csv', index=False)
             self.refugee_db = df
         except:
-            print(Fore.RED + '\nSystem could not read your user database file.\n')
-            print(Style.RESET_ALL)
+            print("System couldn't read your refugees database file.")
             dataFailure = True
 
         try:
@@ -97,8 +97,7 @@ class CentralFunctions():
             df.to_csv('camp_database.csv', index=False)
             self.camps_db = df
         except:
-            print(Fore.RED + '\nSystem could not read your user database file.\n')
-            print(Style.RESET_ALL)
+            print("System couldn't read your camplist database file.")
             dataFailure = True
 
         try:
@@ -113,8 +112,7 @@ class CentralFunctions():
             df.to_csv('emergency_database.csv', index=False)
             self.emergencies_db = df
         except:
-            print(Fore.RED + '\nSystem could not read your user database file.\n')
-            print(Style.RESET_ALL)
+            print("System couldn't read your camplist database file.")
             dataFailure = True
 
         try:
@@ -130,24 +128,35 @@ class CentralFunctions():
             df.to_csv('mealplans_database.csv', index=False)
             self.meals_db = df
         except:
-            print(Fore.RED + '\nSystem could not read your user database file.\n')
-            print(Style.RESET_ALL)
+            print("System couldn't read the camps meals database file.")
             dataFailure = True
 
         try:
             df = pd.read_csv(".sys_countries.csv", index_col='Country name')
             self.countries_db = df
         except:
-            print(Fore.RED + '\nSystem could not read your user database file.\n')
-            print(Style.RESET_ALL)
+            print("System couldn't read the countries database file.")
             dataFailure = True
 
         try:
             df = pd.read_csv('.sys_organisation_per_continent.csv')
             self.organisations_db = df
         except:
-            print(Fore.RED + '\nSystem could not read your user database file.\n')
-            print(Style.RESET_ALL)
+            print("System couldn't read the Organisations per Continent database file.")
+            dataFailure = True
+
+        return dataFailure
+
+        try:
+            df = pd.read_csv('supplies_database.csv')
+            self.supply_db = df
+        except FileNotFoundError:
+            supply_db = {'Camp ID': [''], 'Sleeping bags': [''], 'Masks': [''], 'Basic medication': [''], 'Feminine hygiene products': [''], 'Emergency blankets': [''], 'Towels': ['']}
+            df = pd.DataFrame(supply_db)
+            df.to_csv('supplies_database.csv', index=False)
+            self.emergencies_db = df
+        except:
+            print("System couldn't read your supplies database file. Make sure you have a camp_database.csv")
             dataFailure = True
 
         return dataFailure
@@ -213,14 +222,16 @@ class CentralFunctions():
                 if username == 'admin':
                     self.current_user = 'admin'
                     self.camp_of_user = 'adm'
-                    print(f'Welcome admin!')
+                    print(Fore.BLUE + '\nWelcome admin!\n')
+                    print(Style.RESET_ALL)
                     print(Fore.RED + '\nWARNING: YOUR PASSWORD IS IN DANGER\n')
                     print(Style.RESET_ALL)
                 else:
                     name = vol_dict[username]['First name']
                     self.camp_of_user = vol_dict[username]['Camp ID']
-                    print(f'Welcome {name}!')
-                    print('WARNING: PLEASE ADD YOUR PERSONAL INFORMATION AND CHANGE PASSWORD')
+
+                    print(Fore.BLUE + f'Welcome {name}!')
+                    print(Style.RESET_ALL)
                     print(Fore.RED + '\nWARNING: PLEASE ADD YOUR PERSONAL INFORMATION AND CHANGE PASSWORD\n')
                     print(Style.RESET_ALL)
                 break
@@ -232,14 +243,15 @@ class CentralFunctions():
                     if password == 'B':
                         break
                     elif password != users_dict[username]['password']:
-                        print('Password is incorrect.')
+                        print(Fore.RED + '\nPassword is incorrect.\n')
+                        print(Style.RESET_ALL)
                         count_password += 1
                         left_attempts = 3 - count_password
                         print(f"You have {left_attempts} attempts left ")
                         if count_password == 3:
-                            if self.user_db.loc[self.user_db["username"] == self.current_user]['role'].values[
-                                0] == "volunteer":
-                                print("Your account was deactivated. Please contact admin")
+                            if self.user_db.loc[self.user_db["username"] == self.current_user]['role'].values[0] == "volunteer":
+                                print(Fore.RED + '\nYour account was deactivated. Please contact admin\n')
+                                print(Style.RESET_ALL)
                                 self.user_db.loc[self.user_db["username"] == self.current_user, 'activated'] = False
                                 self.user_db.to_csv("user_database.csv", index=False)
                             exit()
@@ -274,7 +286,8 @@ class CentralFunctions():
                     if inpt == 'B':
                         break
                     elif otp != inpt:
-                        print("Please enter valid OTP.")
+                        print(Fore.RED + '\nPlease enter valid OTP.\n')
+                        print(Style.RESET_ALL)
                     else:
                         break
                 if inpt == 'B':
@@ -284,11 +297,13 @@ class CentralFunctions():
                 print(100 * '=')
                 if username == 'admin':
                     self.camp_of_user = 'adm'
-                    print('Welcome back admin!')
+                    print(Fore.BLUE + '\nWelcome admin!\n')
+                    print(Style.RESET_ALL)
                 else:
                     name = vol_dict[username]['First name']
                     self.camp_of_user = vol_dict[username]['Camp ID']
-                    print(f'Welcome back {name}!')
+                    print(Fore.BLUE + f'Welcome {name}!')
+                    print(Style.RESET_ALL)
                 break
 
     def create_profile(self):
@@ -324,7 +339,8 @@ class CentralFunctions():
                     menu(self.functions)
                     exit()
                 if not name.isalpha() or not surname.isalpha():
-                    print("Invalid input.")
+                    print(Fore.RED + '\nInvalid input.\n')
+                    print(Style.RESET_ALL)
                 while True:
                     mental_state = input(
                         "\nDescribe the mental state of the family: ")
@@ -356,7 +372,8 @@ class CentralFunctions():
                                 no_of_members = int(no_of_members)
 
                             except ValueError:
-                                print("It has to be an integer")
+                                print(Fore.RED + '\nIt has to be an integer\n')
+                                print(Style.RESET_ALL)
                                 continue
 
                             if self.current_user == 'admin':
@@ -372,7 +389,8 @@ class CentralFunctions():
                                         menu(self.functions)
                                         exit()
                                     elif emergency_id not in emergency_list:
-                                        print("Invalid input for emergency")
+                                        print(Fore.RED + '\nInvalid input for emergency\n')
+                                        print(Style.RESET_ALL)
                                         continue
                                     df = \
                                     self.camps_db.loc[self.camps_db['Camp ID'].str.contains(emergency_id, case=False)][
@@ -380,7 +398,8 @@ class CentralFunctions():
                                     df.drop_duplicates(subset='Camp ID', inplace=True)
                                     camp_id_list = list(df['Camp ID'])
                                     if len(camp_id_list) == 0:
-                                        print("!There are no camps in this emergency.")
+                                        print(Fore.RED + '\nThere are no camps in this emergency\n')
+                                        print(Style.RESET_ALL)
                                         continue
                                     while True:
                                         print(tabulate(df, headers='keys', tablefmt='psql', showindex=False))
@@ -392,7 +411,8 @@ class CentralFunctions():
                                             menu(self.functions)
                                             exit()
                                         elif camp_choice not in camp_id_list:
-                                            print("You have to choose from a list of available camps!")
+                                            print(Fore.RED + '\nYou have to choose from a list of available camps!\n')
+                                            print(Style.RESET_ALL)
                                             continue
 
                                         family_count = len(refugee_df.loc[refugee_df['Camp ID'].str.contains(
@@ -434,7 +454,8 @@ class CentralFunctions():
                 if commit == 'y' or commit == 'n':
                     break
                 else:
-                    print('Your input is not recognised')
+                    print(Fore.RED + '\nYour input is not recognised\n')
+                    print(Style.RESET_ALL)
                     continue
 
             if commit == 'y':
@@ -515,7 +536,8 @@ class CentralFunctions():
             elif user_input.upper() == 'B' or user_input.upper() == 'Q':
                 break
             else:
-                print('Invalid input')
+                print(Fore.RED + '\nInvalid input\n')
+                print(Style.RESET_ALL)
             continue
 
         print(100 * '=')
@@ -623,7 +645,7 @@ class CentralFunctions():
                 menu(self.functions)
                 exit()
             else:
-                print(Fore.RED + '\nInvalid action. Try again.')
+                print(Fore.RED + '\nInvalid action. Try again.\n')
                 print(Style.RESET_ALL)
         print(100 * '=')
 
@@ -651,7 +673,8 @@ class CentralFunctions():
                 menu(self.functions)
                 exit()
             if iD not in list(list_of_refugees['Family ID']):
-                print('Please enter valid Family ID')
+                print(Fore.RED + '\nPlease enter valid Family ID\n')
+                print(Style.RESET_ALL)
                 continue
 
             while True:
@@ -676,11 +699,13 @@ class CentralFunctions():
                     try:
                         operations = [int(i) for i in inpt.split(',')]
                     except:
-                        print('Please input valid indices\n')
+                        print(Fore.RED + '\nPlease input valid indices\n')
+                        print(Style.RESET_ALL)
                         continue
                     check = [not (i < 1 or i > 6) for i in operations]
                     if any(i is False for i in check):
-                        print('Please input valid indices\n')
+                        print(Fore.RED + '\nPlease input valid indices\n')
+                        print(Style.RESET_ALL)
                         continue
                     break
 
@@ -748,7 +773,8 @@ class CentralFunctions():
                 if commit == 'y' or commit == 'n':
                     break
                 else:
-                    print('Your input is not recognised')
+                    print(Fore.RED + '\nYour input is not recognised\n')
+                    print(Style.RESET_ALL)
                     continue
 
             if commit == 'y':
@@ -852,7 +878,8 @@ class CentralFunctions():
                 exit()
 
             else:
-                print('Invalid input')
+                print(Fore.RED + '\nInvalid input\n')
+                print(Style.RESET_ALL)
                 continue
 
     def call_help(self):
@@ -880,6 +907,32 @@ class CentralFunctions():
                            showindex=False))
             print('')
         print(100 * '=')
+    def map(self):
+        print('\nChoose an interaction by typing the corresponding number.')
+        print('Example: type "1" to view all camps on the map.\n')
+        print("[1] - To view all camps on the map.\n")
+
+        print('[B] to go back')
+
+        interaction = input('\nChoose interaction:').upper()
+        if interaction == '1':
+            df = pd.read_csv('camp_database.csv')
+            newdf = df[['Lat', 'Long', 'Location']]
+            map = folium.Map(location=[newdf.Lat.mean(), newdf.Long.mean()],
+                             zoom_start=14, control_scale=True)
+
+            def view_all_camps_on_map():
+                for index, location_info in newdf.iterrows():
+                    folium.Marker([location_info["Lat"], location_info["Long"]],
+                                  popup=location_info["Location"]).add_to(map)
+            view_all_camps_on_map()
+            map.save('map.html')
+
+            webbrowser.open('file://' + os.path.realpath('map.html'))
+        elif interaction ==  'B':
+            print(100 * '=')
+            menu(self.functions)
+            exit()
 
 
 class Admin(CentralFunctions):
@@ -894,17 +947,17 @@ class Admin(CentralFunctions):
                           "6": {'method': self.call_volunteers, 'message': '[6] - See information about volunteers', },
                           "7": {'method': self.write_volunteer, 'message': '[7] - Add new volunteer(s) profile(s)', },
                           "8": {'method': self.admin_volunteer_commands,
-                                'message': '[8] - Amend volunteer activation status', },
+                                'message': '[8] - Amend volunteer activation status.', },
                           "9": {'method': self.create_profile, 'message': '[9] - Create refugee profile', },
                           "10": {'method': self.amend_refugee_profile, 'message': '[10] - Amend refugee profile', },
                           "11": {'method': self.call_no_of_refugees,
                                  'message': '[11] - See information about refugees', },
                           "12": {'method': self.camp_finance, 'message': '[12] - Create meal plan for a camp', },
-                          "13": {'method': self.call_help,
+                          "13": {'method': self.map, 'message': '[13] - View map information', },
+                          "14": {'method': self.call_help,
                                  'message': '\n[h] - Contacts of local relief organisations', }}
         self.current_user = current_user
         self.camp_of_user = camp_of_user
-
     def create_emergency(self):
         '''
         Allows user to create emergency by requesting country of emergencym type of emergency, description and start date.
@@ -939,7 +992,8 @@ class Admin(CentralFunctions):
                             elif answer in list(self.countries_db.index):
                                 break
                             else:
-                                print('Please select valid country')
+                                print(Fore.RED + '\nPlease select valid country\n')
+                                print(Style.RESET_ALL)
                                 continue
                     elif i == 3:
                         while True:
@@ -956,7 +1010,8 @@ class Admin(CentralFunctions):
                                     answer, "%Y-%m-%d").strftime("%d/%m/%Y")
                                 break
                             except:
-                                print('Please enter a day of valid format [YYYY-MM-DD]: ')
+                                print(Fore.RED + '\nPlease enter a day of valid format [YYYY-MM-DD]: \n')
+                                print(Style.RESET_ALL)
                                 continue
                     else:
                         answer = input(questionStack[i])
@@ -1000,7 +1055,8 @@ class Admin(CentralFunctions):
                 if commit == 'y' or commit == 'n':
                     break
                 else:
-                    print('Your input is not recognised')
+                    print(Fore.RED + '\nYour input is not recognised \n')
+                    print(Style.RESET_ALL)
                     continue
 
             if commit == 'y':
@@ -1034,7 +1090,8 @@ class Admin(CentralFunctions):
                     menu(self.functions)
                     exit()
                 else:
-                    print('Please provide valid ID')
+                    print(Fore.RED + '\nPlease provide valid ID\n')
+                    print(Style.RESET_ALL)
                     continue
 
             emergency_db.loc[emergency_db['Emergency ID'] == ID, 'Close date'] = datetime.date.today().strftime(
@@ -1046,7 +1103,8 @@ class Admin(CentralFunctions):
                 if commit == 'y' or commit == 'n':
                     break
                 else:
-                    print('Your input is not recognised')
+                    print(Fore.RED + '\nYour input is not recognised\n')
+                    print(Style.RESET_ALL)
                     continue
 
             if commit == 'y':
@@ -1078,7 +1136,8 @@ class Admin(CentralFunctions):
                 if choose_camp in list(camp_db['Camp ID']) or choose_camp.upper() == 'Q' or choose_camp.upper() == 'B':
                     break
                 else:
-                    print('Please select a valid camp')
+                    print(Fore.RED + '\nPlease select a valid camp\n')
+                    print(Style.RESET_ALL)
                     continue
             if choose_camp.upper() == 'Q' or choose_camp.upper() == 'B':
                 print(100 * '=')
@@ -1098,12 +1157,14 @@ class Admin(CentralFunctions):
                         if camp_db.loc[camp_db['Camp ID'] == choose_camp]['Number of refugees'].values[0] != '':
                             limit = int(camp_db.loc[camp_db['Camp ID'] == choose_camp]['Number of refugees'])
                         if cap < limit:
-                            print('Your new capacity is lower than current number of refugees.')
+                            print(Fore.RED + '\nYour new capacity is lower than current number of refugees\n')
+                            print(Style.RESET_ALL)
                             continue
                         else:
                             break
                     except:
-                        print('Your input needs to be an integer')
+                        print(Fore.RED + '\nYour input needs to be an integer\n')
+                        print(Style.RESET_ALL)
                         continue
             if cap.upper() == 'B':
                 continue
@@ -1121,7 +1182,8 @@ class Admin(CentralFunctions):
                 if commit == 'y' or commit == 'n':
                     break
                 else:
-                    print('Your input is not recognised')
+                    print(Fore.RED + '\nYour input is not recognised\n')
+                    print(Style.RESET_ALL)
                     continue
 
             if commit == 'y':
@@ -1164,7 +1226,8 @@ class Admin(CentralFunctions):
                     while True:
                         inpt = input('\nEnter a new username: ')
                         if inpt in users_exist:
-                            print('Username taken. Try another.')
+                            print(Fore.RED + '\nUsername taken. Try another.\n')
+                            print(Style.RESET_ALL)
                             continue
                         break
                     username = inpt
@@ -1206,11 +1269,13 @@ class Admin(CentralFunctions):
                         elif user_input.upper() == 'B' or user_input.upper() == 'Q':
                             break
                         else:
-                            print('Invalid input.')
+                            print(Fore.RED + '\nInvalid input.\n')
+                            print(Style.RESET_ALL)
                             continue
                         user_input = input('\nEnter camp ID: ')
                         while user_input not in camps_exist:
-                            print('Invalid Camp ID.')
+                            print(Fore.RED + '\nInvalid Camp ID.\n')
+                            print(Style.RESET_ALL)
                             user_input = input('\nEnter camp ID: ')
                         camp = user_input
                         break
@@ -1237,7 +1302,8 @@ class Admin(CentralFunctions):
                     if commit == 'y' or commit == 'n':
                         break
                     else:
-                        print('Your input is not recognised')
+                        print(Fore.RED + '\nYour input is not recognised\n')
+                        print(Style.RESET_ALL)
                         continue
 
                 if commit == 'y':
@@ -1255,7 +1321,8 @@ class Admin(CentralFunctions):
                     if repeat == 'y' or repeat == 'n':
                         break
                     else:
-                        print('Your input is not recognised')
+                        print(Fore.RED + '\nYour input is not recognised\n')
+                        print(Style.RESET_ALL)
                         continue
                 if repeat == 'n':
                     break
@@ -1275,14 +1342,16 @@ class Admin(CentralFunctions):
                             menu(self.functions)
                             exit()
                     except ValueError:
-                        print('Your input needs to be an integer')
+                        print(Fore.RED + '\nYour input needs to be an integer\n')
+                        print(Style.RESET_ALL)
                         continue
                     while True:
                         print('')
                         print(tabulate(camps_df, headers='keys', tablefmt='psql', showindex=False))
                         camp = input('\nEnter camp ID: ')
                         if camp not in camps_exist:
-                            print('Invalid Camp ID.')
+                            print(Fore.RED + '\nInvalid Camp ID.\n')
+                            print(Style.RESET_ALL)
                             continue
                         else:
                             break
@@ -1308,7 +1377,8 @@ class Admin(CentralFunctions):
                     if commit == 'y' or commit == 'n':
                         break
                     else:
-                        print('Your input is not recognised')
+                        print(Fore.RED + '\nYour input is not recognised\n')
+                        print(Style.RESET_ALL)
                         continue
 
                 if commit == 'y':
@@ -1329,7 +1399,8 @@ class Admin(CentralFunctions):
             if user_input == '1' or user_input == '2':
                 break
             else:
-                print('You input is not recognised')
+                print(Fore.RED + '\nYour input is not recognised\n')
+                print(Style.RESET_ALL)
                 continue
 
         if user_input == '1':
@@ -1444,7 +1515,9 @@ class Admin(CentralFunctions):
         print('Expected Inputs:\n' +
               '\t>Country\n' +
               '\t>Emergency ID\n' +
-              '\t>Camp capacity\n')
+              '\t>Camp capacity\n' +
+              '\t>Latitude of camp location\n' +
+              '\t>Longtitude of camp location\n')
         print('[B] to go back')
         print('[Q] to quit\n')
         print(tabulate(self.emergencies_db, headers='keys', tablefmt='psql', showindex=False))
@@ -1468,7 +1541,8 @@ class Admin(CentralFunctions):
                         country_id = countries[country]['Country code']
                         if True in list(emergency_df['Emergency ID'].str.contains(country_id, case=False)):
                             break
-                    print('Please select country with an existing emergency.')
+                    print(Fore.RED + '\nPlease select country with an existing emergency.\n')
+                    print(Style.RESET_ALL)
                 return 1
 
             def assign_emergency():
@@ -1487,7 +1561,8 @@ class Admin(CentralFunctions):
                         if emergency in list(emergencies_in_country['Emergency ID']):
                             break
                         else:
-                            print('Please select valid ID.')
+                            print(Fore.RED + '\nPlease select valid ID.\n')
+                            print(Style.RESET_ALL)
                             continue
                     else:
                         emergency = list(
@@ -1509,7 +1584,8 @@ class Admin(CentralFunctions):
                     if capacity.upper() == 'B' or emergency.upper() == 'Q':
                         break
                     if capacity.isdigit() == False:
-                        print('Please enter an integer.')
+                        print(Fore.RED + '\nPlease enter an integer.\n')
+                        print(Style.RESET_ALL)
                         continue
                     break
                 if capacity.upper() == 'B':
@@ -1521,7 +1597,52 @@ class Admin(CentralFunctions):
                 else:
                     return 1
 
-            inputs = [assign_country, assign_emergency, assign_capacity]
+            def assign_lat():
+                global lat
+                while True:
+                    lat = input("\nEnter latitude of camp location: ")
+                    if lat.upper() == 'B' or lat.upper() == 'Q':
+                        break
+                    try:
+                        lat = float(lat)
+                    except ValueError:
+                        print(Fore.RED + '\nInvalid input.\n')
+                        print(Style.RESET_ALL)
+                        continue
+                    break
+                lat = str(lat)
+                if lat.upper() == 'B':
+                    return -1
+                elif lat.upper() == 'Q':
+                    print(100 * '=')
+                    menu(self.functions)
+                    exit()
+                else:
+                    return 1
+
+            def assign_long():
+                global long
+                while True:
+                    long = input("\nEnter longtitude of camp location: ")
+                    if long.upper() == 'B' or long.upper() == 'Q':
+                        break
+                    try:
+                        long = float(long)
+                    except ValueError:
+                        print(Fore.RED + '\nInvalid input.\n')
+                        print(Style.RESET_ALL)
+                        continue
+                    break
+                if str(long).upper() == 'B':
+                    return -1
+                elif str(long).upper() == 'Q':
+                    print(100 * '=')
+                    menu(self.functions)
+                    exit()
+                else:
+                    return 1
+
+            inputs = [assign_country, assign_emergency, assign_capacity, assign_lat, assign_long]
 
             while counter < len(inputs):
                 counter += inputs[counter]()
@@ -1537,7 +1658,7 @@ class Admin(CentralFunctions):
 
             new_ID = emergency + '-' + str(new_camp_index)
 
-            camps_df.loc[len(camps_df.index)] = [new_ID, country, '', capacity, emergency, '']
+            camps_df.loc[len(camps_df.index)] = [new_ID, country, '', capacity, emergency, '', lat, long]
 
             print(tabulate(camps_df.tail(1), headers='keys', tablefmt='psql', showindex=False))
             while True:
@@ -1545,7 +1666,8 @@ class Admin(CentralFunctions):
                 if commit == 'y' or commit == 'n':
                     break
                 else:
-                    print('Your input is not recognised')
+                    print(Fore.RED + '\nYour input is not recognised\n')
+                    print(Style.RESET_ALL)
                     continue
 
             if commit == 'y':
@@ -1594,7 +1716,8 @@ class Admin(CentralFunctions):
                         menu(self.functions)
                         exit()
                     if inpt not in list(camps_df['Camp ID']):
-                        print('Invalid input.')
+                        print(Fore.RED + '\nInvalid input.\n')
+                        print(Style.RESET_ALL)
                         continue
                     camp_id = inpt
                     if camp_id not in list(meals_df['Camp ID']):
@@ -1616,7 +1739,8 @@ class Admin(CentralFunctions):
                     try:
                         inpt = int(inpt)
                     except:
-                        print('Invalid input.')
+                        print(Fore.RED + '\nInvalid input.\n')
+                        print(Style.RESET_ALL)
                         continue
                     no_of_refugees = refugee_df.loc[refugee_df['Camp ID'] == camp_id]['No. Of Family Members'].sum(
                         axis=0)
@@ -1638,7 +1762,8 @@ class Admin(CentralFunctions):
                         return -1
                     if not price_per_meal.isdigit() and re.match(r'^-?\d+(?:\.\d+)$',
                                                                  price_per_meal) is None:  # This check if inpt is neither integer nor float
-                        print('Invalid input.')
+                        print(Fore.RED + '\nInvalid input.\n')
+                        print(Style.RESET_ALL)
                         continue
                     meals_df.loc[index, ['Price per meal']] = [price_per_meal]
                     return 1
@@ -1659,7 +1784,8 @@ class Admin(CentralFunctions):
                     elif choice.upper() == 'B':
                         return -1
                     if choice not in ['1', '2']:
-                        print('Invalid input')
+                        print(Fore.RED + '\nInvalid input.\n')
+                        print(Style.RESET_ALL)
                         continue
                     while True:
                         days = 0
@@ -1675,7 +1801,8 @@ class Admin(CentralFunctions):
                             try:
                                 days = int(days)
                             except:
-                                print('Invalid input.')
+                                print(Fore.RED + '\nInvalid input.\n')
+                                print(Style.RESET_ALL)
                                 continue
                             break
                         else:
@@ -1689,7 +1816,8 @@ class Admin(CentralFunctions):
                             try:
                                 budget = int(budget)
                             except:
-                                print('Invalid input.')
+                                print(Fore.RED + '\nInvalid input.\n')
+                                print(Style.RESET_ALL)
                                 continue
                             break
                     if type(days) == str or type(budget) == str:
@@ -1736,7 +1864,8 @@ class Admin(CentralFunctions):
                 if commit == 'y' or commit == 'n':
                     break
                 else:
-                    print('Your input is not recognised')
+                    print(Fore.RED + '\nYour input is not recognised\n')
+                    print(Style.RESET_ALL)
                     continue
 
             if commit == 'y':
@@ -1751,7 +1880,8 @@ class Admin(CentralFunctions):
                 if repeat == 'y' or repeat == 'n':
                     break
                 else:
-                    print('Your input is not recognised')
+                    print(Fore.RED + '\nYour input is not recognised\n')
+                    print(Style.RESET_ALL)
                     continue
             if repeat == 'n':
                 break
@@ -1773,11 +1903,14 @@ class Volunteer(CentralFunctions):
                           "5": {'method': self.amend_refugee_profile, 'message': '[5] - Amend refugee profile', },
                           "6": {'method': self.call_no_of_refugees,
                                 'message': '[6] - See information about refugees', },
-                          "7": {'method': self.call_help,
+                          "7": {'method': self.inventory,
+                                'message': '[7] - Complete inventory', },
+                          "8": {'method': self.map,
+                                'message': '[8] - View map information', },
+                          "9": {'method': self.call_help,
                                 'message': '\n[h] - Contacts of local relief organisations', }}
         self.current_user = current_user
         self.camp_of_user = camp_of_user
-
     def amend_self_info(self):
         '''
         Allows volunteer user to input their name, surname, phone number and availability.
@@ -1834,7 +1967,8 @@ class Volunteer(CentralFunctions):
                         if inpt.upper() == 'B' or inpt.upper() == 'Q':
                             break
                         elif not inpt.isalpha():
-                            print("Please enter a valid name.")
+                            print(Fore.RED + '\nPlease enter a valid name.\n')
+                            print(Style.RESET_ALL)
                             continue
                         current_name = inpt
                         break
@@ -1847,7 +1981,8 @@ class Volunteer(CentralFunctions):
                         if inpt.upper() == 'B' or inpt.upper() == 'Q':
                             break
                         elif not inpt.isalpha():
-                            print("Please enter a valid name.")
+                            print(Fore.RED + '\nPlease enter a valid name.\n')
+                            print(Style.RESET_ALL)
                             continue
                         else:
                             current_second_name = inpt
@@ -1861,10 +1996,12 @@ class Volunteer(CentralFunctions):
                         if inpt.upper() == 'B' or inpt.upper() == 'Q':
                             break
                         elif not inpt.isnumeric():
-                            print("Please enter a valid phone number.")
+                            print(Fore.RED + '\nPlease enter a valid phone number.\n')
+                            print(Style.RESET_ALL)
                             continue
                         elif len(inpt) != 10:
-                            print("Invalid format.")
+                            print(Fore.RED + '\nInvalid format.\n')
+                            print(Style.RESET_ALL)
                             continue
                         else:
                             current_phone = inpt
@@ -1877,9 +2014,11 @@ class Volunteer(CentralFunctions):
                         if inpt.upper() == 'B' or inpt.upper() == 'Q':
                             break
                         elif not inpt.isnumeric():
-                            print("Invalid input.")
+                            print(Fore.RED + '\nInvalid input.\n')
+                            print(Style.RESET_ALL)
                         elif int(inpt) > 48:
-                            print("Availability exceeds maximum weekly working hours (48h).")
+                            print(Fore.RED + '\nAvailability exceeds maximum weekly working hours (48h).\n')
+                            print(Style.RESET_ALL)
                         else:
                             current_availability = inpt
                             break
@@ -1912,7 +2051,8 @@ class Volunteer(CentralFunctions):
                         if inpt.upper() == 'B' or inpt.upper() == 'Q':
                             break
                         elif otp != inpt:
-                            print("Please enter valid OTP.")
+                            print(Fore.RED + '\nPlease enter valid OTP.\n')
+                            print(Style.RESET_ALL)
                         else:
                             break
                     while True:
@@ -1920,9 +2060,11 @@ class Volunteer(CentralFunctions):
                         if inpt.upper() == 'B' or inpt.upper() == 'Q':
                             break
                         elif password == inpt:
-                            print("Sorry but your password can't be the same as the previous one.")
+                            print(Fore.RED + '\nSorry but your password cannot be the same as the previous one.\n')
+                            print(Style.RESET_ALL)
                         elif len(inpt) < 8:
-                            print("Sorry but your password needs to be at least 8 characters long.")
+                            print(Fore.RED + '\nSorry but your password needs to be at least 8 characters long.\n')
+                            print(Style.RESET_ALL)
                         else:
                             password = inpt
                             break
@@ -1942,13 +2084,15 @@ class Volunteer(CentralFunctions):
                         if inpt.upper() == 'B' or inpt.upper() == 'Q':
                             break
                         elif not check_email(inpt):
-                            print("Please enter a valid email address.")
+                            print(Fore.RED + '\nPlease enter a valid email address.\n')
+                            print(Style.RESET_ALL)
                             continue
                         current_email = inpt
                         break
 
                 else:
-                    print('Invalid input. Please select from the options above.')
+                    print(Fore.RED + '\nInvalid input. Please select from the options above.\n')
+                    print(Style.RESET_ALL)
                     continue
 
                 if inpt.upper() == 'B':
@@ -1979,7 +2123,8 @@ class Volunteer(CentralFunctions):
                     if commit == 'y' or commit == 'n':
                         break
                     else:
-                        print('Your input is not recognised')
+                        print(Fore.RED + '\nYour input is not recognised\n')
+                        print(Style.RESET_ALL)
                         continue
 
                 if commit == 'y':
@@ -1997,7 +2142,8 @@ class Volunteer(CentralFunctions):
                     if repeat == 'y' or repeat == 'n':
                         break
                     else:
-                        print('Your input is not recognised')
+                        print(Fore.RED + '\nYour input is not recognised\n')
+                        print(Style.RESET_ALL)
                         continue
                 if repeat == 'n':
                     break
@@ -2050,7 +2196,8 @@ class Volunteer(CentralFunctions):
                             elif answer == '':
                                 answer = vol_df.iloc[vol_df.index[vol_df['Username'] == self.current_user][0], i + 1]
                             elif not answer.isalpha():
-                                print("Please enter a valid name.")
+                                print(Fore.RED + '\nPlease enter a valid name.\n')
+                                print(Style.RESET_ALL)
                                 continue
                             break
                     elif i == 2:
@@ -2068,10 +2215,12 @@ class Volunteer(CentralFunctions):
                             elif answer == '':
                                 answer = current_phone
                             elif not answer.isnumeric():
-                                print("Please enter a valid phone number.")
+                                print(Fore.RED + '\nPlease enter a valid phone number.\n')
+                                print(Style.RESET_ALL)
                                 continue
                             elif len(answer) != 10:
-                                print("Invalid format.")
+                                print(Fore.RED + '\nInvalid format.\n')
+                                print(Style.RESET_ALL)
                                 continue
                             break
                     elif i == 3:
@@ -2089,10 +2238,12 @@ class Volunteer(CentralFunctions):
                             elif answer == '':
                                 answer = current_availability
                             elif not answer.isnumeric():
-                                print("Invalid input.")
+                                print(Fore.RED + '\nInvalid format.\n')
+                                print(Style.RESET_ALL)
                                 continue
                             elif int(answer) > 48:
-                                print("Availability exceeds maximum weekly working hours (48h).")
+                                print(Fore.RED + '\nAvailability exceeds maximum weekly working hours (48h).\n')
+                                print(Style.RESET_ALL)
                                 continue
                             break
                     elif i == 4:
@@ -2110,7 +2261,8 @@ class Volunteer(CentralFunctions):
                             elif answer == '':
                                 answer = current_email
                             elif not check_email(answer):
-                                print("Please enter a valid email address.")
+                                print(Fore.RED + '\nPlease enter a valid email address.\n')
+                                print(Style.RESET_ALL)
                                 continue
                             break
                     elif i == 5:
@@ -2128,7 +2280,8 @@ class Volunteer(CentralFunctions):
                             elif answer == '':
                                 answer = password
                             elif len(answer) < 8:
-                                print("Sorry but your password needs to be at least 8 characters long.")
+                                print(Fore.RED + '\nSorry but your password needs to be at least 8 characters long.\n')
+                                print(Style.RESET_ALL)
                                 continue
                             break
 
@@ -2162,7 +2315,8 @@ class Volunteer(CentralFunctions):
                     if commit == 'y' or commit == 'n':
                         break
                     else:
-                        print('Your input is not recognised')
+                        print(Fore.RED + '\nYour input is not recognised\n')
+                        print(Style.RESET_ALL)
                         continue
 
                 if commit == 'y':
@@ -2174,10 +2328,102 @@ class Volunteer(CentralFunctions):
                     continue
             print(100 * '=')
 
+    def inventory(self):
+        while True:
+            volunteer_campID = self.camp_of_user
+
+            print("[1] - Total summary of supplies for the camp {}".format(volunteer_campID))
+            print("[2] - Amend number of supplies")
+            print('\n[B] to go back')
+            ans = input("\nChoose interaction: ").upper()
+
+            if ans == "1":
+                supply_summary = self.supply_db[self.supply_db['Camp ID'] == volunteer_campID]
+                print(tabulate(supply_summary, headers='keys', tablefmt='psql', showindex=False))
+                back = input("\nB] to go back").upper()
+                if next == "Q":
+                    print(100 * '=')
+                    menu(self.functions)
+                    exit()
+            elif ans == "2":
+                while True:
+                    def go_back(questionStack):
+                        i = 0
+                        answerStack = []
+                        while i < len(questionStack):
+                            while True:
+                                answer = input(questionStack[i])
+                                if answer.upper() == 'B':
+                                    break
+                                elif not answer.isnumeric():
+                                    print(Fore.RED + 'Please enter a number.')
+                                    print(Style.RESET_ALL)
+                                    continue
+                                else:
+                                    break
+                            if answer.upper() == 'B':
+                                if i == 0:
+                                    break
+                                answerStack.pop()
+                                i -= 1
+                                continue
+                            elif answer.upper() == 'Q':
+                                print(100 * '=')
+                                menu(self.functions)
+                                exit()
+                            answerStack.append(answer)
+                            i += 1
+                        return answerStack
+
+                    questions = ['\nSleeping bags: ','\nFirst aid kits: ','\nMasks: ', '\nBasic medication: ', '\nFeminine hygiene products: ', '\nEmergency blankets: ', '\nTowels: ']
+                    answers = go_back(questions)
+
+                    if len(answers) == 0:
+                        break
+
+                    while True:
+                        commit = input('\nCommit changes? [y]/[n] ')
+                        if commit == 'y' or commit == 'n':
+                            break
+                        else:
+                            print('Your input is not recognised')
+                            continue
+                    if commit == 'y':
+                        column_list = list(self.supply_db.columns.values)
+
+                        try:
+                            index = self.supply_db.index[self.supply_db['Camp ID'] == volunteer_campID].tolist()[0]
+                        except:
+                            list_row = [volunteer_campID, '', '', '', '', '', '']
+                            self.supply_db.loc[len(self.supply_db)] = list_row
+                            self.supply_db.to_csv('supplies_database.csv', index= False)
+                            # self.supply_db.dropna()
+                            index = self.supply_db.index[self.supply_db['Camp ID'] == volunteer_campID].tolist()[0]
+
+                        for i in range(len(column_list) - 1):
+                            self.supply_db.at[index, column_list[i+1]] = answers[i]
+                            self.supply_db.to_csv('supplies_database.csv', index = False)
+                        print(self.supply_db)
+                        supply_summary = self.supply_db[self.supply_db['Camp ID'] == volunteer_campID]
+                        print(tabulate(supply_summary, headers='keys', tablefmt='psql', showindex=False))
+                        break
+                    else:
+                        continue
+
+            elif ans == 'B':
+                print(100 * '=')
+                menu(self.functions)
+                exit()
+            else:
+                print(Fore.RED + 'Invalid input. Try again.')
+                print(Style.RESET_ALL)
+                continue
+
 
 def session_over_message():
     print(100 * '=')
-    print('\nSESSION OVER\n')
+    print(Fore.RED + '\nSESSION OVER\n')
+    print(Style.RESET_ALL)
     print(100 * '=')
 
 
@@ -2208,13 +2454,15 @@ def menu(functions):
             session_over_message()
             exit()
         elif user_input == '#':
-            print('You logged out.')
+            print(Fore.BLUE + '\nYou logged out.\n')
+            print(Style.RESET_ALL)
             print(100 * '=')
             login()
         elif user_input.upper() == 'H':
             user_input = list(functions.keys())[-1]
         if user_input not in functions.keys():
-            print('Please select valid input.')
+            print(Fore.RED + '\nPlease select valid input.\n')
+            print(Style.RESET_ALL)
             continue
         print(100 * '=')
         functions[user_input]['method']()
