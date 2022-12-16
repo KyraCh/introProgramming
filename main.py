@@ -1605,7 +1605,8 @@ class Admin(CentralFunctions):
               '\t>Longtitude of camp location\n')
         print('[B] to go back')
         print('[Q] to quit\n')
-        print(tabulate(self.emergencies_db, headers='keys', tablefmt='psql', showindex=False))
+
+        print(tabulate(self.emergencies_db.loc[self.emergencies_db['Close date']==''], headers='keys', tablefmt='psql', showindex=False))
         while True:
 
             camps_df = self.camps_db.copy()
