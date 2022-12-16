@@ -122,7 +122,7 @@ class CentralFunctions():
 
         try:
             df = pd.read_csv('camp_database.csv')
-            for i in ['Camp ID', 'Location', 'Number of volunteers', 'Capacity','Emergency ID', 'Number of refugees']:
+            for i in ['Camp ID', 'Location', 'Number of volunteers', 'Capacity','Emergency ID', 'Number of refugees', 'Lat', 'Long']:
                 if i not in df.columns:
                     print(Fore.RED + f'Missing {i} index from user database.')
                     print(Style.RESET_ALL)
@@ -132,7 +132,7 @@ class CentralFunctions():
             df.fillna('', inplace=True)
             self.camps_db = df
         except FileNotFoundError:
-            camps_db = {'Camp ID': [''], 'Location': [''], 'Number of volunteers': [''], 'Capacity': [''], 'Emergency ID': [''], 'Number of refugees': ['']} 
+            camps_db = {'Camp ID': [''], 'Location': [''], 'Number of volunteers': [''], 'Capacity': [''], 'Emergency ID': [''], 'Number of refugees': [''], 'Lat': [''], 'Long': ['']} 
             df = pd.DataFrame(camps_db)
             df.to_csv('camp_database.csv',index=False)
             self.camps_db = df
@@ -191,6 +191,29 @@ class CentralFunctions():
             print(Style.RESET_ALL)
             dataFailure = True
 
+        try:
+            df = pd.read_csv('supplies_database.csv')
+
+            for i in ['Camp ID', 'Sleeping bags', 'Masks', 'Basic medication', 'Feminine hygiene products', 'Emergency blankets', 'Towels']:
+                if i not in df.columns:
+                    print(Fore.RED + f'Missing {i} index from supplies database.')
+                    print(Style.RESET_ALL)
+                    dataFailure = True
+
+            df.dropna(how="all", inplace=True)
+            df.fillna('', inplace=True)
+            self.supply_db = df
+
+        except FileNotFoundError:
+            supply_db = {'Camp ID': [''], 'Sleeping bags': [''], 'Masks': [''], 'Basic medication': [''], 'Feminine hygiene products': [''], 'Emergency blankets': [''], 'Towels': ['']}
+            df = pd.DataFrame(supply_db)
+            df.to_csv('supplies_database.csv', index=False)
+            self.emergencies_db = df
+
+        except:
+            print(Fore.RED + "System couldn't read your supplies database file.")
+            print(Style.RESET_ALL)
+            dataFailure = True
 
         try:
             df = pd.read_csv(".sys_countries.csv", index_col='Country name')
@@ -206,18 +229,6 @@ class CentralFunctions():
         except pd.errors.EmptyDataError:
             print(Fore.RED + "Your .sys_organisation_per_continent database file is currently empty.")
             print(Style.RESET_ALL)
-            dataFailure = True
-
-        try:
-            df = pd.read_csv('supplies_database.csv')
-            self.supply_db = df
-        except FileNotFoundError:
-            supply_db = {'Camp ID': [''], 'Sleeping bags': [''], 'Masks': [''], 'Basic medication': [''], 'Feminine hygiene products': [''], 'Emergency blankets': [''], 'Towels': ['']}
-            df = pd.DataFrame(supply_db)
-            df.to_csv('supplies_database.csv', index=False)
-            self.emergencies_db = df
-        except:
-            print("System couldn't read your supplies database file.")
             dataFailure = True
 
         return dataFailure
@@ -548,7 +559,7 @@ class CentralFunctions():
         while True:
 
             user_input = input("\nChoose interaction: ")
-            local_db = self.camps_db.merge(self.emergencies_db, on='Current Emergency', how='inner')
+            local_db = self.camps_db.merge(self.emergencies_db, on='Emergency ID', how='inner')
 
             if user_input == '1':
                 df = self.camps_db
@@ -1470,6 +1481,7 @@ class Admin(CentralFunctions):
         else:
             automatic()
         print(100 * '=')
+    
     def admin_volunteer_commands(self):
 
         def print_msg_box(msg, indent=1, width=None, title=None):
@@ -2215,8 +2227,7 @@ class Volunteer(CentralFunctions):
                     continue
 
                 while True:
-                    repeat = input(
-                        '\nWould you like to alter another parameter? [y]/[n] ')
+                    repeat = input('\nWould you like to alter another parameter? [y]/[n] ')
                     if repeat == 'y' or repeat == 'n':
                         break
                     else:
@@ -2497,7 +2508,6 @@ class Volunteer(CentralFunctions):
                 print(Fore.RED + 'Invalid input. Try again.')
                 print(Style.RESET_ALL)
                 continue
-
 
 
 def session_over_message():
