@@ -1,10 +1,6 @@
 Emergency ID,Location,Type,Description,Start date,Close date
-<<<<<<< HEAD
-PT1,Portugal,Smelly man,It's Mevrick,01/01/0001,
-=======
 AU1,Australia,Bushfire,Description,01/09/2019,
 PK1,Pakistan,Flooding,Description ,01/06/2022,
 LBN1,Lebanon,Flooding,Description ,01/10/2019,02/01/2020
 PK2,Pakistan,Bushfire,Description,10/09/2019,20/10/2019
 AU2,Australia,Bushfire,Description,06/06/2022,
->>>>>>> parent of 1b75517 (Update emergency_database.csv)
