@@ -616,10 +616,11 @@ class CentralFunctions():
 
     def call_volunteers(self):
         self.count_ref_vol()
+        print(100 * '=')
         while True:
             vol_data = self.vol_db.copy()
             camp_data = self.camps_db.copy()
-            print(100 * '=')
+            
             print('\nChoose an interaction by typing the corresponding number.')
             print('Example: type "1" to view comprehensive data on all volunteers.\n')
             print("[1] - View all volunteer data\n"
@@ -701,12 +702,16 @@ class CentralFunctions():
 
                     if len(answers) == 0:
                         break
-                    if answers[0] in vol_data['First name'].values and answers[1] in vol_data['Second name'].values:
-                        print(f'\nHere is our record for {answers[0]} {answers[1]}: \n')
-                        df = vol_data[(vol_data['First name'] == answers[0].title()) & (
-                                    vol_data['Second name'] == answers[1].title())]
-                        print(tabulate(df, headers='keys', tablefmt='psql', showindex=False))
-                        # print(f"{vol_data[(vol_data['First name'] == answers[0].title()) & (vol_data['Second name'] == answers[1].title())].to_string(index=False)}\n")
+                    if answers[0] in vol_data['First name'].values:
+                        usrnm = vol_data.loc[vol_data['First name'] == answers[0], 'Username'].values[0]
+                        if answers[1] in vol_data.loc[vol_data['Username'] == usrnm, 'Second name'].values:
+                            print(f'\nHere is our record for {answers[0]} {answers[1]}: \n')
+                            df = vol_data[(vol_data['First name'] == answers[0].title()) & (
+                                        vol_data['Second name'] == answers[1].title())]
+                            print(tabulate(df, headers='keys', tablefmt='psql', showindex=False))
+                        else:
+                            print(Fore.RED + f'\nThere is no volunteer with the name {answers[0]} {answers[1]}\n')
+                            print(Style.RESET_ALL)
                     else:
                         print(Fore.RED + f'\nThere is no volunteer with the name {answers[0]} {answers[1]}\n')
                         print(Style.RESET_ALL)
