@@ -1470,7 +1470,6 @@ class Admin(CentralFunctions):
         else:
             automatic()
         print(100 * '=')
-
     def admin_volunteer_commands(self):
 
         def print_msg_box(msg, indent=1, width=None, title=None):
@@ -1514,7 +1513,7 @@ class Admin(CentralFunctions):
                                 self.user_db.to_csv('user_database.csv', index=False)
                                 print(Fore.BLUE + f'\nAction completed.\n{volunteer_username} has been deactivated.\n')
                                 print(Style.RESET_ALL)
-                                print(self.user_db)
+                                print(tabulate(self.user_db, headers='keys', tablefmt='psql', showindex=False))
                                 continue
                             else:
                                 print(Fore.RED + '\nNo changes have been made.')
@@ -1534,7 +1533,7 @@ class Admin(CentralFunctions):
                             if commit.lower() == 'y':
                                 self.user_db.at[index, 'activated'] = True
                                 self.user_db.to_csv('user_database.csv', index=False)
-                                print(self.user_db)
+                                print(tabulate(self.user_db, headers='keys', tablefmt='psql', showindex=False))
                                 print(Fore.BLUE + f'\nAction completed.\n{volunteer_username} has been reactivated.\n')
                                 print(Style.RESET_ALL)
                                 continue
@@ -1546,19 +1545,19 @@ class Admin(CentralFunctions):
                     elif action == 'del':
                         commit = input('\nCommit changes? [y]/[n] ')
                         if commit.lower() == 'y':
-                            # delete Volunteer from volunteer_database
-                            self.user_db = self.user_db.drop(index)
-                            self.user_db.to_csv('user_database.csv', index=False)
-                            # delete Volunteer from user_database
-                            index_vol = df1.index[df1['Username'] == volunteer_username].tolist()[0]
-                            self.vol_db = self.vol_db.drop(index_vol)
-                            self.vol_db.to_csv('volunteer_database.csv', index=False)
+                                # delete Volunteer from volunteer_database
+                                self.user_db = self.user_db.drop(index)
+                                self.user_db.to_csv('user_database.csv', index=False)
+                                # delete Volunteer from user_database
+                                index_vol = df1.index[df1['Username'] == volunteer_username].tolist()[0]
+                                self.vol_db = self.vol_db.drop(index_vol)
+                                self.vol_db.to_csv('volunteer_database.csv', index=False)
 
-                            print(self.vol_db)
-                            print(self.user_db)
-                            print(Fore.BLUE + f'\nAction completed.\n{volunteer_username} has been deleted.\n')
-                            print(Style.RESET_ALL)
-                            continue
+                                print(self.vol_db)
+                                print(tabulate(self.user_db, headers='keys', tablefmt='psql', showindex=False))
+                                print(Fore.BLUE + f'\nAction completed.\n{volunteer_username} has been deleted.\n')
+                                print(Style.RESET_ALL)
+                                continue
                         else:
                             print(Fore.RED + '\nNo changes have been made.')
                             print(Style.RESET_ALL)
