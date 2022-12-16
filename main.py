@@ -1,3 +1,7 @@
+import os
+import webbrowser
+
+import folium as folium
 import pandas as pd
 # import matplotlib.pyplot as plt
 import numpy as np
@@ -22,6 +26,7 @@ class CentralFunctions():
         self.meals_db = None
         self.countries_db = None
         self.organisations_db = None
+        self.supply_db = None
 
         fileCheckError = self.download_all_data()
 
@@ -201,6 +206,18 @@ class CentralFunctions():
         except pd.errors.EmptyDataError:
             print(Fore.RED + "Your .sys_organisation_per_continent database file is currently empty.")
             print(Style.RESET_ALL)
+            dataFailure = True
+
+        try:
+            df = pd.read_csv('supplies_database.csv')
+            self.supply_db = df
+        except FileNotFoundError:
+            supply_db = {'Camp ID': [''], 'Sleeping bags': [''], 'Masks': [''], 'Basic medication': [''], 'Feminine hygiene products': [''], 'Emergency blankets': [''], 'Towels': ['']}
+            df = pd.DataFrame(supply_db)
+            df.to_csv('supplies_database.csv', index=False)
+            self.emergencies_db = df
+        except:
+            print("System couldn't read your supplies database file.")
             dataFailure = True
 
         return dataFailure
@@ -951,6 +968,33 @@ class CentralFunctions():
             print('')
         print(100 * '=')
 
+    def map(self):
+        print('\nChoose an interaction by typing the corresponding number.')
+        print('Example: type "1" to view all camps on the map.\n')
+        print("[1] - To view all camps on the map.\n")
+
+        print('[B] to go back')
+
+        interaction = input('\nChoose interaction:').upper()
+        if interaction == '1':
+            df = pd.read_csv('camp_database.csv')
+            newdf = df[['Lat', 'Long', 'Location']]
+            map = folium.Map(location=[newdf.Lat.mean(), newdf.Long.mean()],
+                             zoom_start=14, control_scale=True)
+
+            def view_all_camps_on_map():
+                for index, location_info in newdf.iterrows():
+                    folium.Marker([location_info["Lat"], location_info["Long"]],
+                                  popup=location_info["Location"]).add_to(map)
+            view_all_camps_on_map()
+            map.save('map.html')
+
+            webbrowser.open('file://' + os.path.realpath('map.html'))
+        elif interaction ==  'B':
+            print(100 * '=')
+            menu(self.functions)
+            exit()
+
 
 class Admin(CentralFunctions):
 
@@ -970,7 +1014,8 @@ class Admin(CentralFunctions):
                           "11": {'method': self.call_no_of_refugees,
                                  'message': '[11] - See information about refugees', },
                           "12": {'method': self.camp_finance, 'message': '[12] - Create meal plan for a camp', },
-                          "13": {'method': self.call_help,
+                          "13": {'method': self.map, 'message': '[13] - View map information', },
+                          "14": {'method': self.call_help,
                                  'message': '\n[h] - Contacts of local relief organisations', }}
         self.current_user = current_user
         self.camp_of_user = camp_of_user
@@ -1443,22 +1488,16 @@ class Admin(CentralFunctions):
 
         df = self.user_db.copy()
         df1 = self.vol_db.copy()
-        df2 = self.camps_db.copy()
+
         while True:
             try:
-                print_msg_box('Enter d, r or del and the volunteer username separated by space\n'
-                              "Example: d Volunteer1 to deactive Volunteer1's account.\n\n"
-                              '[d] - deactivate volunteer account\n'
-                              '[r] - reactivate volunteer account\n'
-                              '[del] delete volunteer account\n\n'
-                              '[B] to go back.\n'
-                              '[Q] to quit\n')
+                print_msg_box('[d] deactivate volunteer account\n'
+                              '[r] reactivate volunteer account\n'
+                              '[del] delete volunteer account')
+                print('\nEnter [B] to go back.')
+                action_and_volunteer = input('Enter d, r or del and the volunteer username separated by space: ')
 
-                print(tabulate(df[['username', 'role', 'activated']].tail(len(df) - 1), headers='keys', tablefmt='psql',
-                               showindex=False))
-                action_and_volunteer = input('\nInput: ')
-
-                if action_and_volunteer.upper() == 'B' or action_and_volunteer.upper() == 'Q':
+                if action_and_volunteer.upper() == 'B':
                     print(100 * '=')
                     menu(self.functions)
                     exit()
@@ -1466,46 +1505,65 @@ class Admin(CentralFunctions):
                 volunteer_username = action_and_volunteer.split(' ')[1]
 
                 if volunteer_username in df1['Username'].values:
-                    index = df.index[df['username'] == volunteer_username].tolist()[0]
+                    index = self.user_db.index[df['username'] == volunteer_username].tolist()[0]
                     if action == 'd':
-                        if df.at[index, 'activated']:
-                            df.at[index, 'activated'] = False
-                            df.to_csv('user_database.csv', index=False)
-                            print(Fore.BLUE + f'\nAction completed.\n{volunteer_username} has been deactivated.\n')
-                            print(Style.RESET_ALL)
-                            continue
+                        if self.user_db.at[index, 'activated']:
+                            commit = input('\nCommit changes? [y]/[n] ')
+                            if commit.lower() == 'y':
+                                self.user_db.at[index, 'activated'] = False
+                                self.user_db.to_csv('user_database.csv', index=False)
+                                print(Fore.BLUE + f'\nAction completed.\n{volunteer_username} has been deactivated.\n')
+                                print(Style.RESET_ALL)
+                                print(self.user_db)
+                                continue
+                            else:
+                                print(Fore.RED + '\nNo changes have been made.')
+                                print(Style.RESET_ALL)
+                                continue
                         else:
                             print(Fore.RED + '\nThis user is not active.\n')
                             print(Style.RESET_ALL)
                             continue
                     elif action == 'r':
-                        if df.at[index, 'activated']:
+                        if self.user_db.at[index, 'activated']:
                             print(Fore.RED + '\nThis user is already active.\n')
                             print(Style.RESET_ALL)
                             continue
                         else:
-                            df.at[index, 'activated'] = True
-                            df.to_csv('user_database.csv', index=False)
-                            print(Fore.BLUE + f'\nAction completed.\n{volunteer_username} has been reactivated.\n')
+                            commit = input('\nCommit changes? [y]/[n] ')
+                            if commit.lower() == 'y':
+                                self.user_db.at[index, 'activated'] = True
+                                self.user_db.to_csv('user_database.csv', index=False)
+                                print(self.user_db)
+                                print(Fore.BLUE + f'\nAction completed.\n{volunteer_username} has been reactivated.\n')
+                                print(Style.RESET_ALL)
+                                continue
+                            else:
+                                print(Fore.RED + '\nNo changes have been made.')
+                                print(Style.RESET_ALL)
+                                continue
+
+                    elif action == 'del':
+                        commit = input('\nCommit changes? [y]/[n] ')
+                        if commit.lower() == 'y':
+                            # delete Volunteer from volunteer_database
+                            self.user_db = self.user_db.drop(index)
+                            self.user_db.to_csv('user_database.csv', index=False)
+                            # delete Volunteer from user_database
+                            index_vol = df1.index[df1['Username'] == volunteer_username].tolist()[0]
+                            self.vol_db = self.vol_db.drop(index_vol)
+                            self.vol_db.to_csv('volunteer_database.csv', index=False)
+
+                            print(self.vol_db)
+                            print(self.user_db)
+                            print(Fore.BLUE + f'\nAction completed.\n{volunteer_username} has been deleted.\n')
                             print(Style.RESET_ALL)
                             continue
-                    elif action == 'del':
-                        # subtract number of volunteers in camp_database
-                        camp_id = df1[df1['Username'] == volunteer_username]['Camp ID'].values[0]
-                        index_camp = df2.index[df2['Camp ID'] == camp_id].tolist()[0]
-                        df2.at[index_camp, 'Number of volunteers'] = \
-                        df2[df2['Camp ID'] == camp_id]["Number of volunteers"].values[0] - 1
-                        df2.to_csv('camp_database.csv', index=False)
-                        # delete Volunteer from volunteer_database
-                        df = df.drop(index)
-                        df.to_csv('user_database.csv', index=False)
-                        # delete Volunteer from user_database
-                        index_vol = df1.index[df1['Username'] == volunteer_username].tolist()[0]
-                        df1 = df1.drop(index_vol)
-                        df1.to_csv('volunteer_database.csv', index=False)
+                        else:
+                            print(Fore.RED + '\nNo changes have been made.')
+                            print(Style.RESET_ALL)
+                            continue
 
-                        print(Fore.BLUE + f'\nAction completed.\n{volunteer_username} has been deleted.\n')
-                        print(Style.RESET_ALL)
                     else:
                         print(Fore.RED + '\nInvalid action. Try again. \n')
                         print(Style.RESET_ALL)
@@ -1532,7 +1590,9 @@ class Admin(CentralFunctions):
         print('Expected Inputs:\n' +
               '\t>Country\n' +
               '\t>Emergency ID\n' +
-              '\t>Camp capacity\n')
+              '\t>Camp capacity\n' +
+              '\t>Latitude of camp location\n' +
+              '\t>Longtitude of camp location\n')
         print('[B] to go back')
         print('[Q] to quit\n')
         print(tabulate(self.emergencies_db, headers='keys', tablefmt='psql', showindex=False))
@@ -1615,7 +1675,52 @@ class Admin(CentralFunctions):
                 else:
                     return 1
 
-            inputs = [assign_country, assign_emergency, assign_capacity]
+            def assign_lat():
+                global lat
+                while True:
+                    lat = input("\nEnter latitude of camp location: ")
+                    if lat.upper() == 'B' or lat.upper() == 'Q':
+                        break
+                    try:
+                        lat = float(lat)
+                    except ValueError:
+                        print(Fore.RED + '\nInvalid input.\n')
+                        print(Style.RESET_ALL)
+                        continue
+                    break
+                lat = str(lat)
+                if lat.upper() == 'B':
+                    return -1
+                elif lat.upper() == 'Q':
+                    print(100 * '=')
+                    menu(self.functions)
+                    exit()
+                else:
+                    return 1
+
+            def assign_long():
+                global long
+                while True:
+                    long = input("\nEnter longtitude of camp location: ")
+                    if long.upper() == 'B' or long.upper() == 'Q':
+                        break
+                    try:
+                        long = float(long)
+                    except ValueError:
+                        print(Fore.RED + '\nInvalid input.\n')
+                        print(Style.RESET_ALL)
+                        continue
+                    break
+                if str(long).upper() == 'B':
+                    return -1
+                elif str(long).upper() == 'Q':
+                    print(100 * '=')
+                    menu(self.functions)
+                    exit()
+                else:
+                    return 1
+
+            inputs = [assign_country, assign_emergency, assign_capacity, assign_lat, assign_long]
 
             while counter < len(inputs):
                 counter += inputs[counter]()
@@ -1631,7 +1736,7 @@ class Admin(CentralFunctions):
 
             new_ID = emergency + '-' + str(new_camp_index)
 
-            camps_df.loc[len(camps_df.index)] = [new_ID, country, '', capacity, emergency, '']
+            camps_df.loc[len(camps_df.index)] = [new_ID, country, '', capacity, emergency, '', lat, long]
 
             print(tabulate(camps_df.tail(1), headers='keys', tablefmt='psql', showindex=False))
             while True:
@@ -1876,7 +1981,11 @@ class Volunteer(CentralFunctions):
                           "5": {'method': self.amend_refugee_profile, 'message': '[5] - Amend refugee profile', },
                           "6": {'method': self.call_no_of_refugees,
                                 'message': '[6] - See information about refugees', },
-                          "7": {'method': self.call_help,
+                          "7": {'method': self.inventory,
+                                'message': '[7] - Complete inventory', },
+                          "8": {'method': self.map,
+                                'message': '[8] - View map information', },
+                          "9": {'method': self.call_help,
                                 'message': '\n[h] - Contacts of local relief organisations', }}
         self.current_user = current_user
         self.camp_of_user = camp_of_user
@@ -2298,6 +2407,98 @@ class Volunteer(CentralFunctions):
                     answers = []
                     continue
             print(100 * '=')
+
+    def inventory(self):
+        while True:
+            volunteer_campID = self.camp_of_user
+
+            print("[1] - Total summary of supplies for the camp {}".format(volunteer_campID))
+            print("[2] - Amend number of supplies")
+            print('\n[B] to go back: ')
+            ans = input("\nChoose interaction: ").upper()
+
+            if ans == "1":
+                supply_summary = self.supply_db[self.supply_db['Camp ID'] == volunteer_campID]
+                print(tabulate(supply_summary, headers='keys', tablefmt='psql', showindex=False))
+                back = input("\n[B] to go back").upper()
+                if back == "B":
+                    print(100 * '=')
+                    menu(self.functions)
+                    exit()
+                else:
+                    print(Fore.RED + 'Invalid input. Try again.')
+                    print(Style.RESET_ALL)
+
+            elif ans == "2":
+                while True:
+                    def go_back(questionStack):
+                        i = 0
+                        answerStack = []
+                        while i < len(questionStack):
+                            while True:
+                                answer = input(questionStack[i])
+                                if answer.upper() == 'B':
+                                    break
+                                elif not answer.isnumeric():
+                                    print(Fore.RED + 'Please enter a number.')
+                                    print(Style.RESET_ALL)
+                                    continue
+                                else:
+                                    break
+                            if answer.upper() == 'B':
+                                if i == 0:
+                                    break
+                                answerStack.pop()
+                                i -= 1
+                                continue
+                            answerStack.append(answer)
+                            i += 1
+                        return answerStack
+
+                    questions = ['\nSleeping bags: ','\nFirst aid kits: ','\nMasks: ', '\nBasic medication: ', '\nFeminine hygiene products: ', '\nEmergency blankets: ', '\nTowels: ']
+                    answers = go_back(questions)
+
+                    if len(answers) == 0:
+                        break
+
+                    while True:
+                        commit = input('\nCommit changes? [y]/[n] ')
+                        if commit == 'y' or commit == 'n':
+                            break
+                        else:
+                            print(Fore.RED +'Your input is not recognised')
+                            print(Style.RESET_ALL)
+                            continue
+                    if commit == 'y':
+                        column_list = list(self.supply_db.columns.values)
+                        try:
+                            index = self.supply_db.index[self.supply_db['Camp ID'] == volunteer_campID].tolist()[0]
+                        except:
+                            list_row = [volunteer_campID, '', '', '', '', '', '']
+                            self.supply_db.loc[len(self.supply_db)] = list_row
+                            self.supply_db.to_csv('supplies_database.csv', index= False)
+                            # self.supply_db.dropna()
+                            index = self.supply_db.index[self.supply_db['Camp ID'] == volunteer_campID].tolist()[0]
+
+                        for i in range(len(column_list) - 1):
+                            self.supply_db.at[index, column_list[i+1]] = answers[i]
+                            self.supply_db.to_csv('supplies_database.csv', index = False)
+
+                        supply_summary = self.supply_db[self.supply_db['Camp ID'] == volunteer_campID]
+                        print(tabulate(supply_summary, headers='keys', tablefmt='psql', showindex=False))
+                        break
+                    else:
+                        break
+
+            elif ans.upper() == 'B':
+                print(100 * '=')
+                menu(self.functions)
+                exit()
+            else:
+                print(Fore.RED + 'Invalid input. Try again.')
+                print(Style.RESET_ALL)
+                continue
+
 
 
 def session_over_message():
