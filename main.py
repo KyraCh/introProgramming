@@ -124,7 +124,7 @@ class CentralFunctions():
             df = pd.read_csv('camp_database.csv')
             for i in ['Camp ID', 'Location', 'Number of volunteers', 'Capacity','Emergency ID', 'Number of refugees', 'Lat', 'Long']:
                 if i not in df.columns:
-                    print(Fore.RED + f'Missing {i} index from user database.')
+                    print(Fore.RED + f'Missing {i} index from camps database.')
                     print(Style.RESET_ALL)
                     dataFailure = True
             
