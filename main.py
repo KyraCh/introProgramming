@@ -914,7 +914,7 @@ class CentralFunctions():
 
         print('\nChoose an interaction by typing the corresponding number.')
         print('Example: type "1" to view comprehensive data on all refugee profiles.\n')
-        print("[1] - List of all refugees for all camps")
+        print("[1] - List of all refugees")
         print("[2] - Total number of refugees in chosen camp")
         print("[3] - Number of families in each camp")
         print("[4] - Total summary for each camp\n")
@@ -963,24 +963,16 @@ class CentralFunctions():
         print('\nContacts of helpful organisations in emergency area:\n')
 
         local_db = self.camps_db.merge(self.emergencies_db, on='Emergency ID', how='inner')
-        local_db_II = self.countries_db.reset_index().merge(self.organisations_db, on='Continent',
-                                                            how='left').set_index('Country name')
+        local_db_II = self.countries_db.reset_index().merge(self.organisations_db, on='Continent',how='left').set_index('Country name')
         local_db_III = pd.merge(local_db_II, local_db, left_index=True, right_on='Location_x')
-        help = local_db_III.loc[
-            local_db_III['Close date'] == '', ['Emergency ID', 'Camp ID', 'Type', 'Name of non-profit organisation',
-                                               'Email', 'Website']]
+        help = local_db_III.loc[local_db_III['Close date'] == '', ['Emergency ID', 'Camp ID', 'Type', 'Name of non-profit organisation','Email', 'Website']]
         if self.current_user == 'admin':
-            help = local_db_III.loc[
-                local_db_III['Close date'] == '', ['Location_x', 'Type', 'Name of non-profit organisation', 'Email',
-                                                   'Website']].drop_duplicates()
+            help = local_db_III.loc[local_db_III['Close date'] == '', ['Location_x', 'Type', 'Name of non-profit organisation', 'Email','Website']].drop_duplicates()
             print(tabulate(help, headers='keys', tablefmt='psql', showindex=False))
             print('')
         else:
-            help = local_db_III.loc[
-                local_db_III['Close date'] == '', ['Emergency ID', 'Camp ID', 'Type', 'Name of non-profit organisation',
-                                                   'Email', 'Website']]
-            print(tabulate(help.loc[help['Camp ID'] == self.camp_of_user], headers='keys', tablefmt='psql',
-                           showindex=False))
+            help = local_db_III.loc[local_db_III['Close date'] == '', ['Emergency ID', 'Camp ID', 'Type', 'Name of non-profit organisation', 'Email', 'Website']]
+            print(tabulate(help.loc[help['Camp ID'] == self.camp_of_user], headers='keys', tablefmt='psql', showindex=False))
             print('')
         print(100 * '=')
 
