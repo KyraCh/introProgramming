@@ -13,7 +13,9 @@ import random
 from email.message import EmailMessage
 import ssl
 from colorama import Fore, Back, Style
+import colorama
 
+colorama.init()
 
 class CentralFunctions():
 
