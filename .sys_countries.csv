@@ -1,250 +1,251 @@
-﻿Country name,Country code,Continent
-Afghanistan,AF,Asia
-Albania,AL,Europe
-Algeria,DZ,Asia
-American Samoa,AS,Oceania
-Andorra,AD,Europe
-Angola,AO,Africa
-Anguilla,AI,North America
-Antarctica,AQ,Antarctica
-Antigua and Barbuda,AG,North America
-Argentina,AR,South America
-Armenia,AM,Asia
-Aruba,AW,South America
-Australia,AU,Oceania
-Austria,AT,Europe
-Azerbaijan,AZ,Asia
-Bahamas,BS,North America
-Bahrain,BH,Asia
-Bangladesh,BD,Asia
-Barbados,BB,North America
-Belarus,BY,Europe
-Belgium,BE,Europe
-Belize,BZ,North America
-Benin,BJ,Africa
-Bermuda,BM,North America
-Bhutan,BT,Asia
-Bolivia,BO,South America
-Bonaire Sint Eustatius and Saba,BQ,South America
-Bosnia and Herzegovina,BA,Europe
-Botswana,BW,Africa
-Bouvet Island,BV,Antarctica
-Brazil,BR,South America
-British Indian Ocean Territory,IO,Asia
-Brunei Darussalam,BN,Asia
-Bulgaria,BG,Europe
-Burkina Faso,BF,Africa
-Burundi,BI,Africa
-Cabo Verde,CV,Africa
-Cambodia,KH,Asia
-Cameroon,CM,Africa
-Canada,CA,North America
-Cayman Islands,KY,North America
-Central African Republic,CF,Africa
-Chad,TD,Africa
-Chile,CL,South America
-China,CN,Asia
-Christmas Island,CX,Asia
-Cocos (Keeling) Islands,CC,Asia
-Colombia,CO,South America
-Comoros,KM,Africa
-Democratic Republic of Congo,CD,Africa
-Congo,CG,Africa
-Cook Islands,CK,Oceania
-Costa Rica,CR,South America
-Croatia,HR,Europe
-Cuba,CU,South America
-Curaçao,CW,South America
-Cyprus,CY,Europe
-Czechia,CZ,Europe
-Côte d'Ivoire,CI,Africa
-Denmark,DK,Europe
-Djibouti,DJ,Africa
-Dominica,DM,North America
-Dominican Republic,DO,North America
-Ecuador,EC,South America
-Egypt,EG,Africa
-El Salvador,SV,North America
-Equatorial Guinea,GQ,Africa
-Eritrea,ER,Africa
-Estonia,EE,Europe
-Eswatini,SZ,Europe
-Ethiopia,ET,Africa
-Falkland Islands,FK,South America
-Faroe Islands,FO,Europe
-Fiji,FJ,Oceania
-Finland,FI,Europe
-France,FR,Europe
-French Guiana,GF,South America
-French Polynesia,PF,Oceania
-French Southern Territories,TF,Antarctica
-Gabon,GA,Africa
-Gambia,GM,Africa
-Georgia,GE,Asia
-Germany,DE,Europe
-Ghana,GH,Africa
-Gibraltar,GI,Europe
-Greece,GR,Europe
-Greenland,GL,Europe
-Grenada,GD,North America
-Guadeloupe,GP,North America
-Guam,GU,Oceania
-Guatemala,GT,North America
-Guernsey,GG,Europe
-Guinea,GN,Africa
-Guinea-Bissau,GW,Africa
-Guyana,GY,South America
-Haiti,HT,North America
-Heard Island and McDonald Islands,HM,Oceania
-Holy See,VA,Europe
-Honduras,HN,North America
-Hong Kong,HK,Asia
-Hungary,HU,Europe
-Iceland,IS,Europe
-India,IN,Asia
-Indonesia,ID,Asia
-Iran,IR,Asia
-Iraq,IQ,Asia
-Ireland,IE,Europe
-Isle of Man,IM,Europe
-Israel,IL,Asia
-Italy,IT,Europe
-Jamaica,JM,North America
-Japan,JP,Asia
-Jersey,JE,Europe
-Jordan,JO,Asia
-Kazakhstan,KZ,Asia
-Kenya,KE,Africa
-Kiribati,KI,Oceania
-North Korea,KP,Asia
-South Korea,KR,Asia
-Kuwait,KW,Asia
-Kyrgyzstan,KG,Asia
-Lao People's Democratic Republic,LA,Africa
-Latvia,LV,Europe
-Lebanon,LB,Asia
-Lesotho,LS,Africa
-Liberia,LR,Africa
-Libya,LY,Africa
-Liechtenstein,LI,Europe
-Lithuania,LT,Europe
-Luxembourg,LU,Europe
-Macao,MO,Asia
-Madagascar,MG,Africa
-Malawi,MW,Africa
-Malaysia,MY,Asia
-Maldives,MV,Asia
-Mali,ML,Africa
-Malta,MT,Europe
-Marshall Islands,MH,Oceania
-Martinique,MQ,North America
-Mauritania,MR,Africa
-Mauritius,MU,Africa
-Mayotte,YT,Africa
-Mexico,MX,North America
-Micronesia,FM,Oceania
-Moldova,MD,Europe
-Monaco,MC,Europe
-Mongolia,MN,Asia
-Montenegro,ME,Europe
-Montserrat,MS,North America
-Morocco,MA,Africa
-Mozambique,MZ,Africa
-Myanmar,MM,Asia
-Namibia,NA,Africa
-Nauru,NR,Oceania
-Nepal,NP,Asia
-Netherlands,NL,Europe
-New Caledonia,NC,Oceania
-New Zealand,NZ,Oceania
-Nicaragua,NI,North America
-Niger,NE,Africa
-Nigeria,NG,Africa
-Niue,NU,Oceania
-Norfolk Island,NF,Oceania
-Northern Mariana Islands,MP,Oceania
-Norway,NO,Europe
-Oman,OM,Asia
-Pakistan,PK,Asia
-Palau,PW,Oceania
-Palestine,PS,Asia
-Panama,PA,North America
-Papua New Guinea,PG,Oceania
-Paraguay,PY,South America
-Peru,PE,South America
-Philippines,PH,Asia
-Pitcairn,PN,Oceania
-Poland,PL,Europe
-Portugal,PT,Europe
-Puerto Rico,PR,South America
-Qatar,QA,Asia
-Republic of North Macedonia,MK,Europe
-Romania,RO,Europe
-Russian Federation,RU,Europe
-Rwanda,RW,Africa
-Réunion,RE,Africa
-Saint Barthélemy,BL,North America
-"Saint Helena, Ascension and Tristan da Cunha",SH,North America
-Saint Kitts and Nevis,KN,North America
-Saint Lucia,LC,North America
-Saint Martin,MF,North America
-Saint Pierre and Miquelon,PM,North America
-Saint Vincent and the Grenadines,VC,North America
-Samoa,WS,Oceania
-San Marino,SM,Europe
-Sao Tome and Principe,ST,Africa
-Saudi Arabia,SA,Asia
-Senegal,SN,Africa
-Serbia,RS,Europe
-Seychelles,SC,Africa
-Sierra Leone,SL,Africa
-Singapore,SG,Asia
-Sint Maarten,SX,North America
-Slovakia,SK,Europe
-Slovenia,SI,Europe
-Solomon Islands,SB,Oceania
-Somalia,SO,Africa
-South Africa,ZA,Africa
-South Georgia and the South Sandwich Islands,GS,South America
-South Sudan,SS,Africa
-Spain,ES,Europe
-Sri Lanka,LK,Asia
-Sudan,SD,Africa
-Suriname,SR,South America
-Svalbard and Jan Mayen,SJ,Europe
-Sweden,SE,Europe
-Switzerland,CH,Europe
-Syrian Arab Republic,SY,Asia
-Taiwan,TW,Asia
-Tajikistan,TJ,Asia
-Tanzania,TZ,Africa
-Thailand,TH,Asia
-Timor-Leste,TL,Asia
-Togo,TG,Africa
-Tokelau,TK,Oceania
-Tonga,TO,Oceania
-Trinidad and Tobago,TT,South America
-Tunisia,TN,Africa
-Turkey,TR,Asia
-Turkmenistan,TM,Asia
-Turks and Caicos Islands,TC,North America
-Tuvalu,TV,Oceania
-Uganda,UG,Africa
-Ukraine,UA,Europe
-United Arab Emirates,AE,Asia
-United Kingdom,GB,Europe
-United States Minor Outlying Islands,UM,North America
-United States of America,US,North America
-Uruguay,UY,South America
-Uzbekistan,UZ,Asia
-Vanuatu,VU,Oceania
-Venezuela,VE,South America
-Viet Nam,VN,Asia
-British Virgin Islands,VG,North America
-Virgin Islands U.S.,VI,North America
-Wallis and Futuna,WF,Oceania
-Western Sahara,EH,Africa
-Yemen,YE,Asia
-Zambia,ZM,Africa
-Zimbabwe,ZW,Africa
-Aland Islands,AX,Europe
+﻿Country name,Country code,Continent,Country Phone Codes
+Afghanistan,AF,Asia,93
+Albania,AL,Europe,355
+Algeria,DZ,Asia,213
+American Samoa,AS,Oceania,1684
+Andorra,AD,Europe,376
+Angola,AO,Africa,244
+Anguilla,AI,North America,1264
+Antarctica,AQ,Antarctica,672
+Antigua and Barbuda,AG,North America,1628
+Argentina,AR,South America,54
+Armenia,AM,Asia,374
+Aruba,AW,South America,297
+Australia,AU,Oceania,61
+Austria,AT,Europe,43
+Azerbaijan,AZ,Asia,994
+Bahamas,BS,North America,1242
+Bahrain,BH,Asia,973
+Bangladesh,BD,Asia,880
+Barbados,BB,North America,1264
+Belarus,BY,Europe,375
+Belgium,BE,Europe,32
+Belize,BZ,North America,501
+Benin,BJ,Africa,229
+Bermuda,BM,North America,1441
+Bhutan,BT,Asia,975
+Bolivia,BO,South America,591
+Bonaire Sint Eustatius and Saba,BQ,South America,--
+Bosnia and Herzegovina,BA,Europe,387
+Botswana,BW,Africa,267
+Bouvet Island,BV,Antarctica,--
+Brazil,BR,South America,55
+British Indian Ocean Territory,IO,Asia,246
+Brunei Darussalam,BN,Asia,673
+Bulgaria,BG,Europe,359
+Burkina Faso,BF,Africa,226
+Burundi,BI,Africa,257
+Cabo Verde,CV,Africa,--
+Cambodia,KH,Asia,855
+Cameroon,CM,Africa,237
+Canada,CA,North America,1
+Cayman Islands,KY,North America,1345
+Central African Republic,CF,Africa,236
+Chad,TD,Africa,235
+Chile,CL,South America,56
+China,CN,Asia,86
+Christmas Island,CX,Asia,61
+Cocos (Keeling) Islands,CC,Asia,61
+Colombia,CO,South America,57
+Comoros,KM,Africa,269
+Democratic Republic of Congo,CD,Africa,243
+Congo,CG,Africa,--
+Cook Islands,CK,Oceania,682
+Costa Rica,CR,South America,506
+Croatia,HR,Europe,385
+Cuba,CU,South America,53
+Curaçao,CW,South America,599
+Cyprus,CY,Europe,357
+Czech Republic,CZ,Europe,420
+Denmark,DK,Europe,45
+Djibouti,DJ,Africa,253
+Dominica,DM,North America,1767
+Dominican Republic,DO,North America,1809
+Ecuador,EC,South America,593
+Egypt,EG,Africa,20
+El Salvador,SV,North America,503
+Equatorial Guinea,GQ,Africa,240
+Eritrea,ER,Africa,291
+Estonia,EE,Europe,372
+Eswatini,SZ,Europe,--
+Ethiopia,ET,Africa,251
+Falkland Islands,FK,South America,500
+Faroe Islands,FO,Europe,298
+Fiji,FJ,Oceania,679
+Finland,FI,Europe,358
+France,FR,Europe,33
+French Guiana,GF,South America,33
+French Polynesia,PF,Oceania,689
+French Southern Territories,TF,Antarctica,33
+Gabon,GA,Africa,241
+Gambia,GM,Africa,220
+Georgia,GE,Asia,995
+Germany,DE,Europe,49
+Ghana,GH,Africa,233
+Gibraltar,GI,Europe,350
+Greece,GR,Europe,30
+Greenland,GL,Europe,299
+Grenada,GD,North America,1473
+Guadeloupe,GP,North America,--
+Guam,GU,Oceania,1671
+Guatemala,GT,North America,502
+Guernsey,GG,Europe,441481
+Guinea,GN,Africa,224
+Guinea-Bissau,GW,Africa,245
+Guyana,GY,South America,592
+Haiti,HT,North America,509
+Heard Island and McDonald Islands,HM,Oceania,--
+Holy See,VA,Europe,--
+Honduras,HN,North America,504
+Hong Kong,HK,Asia,852
+Hungary,HU,Europe,36
+Iceland,IS,Europe,354
+India,IN,Asia,91
+Indonesia,ID,Asia,62
+Iran,IR,Asia,98
+Iraq,IQ,Asia,964
+Ireland,IE,Europe,353
+Isle of Man,IM,Europe,441624
+Israel,IL,Asia,972
+Italy,IT,Europe,39
+Ivory Coast,CI,Africa,225
+Jamaica,JM,North America,1876
+Japan,JP,Asia,81
+Jersey,JE,Europe,441534
+Jordan,JO,Asia,962
+Kazakhstan,KZ,Asia,7
+Kenya,KE,Africa,254
+Kiribati,KI,Oceania,686
+North Korea,KP,Asia,850
+South Korea,KR,Asia,82
+Kosovo,XK,Europe,383
+Kuwait,KW,Asia,965
+Kyrgyzstan,KG,Asia,996
+Lao People's Democratic Republic,LA,Africa,856
+Latvia,LV,Europe,371
+Lebanon,LB,Asia,961
+Lesotho,LS,Africa,266
+Liberia,LR,Africa,231
+Libya,LY,Africa,218
+Liechtenstein,LI,Europe,423
+Lithuania,LT,Europe,370
+Luxembourg,LU,Europe,352
+Macao,MO,Asia,853
+Madagascar,MG,Africa,261
+Malawi,MW,Africa,265
+Malaysia,MY,Asia,60
+Maldives,MV,Asia,960
+Mali,ML,Africa,223
+Malta,MT,Europe,356
+Marshall Islands,MH,Oceania,692
+Martinique,MQ,North America,--
+Mauritania,MR,Africa,222
+Mauritius,MU,Africa,230
+Mayotte,YT,Africa,262
+Mexico,MX,North America,52
+Micronesia,FM,Oceania,691
+Moldova,MD,Europe,373
+Monaco,MC,Europe,377
+Mongolia,MN,Asia,976
+Montenegro,ME,Europe,382
+Montserrat,MS,North America,1664
+Morocco,MA,Africa,212
+Mozambique,MZ,Africa,258
+Myanmar,MM,Asia,95
+Namibia,NA,Africa,264
+Nauru,NR,Oceania,674
+Nepal,NP,Asia,977
+Netherlands,NL,Europe,31
+New Caledonia,NC,Oceania,687
+New Zealand,NZ,Oceania,64
+Nicaragua,NI,North America,505
+Niger,NE,Africa,227
+Nigeria,NG,Africa,234
+Niue,NU,Oceania,683
+Norfolk Island,NF,Oceania,--
+Northern Mariana Islands,MP,Oceania,1670
+Norway,NO,Europe,47
+Oman,OM,Asia,968
+Pakistan,PK,Asia,92
+Palau,PW,Oceania,680
+Palestine,PS,Asia,970
+Panama,PA,North America,507
+Papua New Guinea,PG,Oceania,675
+Paraguay,PY,South America,595
+Peru,PE,South America,51
+Philippines,PH,Asia,63
+Pitcairn,PN,Oceania,64
+Poland,PL,Europe,48
+Portugal,PT,Europe,351
+Puerto Rico,PR,South America,1787
+Qatar,QA,Asia,974
+Republic of North Macedonia,MK,Europe,389
+Romania,RO,Europe,40
+Russia,RU,Europe,7
+Rwanda,RW,Africa,250
+Réunion,RE,Africa,--
+Saint Barthélemy,BL,North America,590
+"Saint Helena, Ascension and Tristan da Cunha",SH,North America,290
+Saint Kitts and Nevis,KN,North America,1869
+Saint Lucia,LC,North America,1758
+Saint Martin,MF,North America,590
+Saint Pierre and Miquelon,PM,North America,508
+Saint Vincent and the Grenadines,VC,North America,1784
+Samoa,WS,Oceania,685
+San Marino,SM,Europe,378
+Sao Tome and Principe,ST,Africa,239
+Saudi Arabia,SA,Asia,966
+Senegal,SN,Africa,221
+Serbia,RS,Europe,381
+Seychelles,SC,Africa,248
+Sierra Leone,SL,Africa,232
+Singapore,SG,Asia,65
+Sint Maarten,SX,North America,1721
+Slovakia,SK,Europe,421
+Slovenia,SI,Europe,386
+Solomon Islands,SB,Oceania,677
+Somalia,SO,Africa,252
+South Africa,ZA,Africa,27
+South Georgia and the South Sandwich Islands,GS,South America,--
+South Sudan,SS,Africa,211
+Spain,ES,Europe,34
+Sri Lanka,LK,Asia,94
+Sudan,SD,Africa,249
+Suriname,SR,South America,597
+Svalbard and Jan Mayen,SJ,Europe,47
+Sweden,SE,Europe,46
+Switzerland,CH,Europe,41
+Syria,SY,Asia,963
+Taiwan,TW,Asia,886
+Tajikistan,TJ,Asia,992
+Tanzania,TZ,Africa,255
+Thailand,TH,Asia,66
+Timor-Leste,TL,Asia,--
+Togo,TG,Africa,288
+Tokelau,TK,Oceania,690
+Tonga,TO,Oceania,676
+Trinidad and Tobago,TT,South America,1868
+Tunisia,TN,Africa,216
+Turkey,TR,Asia,90
+Turkmenistan,TM,Asia,993
+Turks and Caicos Islands,TC,North America,1649
+Tuvalu,TV,Oceania,688
+Uganda,UG,Africa,256
+Ukraine,UA,Europe,380
+United Arab Emirates,AE,Asia,971
+United Kingdom,GB,Europe,44
+United States Minor Outlying Islands,UM,North America,1
+United States of America,US,North America,1
+Uruguay,UY,South America,598
+Uzbekistan,UZ,Asia,998
+Vanuatu,VU,Oceania,678
+Venezuela,VE,South America,58
+Vietnam,VN,Asia,84
+British Virgin Islands,VG,North America,44
+Virgin Islands U.S.,VI,North America,1340
+Wallis and Futuna,WF,Oceania,681
+Western Sahara,EH,Africa,212
+Yemen,YE,Asia,967
+Zambia,ZM,Africa,260
+Zimbabwe,ZW,Africa,263
+Aland Islands,AX,Europe,--
