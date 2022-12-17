@@ -17,6 +17,7 @@ import ssl
 from colorama import Fore, Back, Style
 import colorama
 import warnings
+import logging
 warnings.simplefilter(action='ignore', category=FutureWarning)
 
 colorama.init()
@@ -24,6 +25,10 @@ colorama.init()
 class CentralFunctions():
 
     def __init__(self):
+        logging.basicConfig(filename='logfile.log', filemode='a', format='%(asctime)s - %(name)s - %(levelname)s - %(message)s')
+        self.logger = logging.getLogger()
+        self.logger.setLevel(logging.DEBUG)
+
         self.user_db = None
         self.vol_db = None
         self.refugee_db = None
