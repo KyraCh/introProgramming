@@ -1,7 +1,7 @@
 import os
 import webbrowser
 
-import folium as folium
+import folium
 import pandas as pd
 # import matplotlib.pyplot as plt
 import numpy as np
