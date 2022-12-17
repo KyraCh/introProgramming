@@ -1,10 +1,12 @@
+### TO BE ABLE TO ACCESS THE EMAIL THAT RECIEVES ONE TIME-PASSWORDS ###
+#   email/username = hemtest11@gmail.com
+#   password = hemtest1234
+### LOGIN VIA GMAIL
+
 import os
 import webbrowser
-
 import folium as folium
 import pandas as pd
-# import matplotlib.pyplot as plt
-import numpy as np
 import datetime
 from tabulate import tabulate
 import re
@@ -14,6 +16,8 @@ from email.message import EmailMessage
 import ssl
 from colorama import Fore, Back, Style
 import colorama
+import warnings
+warnings.simplefilter(action='ignore', category=FutureWarning)
 
 colorama.init()
 
@@ -264,10 +268,9 @@ class CentralFunctions():
 
             self.current_user = username
             count_password = 0  # counts the amount of time password was typed wrongly
-            # IF PASSWORD = 111
+            # The upper condition is more realistic, the lower condition is more suitable for demostration purposes
             # if users_df.loc[users_df['username'] == username,'email'].values[0] == '': # CHECKS IF EMAIL IS SET
-            if users_df.loc[users_df['username'] == username, 'password'].values[
-                0] == '111':  # CHECKS IF PASSWORD IS 111
+            if users_df.loc[users_df['username'] == username, 'password'].values[0] == '111':  # CHECKS IF PASSWORD IS 111
 
                 while True:
                     password = input('\nPlease input your PASSWORD: ').strip()
@@ -294,6 +297,7 @@ class CentralFunctions():
                 print('')
                 print(100 * '=')
                 if username == 'admin':
+                    # admin has extraordinary powers and access so they would change their password manually within the document
                     self.current_user = 'admin'
                     self.camp_of_user = 'adm'
                     print(Fore.BLUE + '\nWelcome admin!\n')
@@ -309,7 +313,7 @@ class CentralFunctions():
                     print(Fore.RED + '\nWARNING: PLEASE ADD YOUR PERSONAL INFORMATION AND CHANGE PASSWORD\n')
                     print(Style.RESET_ALL)
                 break
-            # IF PASSWORD != 111
+
             else:
 
                 while True:
@@ -335,7 +339,7 @@ class CentralFunctions():
                 if password == 'B':
                     continue
 
-                print("\nEmail with One-Time-Password to reset password was sent to you.")
+                print("\nEmail with One-Time-Password was sent to you.")
                 otp = ''.join([str(random.randint(0, 9)) for x in range(4)])
                 email_sender = "hemsystem1@gmail.com"
                 email_password = "asbwtshlldlaalld"
@@ -466,9 +470,7 @@ class CentralFunctions():
                                         print(Fore.RED + '\nInvalid input for emergency\n')
                                         print(Style.RESET_ALL)
                                         continue
-                                    df = \
-                                    self.camps_db.loc[self.camps_db['Camp ID'].str.contains(emergency_id, case=False)][
-                                        ['Camp ID']]
+                                    df = self.camps_db.loc[self.camps_db['Camp ID'].str.contains(emergency_id, case=False)][['Camp ID']]
                                     df.drop_duplicates(subset='Camp ID', inplace=True)
                                     camp_id_list = list(df['Camp ID'])
                                     if len(camp_id_list) == 0:
@@ -488,11 +490,11 @@ class CentralFunctions():
                                             print(Fore.RED + '\nYou have to choose from a list of available camps!\n')
                                             print(Style.RESET_ALL)
                                             continue
-
-                                        family_count = len(refugee_df.loc[refugee_df['Camp ID'].str.contains(
-                                            camp_choice, case=False)]) + 1
-                                        family_id = str(
-                                            family_count) + camp_choice
+                                        if (refugee_df['Camp ID'] == '').all():
+                                            family_id = '1' + camp_choice
+                                        else:
+                                            family_count = len(refugee_df.loc[refugee_df['Camp ID'].str.contains(camp_choice, case=False)]) + 1
+                                            family_id = str(family_count) + camp_choice
                                         break
                                     if camp_choice.upper() == "B":
                                         continue
@@ -636,7 +638,6 @@ class CentralFunctions():
             if choose_action == '1':
                 print('')
                 print(tabulate(vol_data, headers='keys', tablefmt='psql', showindex=False))
-                # print(f"\n{vol_data}")
             elif choose_action == '2':
                 while True:
                     print('\nList of Camp IDs: ')
@@ -760,12 +761,12 @@ class CentralFunctions():
                 print(f'\nPlease Choose which values you would like to ammend for family {iD}.')
                 print('Input indices corresponding to value you wish to ammend separated by commas ",".')
                 print('eg: "1,2" for amending "Lead Family Member Name" and "Lead Family Member Surname".\n')
-                print('[1] - "Lead Family Member Name"')
-                print('[2] - "Lead Family Member Surname"')
-                print('[3] - "Camp of Refugee"')
-                print('[4] - "Mental State"')
-                print('[5] - "Physical State"')
-                print('[6] - "No. Of Family Members"\n')
+                print('[1] - Lead Family Member Name')
+                print('[2] - Lead Family Member Surname')
+                print('[3] - Camp of Refugee')
+                print('[4] - Mental State')
+                print('[5] - Physical State')
+                print('[6] - No. Of Family Members\n')
                 counter = 0
                 while True:
                     inpt = input('Indices: ')
@@ -863,7 +864,7 @@ class CentralFunctions():
             else:
                 continue
 
-    def count_ref_vol(self):  # what is the purpose of this method? - count refugees and volunteers and update camps_db - Fedor
+    def count_ref_vol(self):
         '''
         Counts the number of volunteers in each camp and the number of refugees in each camp, after which it updates the camp_database.csv with correct numbers.
         '''
@@ -1119,7 +1120,7 @@ class Admin(CentralFunctions):
             emergency_id = country_code + str(new_no_index)
 
             emergency_db.loc[len(emergency_db.index)] = [emergency_id, answers[0], answers[1], answers[2], answers[3],
-                                                         None]
+                                                         '']
             print('')
             print(tabulate(emergency_db.tail(1), headers='keys', tablefmt='psql', showindex=False))
             while True:
@@ -1284,8 +1285,8 @@ class Admin(CentralFunctions):
         self.quit = False
         print(100 * '=')
         print('\nPlease select how would you like to create a new volunteer profile\n')
-        print('[1] - manual input')
-        print('[2] - automatic creation\n')
+        print('[1] - Manual input')
+        print('[2] - Automatic creation\n')
         print('[B] to go back')
         print('[Q] to quit\n')
 
@@ -2079,9 +2080,9 @@ class Volunteer(CentralFunctions):
                             break
 
                 elif user_input == '3':
-                    print(f"Currently, your phone number is set to +{current_phone}.")
+                    print(f"Currently, your phone number is set to {current_phone}.")
                     while True:
-                        country_code = self.countries_db.loc[self.countries_db['Country code'] == self.camp_of_volunteer[:2], 'Country Phone Codes'].values[0]
+                        country_code = self.countries_db.loc[self.countries_db['Country code'] == self.camp_of_user[:2], 'Country Phone Codes'].values[0]
                         inpt = input(f"\nEnter new phone number in the format +[{country_code}](0)_______: ")
                         if inpt.upper() == 'B' or inpt.upper() == 'Q':
                             break
@@ -2089,12 +2090,8 @@ class Volunteer(CentralFunctions):
                             print(Fore.RED + '\nPlease enter a valid phone number.\n')
                             print(Style.RESET_ALL)
                             continue
-                        elif len(inpt) != 10:
-                            print(Fore.RED + '\nInvalid format.\n')
-                            print(Style.RESET_ALL)
-                            continue
                         else:
-                            current_phone = str(inpt)
+                            current_phone = f'+{country_code}(0){str(inpt)}'
                             break
 
                 elif user_input == '4':
@@ -2159,8 +2156,6 @@ class Volunteer(CentralFunctions):
                             password = inpt
                             break
 
-                    print(password)
-
                 elif user_input.upper() == 'B' or user_input.upper() == 'Q':
                     print(100 * '=')
                     menu(self.functions)
@@ -2192,8 +2187,8 @@ class Volunteer(CentralFunctions):
                     menu(self.functions)
                     exit()
 
-                print(password)
-                vol_df.loc[vol_df['Username'] == self.current_user] = [self.current_user, current_name,
+                df = list(vol_df.columns)
+                vol_df.loc[vol_df['Username'] == self.current_user,df] = [self.current_user, current_name,
                                                                        current_second_name, current_phone,
                                                                        self.camp_of_user, current_availability]
                 users_df.loc[users_df['username'] == self.current_user, ['password', 'email']] = [password,
@@ -2205,8 +2200,6 @@ class Volunteer(CentralFunctions):
                 print('')
                 df = users_df.loc[users_df['username'] == self.current_user, ['username', 'password', 'email']]
                 print(tabulate(df, headers='keys', tablefmt='psql', showindex=False))
-                # print('\n', vol_df.loc[vol_df['Username'] == self.current_user])
-                # print(users_df.loc[users_df['username'] == self.current_user, ['username', 'password', 'email']])
 
                 while True:
                     commit = input('\nCommit changes? [y]/[n] ')
@@ -2259,7 +2252,7 @@ class Volunteer(CentralFunctions):
 
             df = vol_df.loc[vol_df['Username'] == self.current_user]
             print(tabulate(df, headers='keys', tablefmt='psql', showindex=False))
-            country_code = self.countries_db.loc[self.countries_db['Country code'] == self.camp_of_volunteer[:2], 'Country Phone Codes'].values[0]
+            country_code = self.countries_db.loc[self.countries_db['Country code'] == self.camp_of_user[:2], 'Country Phone Codes'].values[0]
             questions = ['\nEnter first name: ', '\nEnter second name: ',
                          f'\nEnter phone number in the format [+[{country_code}](0)_______]:', '\nEnter availability: ',
                          '\nEnter your email: ', '\nEnter your new password (over 8 characters long): ']
@@ -2291,6 +2284,7 @@ class Volunteer(CentralFunctions):
                                 continue
                             break
                     elif i == 2:
+                        # different countries have different length phone numbers so no check on phone number length
                         while True:
                             answer = input(questionStack[i])
                             if answer.upper() == 'B':
@@ -2306,10 +2300,6 @@ class Volunteer(CentralFunctions):
                                 answer = current_phone
                             elif not answer.isnumeric():
                                 print(Fore.RED + '\nPlease enter a valid phone number.\n')
-                                print(Style.RESET_ALL)
-                                continue
-                            elif len(answer) != 10:
-                                print(Fore.RED + '\nInvalid format.\n')
                                 print(Style.RESET_ALL)
                                 continue
                             break
@@ -2386,7 +2376,7 @@ class Volunteer(CentralFunctions):
             while True:
                 answers = go_back(questions)
                 df = vol_df.loc[vol_df['Username'] == self.current_user]
-                print([self.current_user, answers[0], answers[1], answers[2], self.camp_of_user, answers[3]])
+                print([self.current_user, answers[0], answers[1], f'+{country_code}(0){str(answers[2])}', self.camp_of_user, answers[3]])
                 vol_df.loc[vol_df['Username'] == self.current_user, list(df.columns)] = [self.current_user, answers[0],
                                                                                          answers[1], answers[2],
                                                                                          self.camp_of_user, answers[3]]
@@ -2487,7 +2477,6 @@ class Volunteer(CentralFunctions):
                             list_row = [volunteer_campID, '', '', '', '', '', '']
                             self.supply_db.loc[len(self.supply_db)] = list_row
                             self.supply_db.to_csv('supplies_database.csv', index= False)
-                            # self.supply_db.dropna()
                             index = self.supply_db.index[self.supply_db['Camp ID'] == volunteer_campID].tolist()[0]
 
                         for i in range(len(column_list) - 1):

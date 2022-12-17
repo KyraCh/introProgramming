@@ -1,0 +1,27 @@
+2022-11-08 17:25:27,747 - root - WARNING - Failed attempt to log into admin's account.
+2022-11-08 17:25:29,439 - root - WARNING - Failed attempt to log into admin's account.
+2022-11-08 17:25:51,781 - root - INFO - admin logged in successfully!
+2022-11-13 15:04:38,630 - root - WARNING - Failed attempt to log into admin's account.
+2022-11-13 15:04:42,778 - root - WARNING - Failed attempt to log into admin's account.
+2022-11-13 15:06:45,388 - root - WARNING - Failed attempt to log into admin's account.
+2022-11-13 15:07:10,347 - root - WARNING - Failed attempt to log into admin's account.
+2022-11-13 15:07:11,189 - root - WARNING - Failed attempt to log into admin's account.
+2022-11-13 15:07:11,333 - root - WARNING - Failed attempt to log into admin's account.
+2022-11-13 15:07:11,479 - root - WARNING - Failed attempt to log into admin's account.
+2022-11-13 15:07:11,655 - root - WARNING - Failed attempt to log into admin's account.
+2022-11-13 15:07:11,880 - root - WARNING - Failed attempt to log into admin's account.
+2022-11-13 15:07:12,217 - root - WARNING - Failed attempt to log into admin's account.
+2022-11-13 15:07:12,406 - root - WARNING - Failed attempt to log into admin's account.
+2022-11-13 15:08:02,274 - root - INFO - admin logged in successfully!
+2022-11-13 15:08:30,401 - root - INFO - admin logged in successfully!
+2022-11-13 15:08:59,926 - root - INFO - admin logged in successfully!
+2022-11-13 15:09:27,309 - root - ERROR - User attempted to log into an account which does not exist.
+2022-11-13 15:09:29,397 - root - ERROR - User attempted to log into an account which does not exist.
+2022-11-13 15:09:29,595 - root - ERROR - User attempted to log into an account which does not exist.
+2022-11-13 15:09:29,766 - root - ERROR - User attempted to log into an account which does not exist.
+2022-11-13 15:09:29,941 - root - ERROR - User attempted to log into an account which does not exist.
+2022-11-13 15:09:34,015 - root - ERROR - User attempted to log into an account which does not exist.
+2022-11-13 15:09:35,650 - root - ERROR - User attempted to log into an account which does not exist.
+2022-11-13 15:09:35,832 - root - ERROR - User attempted to log into an account which does not exist.
+2022-11-13 15:09:36,041 - root - ERROR - User attempted to log into an account which does not exist.
+2022-11-13 15:11:06,323 - root - INFO - admin logged in successfully!
