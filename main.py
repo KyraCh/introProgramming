@@ -58,16 +58,21 @@ class CentralFunctions():
             for i in ['username', 'password', 'role', 'activated', 'email']:
                 if i not in df.columns:
                     print(Fore.RED + f'Missing {i} index from user database.')
+                    self.logger.critical(f'Missing {i} index from user database.')
                     print(Style.RESET_ALL)
                     dataFailure = True
 
             df.dropna(how="all", inplace=True)
             df.fillna('', inplace=True)
-            df['password'] = df['password'].astype(str)
+            try:
+                df['password'] = df['password'].astype(str)
+            except:
+                return True
             self.user_db = df
 
         # If the file does not exist
         except FileNotFoundError:
+            self.logger.info(f'New user database file created')
             user_db = {'username': ['admin'], 'password': [
                 '111'], 'role': ['admin'], 'activated': [True], 'email': ['hemtest11@gmail.com']}
             df = pd.DataFrame(user_db)
@@ -77,6 +82,7 @@ class CentralFunctions():
 
         # If the file is empty
         except pd.errors.EmptyDataError:
+            self.logger.critical('User database file is empty')
             print(Fore.RED + "Your user database file is currently empty.")
             print(Style.RESET_ALL)
             dataFailure = True
@@ -87,6 +93,7 @@ class CentralFunctions():
             for i in ['Username', 'First name', 'Second name', 'Phone', 'Camp ID', 'Availability']:
                 if i not in df.columns:
                     print(Fore.RED + f'Missing {i} index from volunteer database.')
+                    self.logger.critical(f'Missing {i} index from volunteer database.')
                     print(Style.RESET_ALL)
                     dataFailure = True
 
@@ -96,12 +103,14 @@ class CentralFunctions():
 
         except FileNotFoundError:
             vol_db = {'Username': [''], 'First name': [''], 'Second name': [''], 'Phone': [''], 'Camp ID': [''], 'Availability': ['']}
+            self.logger.info(f'New volunteer database file created')
             df = pd.DataFrame(vol_db)
             df.to_csv('volunteer_database.csv',index=False)
             self.vol_db = df
 
         except pd.errors.EmptyDataError:
             print(Fore.RED + "Your volunteer database file is currently empty.")
+            self.logger.critical('Volunteer database file is empty')
             print(Style.RESET_ALL)
             dataFailure = True
 
@@ -110,6 +119,7 @@ class CentralFunctions():
             
             for i in ['Family ID', 'Lead Family Member Name', 'Lead Family Member Surname', 'Camp ID', 'Mental State', 'Physical State', 'No. Of Family Members']:
                 if i not in df.columns:
+                    self.logger.critical(f'Missing {i} index from refugee database')
                     print(Fore.RED + f'Missing {i} index from refugee database.')
                     print(Style.RESET_ALL)
                     dataFailure = True
@@ -119,7 +129,7 @@ class CentralFunctions():
             self.refugee_db = df
 
         except FileNotFoundError:
-
+            self.logger.info(f'New refugee database file created')
             refugee_db = {'Family ID': [''], 'Lead Family Member Name': [''], 'Lead Family Member Surname': [
                 ''], 'Camp ID': [''], 'Mental State': [''], 'Physical State': [''], 'No. Of Family Members': ['']}
             df = pd.DataFrame(refugee_db)
@@ -127,6 +137,7 @@ class CentralFunctions():
             self.refugee_db = df
 
         except pd.errors.EmptyDataError:
+            self.logger.critical('Refugee database file is empty')
             print(Fore.RED + "Your refugee database file is currently empty.")
             print(Style.RESET_ALL)
             dataFailure = True
@@ -135,6 +146,7 @@ class CentralFunctions():
             df = pd.read_csv('camp_database.csv')
             for i in ['Camp ID', 'Location', 'Number of volunteers', 'Capacity','Emergency ID', 'Number of refugees', 'Lat', 'Long']:
                 if i not in df.columns:
+                    self.logger.critical(f'Missing {i} index from camps database')
                     print(Fore.RED + f'Missing {i} index from camps database.')
                     print(Style.RESET_ALL)
                     dataFailure = True
@@ -143,11 +155,13 @@ class CentralFunctions():
             df.fillna('', inplace=True)
             self.camps_db = df
         except FileNotFoundError:
+            self.logger.info(f'New camp database file created')
             camps_db = {'Camp ID': [''], 'Location': [''], 'Number of volunteers': [''], 'Capacity': [''], 'Emergency ID': [''], 'Number of refugees': [''], 'Lat': [''], 'Long': ['']} 
             df = pd.DataFrame(camps_db)
             df.to_csv('camp_database.csv',index=False)
             self.camps_db = df
         except pd.errors.EmptyDataError:
+            self.logger.critical('Camp database file is empty')
             print(Fore.RED + "Your camplist database file is currently empty.")
             print(Style.RESET_ALL)
             dataFailure = True
@@ -157,6 +171,7 @@ class CentralFunctions():
             
             for i in ['Emergency ID', 'Location', 'Type', 'Description', 'Start date', 'Close date']:
                 if i not in df.columns:
+                    self.logger.critical(f'Missing {i} index from emergency database')
                     print(Fore.RED + f'Missing {i} index from emergency database.')
                     print(Style.RESET_ALL)
                     dataFailure = True
@@ -168,10 +183,12 @@ class CentralFunctions():
         except FileNotFoundError:
             emergencies_db = {'Emergency ID': [''], 'Location': [''], 'Type': [
                 ''], 'Description': [''], 'Start date': [''], 'Close date': ['']}
+            self.logger.info(f'New emergency database file created')
             df = pd.DataFrame(emergencies_db)
             df.to_csv('emergency_database.csv',index=False)
             self.emergencies_db = df
         except pd.errors.EmptyDataError:
+            self.logger.critical('Emergency database file is empty')
             print(Fore.RED + "Your emergency database file is currently empty.")
             print(Style.RESET_ALL)
             dataFailure = True
@@ -181,6 +198,7 @@ class CentralFunctions():
 
             for i in ['Camp ID', 'Total number of refugees', 'Meals per day', 'Days', 'Total meals', 'Price per meal', 'Budget per day', 'Total budget']:
                 if i not in df.columns:
+                    self.logger.critical(f'Missing {i} index from mealplans database')
                     print(Fore.RED + f'Missing {i} index from mealplans database.')
                     print(Style.RESET_ALL)
                     dataFailure = True
@@ -193,11 +211,13 @@ class CentralFunctions():
             meals_db = {'Camp ID': [''], 'Total number of refugees': [''],
                        'Meals per day': [''], 'Days': [''], 'Total meals': [''],
                        'Price per meal': [''], 'Budget per day': [''], 'Total budget': ['']}
+            self.logger.info(f'New mealplans database file created')
             df = pd.DataFrame(meals_db)
             df.to_csv('mealplans_database.csv',index=False)
             self.meals_db = df
 
         except pd.errors.EmptyDataError:
+            self.logger.critical('Mealplans database file is empty')
             print(Fore.RED + "Your meal plans database file is currently empty.")
             print(Style.RESET_ALL)
             dataFailure = True
@@ -207,6 +227,7 @@ class CentralFunctions():
 
             for i in ['Camp ID', 'Sleeping bags', 'Masks', 'Basic medication', 'Feminine hygiene products', 'Emergency blankets', 'Towels']:
                 if i not in df.columns:
+                    self.logger.critical(f'Missing {i} index from supplies database')
                     print(Fore.RED + f'Missing {i} index from supplies database.')
                     print(Style.RESET_ALL)
                     dataFailure = True
@@ -217,12 +238,14 @@ class CentralFunctions():
 
         except FileNotFoundError:
             supply_db = {'Camp ID': [''], 'Sleeping bags': [''], 'Masks': [''], 'Basic medication': [''], 'Feminine hygiene products': [''], 'Emergency blankets': [''], 'Towels': ['']}
+            self.logger.info(f'New supplies database file created')
             df = pd.DataFrame(supply_db)
             df.to_csv('supplies_database.csv', index=False)
             self.emergencies_db = df
 
         except:
             print(Fore.RED + "System couldn't read your supplies database file.")
+            self.logger.critical('Supplies database file is empty')
             print(Style.RESET_ALL)
             dataFailure = True
 
@@ -230,6 +253,7 @@ class CentralFunctions():
             df = pd.read_csv(".sys_countries.csv", index_col='Country name')
             self.countries_db = df
         except pd.errors.EmptyDataError:
+            self.logger.critical('.sys_countries database file is empty')
             print(Fore.RED + "Your .sys_countries database file is currently empty.")
             print(Style.RESET_ALL)
             dataFailure = True
@@ -238,6 +262,7 @@ class CentralFunctions():
             df = pd.read_csv('.sys_organisation_per_continent.csv')
             self.organisations_db = df
         except pd.errors.EmptyDataError:
+            self.logger.critical('.sys_organisation_per_continent database file is empty')
             print(Fore.RED + "Your .sys_organisation_per_continent database file is currently empty.")
             print(Style.RESET_ALL)
             dataFailure = True
