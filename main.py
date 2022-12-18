@@ -10,6 +10,7 @@ import pandas as pd
 import datetime
 from source_code.tabulate_sc import tabulate
 import source_code.re_sc as re
+# import re
 import source_code.smtplib_sc as smtplib
 import random
 from email.message import EmailMessage
@@ -292,7 +293,9 @@ class CentralFunctions():
                 username = input('\nPlease input your USERNAME: ').strip()
 
                 if username not in users_dict:
-                    print('Username is incorrect.')
+                    print(Fore.RED + '\nUsername does not exist\n')
+                    print(Style.RESET_ALL)
+                    self.logger.info('Login Failed. Username does not exist.')
                 elif not users_dict[username]['activated']:
                     print(Fore.RED + '\nAccount not activated. Please contact your admin.\n')
                     self.logger.info('Login Failed. User account deactivated.')
@@ -1552,8 +1555,8 @@ class Admin(CentralFunctions):
                 action = action_and_volunteer.split(' ')[0].lower()
                 volunteer_username = action_and_volunteer.split(' ')[1]
 
-                if volunteer_username in df1['Username'].values:
-                    index = self.user_db.index[df['username'] == volunteer_username].tolist()[0]
+                if volunteer_username in self.vol_db['Username'].values:
+                    index = self.user_db.index[self.user_db['username'] == volunteer_username].tolist()[0]
                     if action == 'd':
                         if self.user_db.at[index, 'activated']:
                             commit = input('\nCommit changes? [y]/[n] ')
@@ -1618,6 +1621,7 @@ class Admin(CentralFunctions):
                         continue
 
                 else:
+                    print(self.vol_db)
                     print(Fore.RED + '\nThere is no volunteer with this username. Try again.\n')
                     print(Style.RESET_ALL)
                     continue
@@ -2045,6 +2049,10 @@ class Volunteer(CentralFunctions):
         If system detects no lack of an input it will launch a "flowing" version, otherwise it will launch
         "selective" version of this method.
         '''
+
+        # update the dataframes
+        self.download_all_data()
+
         current_name = self.vol_db[self.vol_db["Username"] == self.current_user]["First name"].values[0]
         current_second_name = self.vol_db[self.vol_db["Username"] == self.current_user]["Second name"].values[0]
         current_phone = str(self.vol_db[self.vol_db["Username"] == self.current_user]["Phone"].values[0])
@@ -2054,7 +2062,7 @@ class Volunteer(CentralFunctions):
         vol_df = self.vol_db.copy()
         users_df = self.user_db.copy()
 
-        regex = '^[a-z0-9]+[\._]?[a-z0-9]+[@]\w+[.]\w{2,3}$'
+        regex = r'\b[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\.[A-Z|a-z]{2,}\b'
 
         def check_email(email):
             if (re.search(regex, email)):
