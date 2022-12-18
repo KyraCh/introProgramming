@@ -4,21 +4,24 @@
 ### LOGIN VIA GMAIL
 
 import os
-import webbrowser
-import folium as folium
+import source_code.webbrowser_sc as webbrowser
+import source_code.folium_sc as folium
 import pandas as pd
 import datetime
-from tabulate import tabulate
-import re
-import smtplib
+from source_code.tabulate_sc import tabulate
+import source_code.re_sc as re
+import source_code.smtplib_sc as smtplib
 import random
 from email.message import EmailMessage
-import ssl
-from colorama import Fore, Back, Style
-import colorama
+import source_code.ssl_sc as ssl
+from source_code.colorama.ansi import Fore, Back, Style
+import source_code.colorama.initialise as colorama
+
+# I need to get rid of this tonight
 import warnings
 import logging
 warnings.simplefilter(action='ignore', category=FutureWarning)
+
 
 colorama.init()
 
@@ -292,6 +295,7 @@ class CentralFunctions():
                     print('Username is incorrect.')
                 elif not users_dict[username]['activated']:
                     print(Fore.RED + '\nAccount not activated. Please contact your admin.\n')
+                    self.logger.info('Login Failed. User account deactivated.')
                     print(Style.RESET_ALL)
                 else:
                     break
@@ -308,6 +312,7 @@ class CentralFunctions():
                         break
                     elif password != users_dict[username]['password']:
                         print(Fore.RED + '\nPassword is incorrect.\n')
+                        self.logger.info('Login Failed. Incorrect Password.')
                         print(Style.RESET_ALL)
                         count_password += 1
                         left_attempts = 3 - count_password
@@ -316,6 +321,8 @@ class CentralFunctions():
                             if self.user_db.loc[self.user_db["username"] == self.current_user]['role'].values[
                                 0] == "volunteer":
                                 print(Fore.RED + '\nYour account was deactivated. Please contact admin\n')
+                                self.logger.info('Entered wrong password 3 times. User account deactivated.')
+
                                 print(Style.RESET_ALL)
                                 self.user_db.loc[self.user_db["username"] == self.current_user, 'activated'] = False
                                 self.user_db.to_csv("user_database.csv", index=False)
