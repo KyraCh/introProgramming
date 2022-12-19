@@ -10,18 +10,14 @@ import pandas as pd
 import datetime
 from source_code.tabulate_sc import tabulate
 import source_code.re_sc as re
-# import re
-import source_code.smtplib_sc as smtplib
+import smtplib
 import random
 from email.message import EmailMessage
 import source_code.ssl_sc as ssl
 from source_code.colorama.ansi import Fore, Back, Style
 import source_code.colorama.initialise as colorama
-
-# I need to get rid of this tonight
-import warnings
 import logging
-warnings.simplefilter(action='ignore', category=FutureWarning)
+
 
 
 colorama.init()
@@ -78,7 +74,7 @@ class CentralFunctions():
         except FileNotFoundError:
             self.logger.info(f'New user database file created')
             user_db = {'username': ['admin'], 'password': [
-                '111'], 'role': ['admin'], 'activated': [True], 'email': ['hemtest11@gmail.com']}
+                '111'], 'role': ['admin'], 'email': ['hemtest11@gmail.com'] ,'activated': [True]}
             df = pd.DataFrame(user_db)
             df['password'] = df['password'].astype(str)
             df.to_csv('user_database.csv',index=False)
@@ -681,13 +677,17 @@ class CentralFunctions():
             elif choose_action == '2':
                 while True:
                     print('\nList of Camp IDs: ')
+                    
                     print(tabulate(self.camps_db[['Camp ID']], headers='keys', tablefmt='psql', showindex=False))
+                    
                     choose_camp = input('\nEnter a Camp ID: ')
                     if choose_camp.upper() == 'B':
                         break
                     elif choose_camp in vol_data['Camp ID'].values:
                         df = self.vol_db.loc[self.vol_db['Camp ID'] == choose_camp]
                         print(tabulate(df, headers='keys', tablefmt='psql', showindex=False))
+                    elif choose_camp in self.camps_db['Camp ID'].values:
+                        print('No existing volunteers assigned to this camp. Please assign or create volunteer account.')
                     else:
                         print(Fore.RED + '\nInvalid Camp ID. Try again.')
                         print(Style.RESET_ALL)
@@ -932,6 +932,9 @@ class CentralFunctions():
         state per each camp and gives information about each family that is assigned to certain camp.
         Secondly, the method call no of refugees now will only show you camp details of only the one that you are assigned to.
         Unless you are admin then you can see evrything '''
+        
+        self.download_all_data()
+                
         print(100 * '=')
         self.count_ref_vol()
         if self.current_user == "admin":
@@ -1279,9 +1282,9 @@ class Admin(CentralFunctions):
                         print(Fore.RED + '\nYour input needs to be an integer\n')
                         print(Style.RESET_ALL)
                         continue
-            if cap.upper() == 'B':
+            if type(cap) == str and cap.upper() == 'B':
                 continue
-            elif cap.upper() == 'Q':
+            elif type(cap) == str and cap.upper() == 'Q':
                 print(100 * '=')
                 menu(self.functions)
                 exit()
@@ -1408,7 +1411,7 @@ class Admin(CentralFunctions):
                     counter += inputs[counter]()
 
                 vol_df.loc[len(vol_df.index)] = [username, '', '', '', camp, '']
-                users_df.loc[len(users_df.index)] = [username, password, 'volunteer', 'TRUE', '']
+                users_df.loc[len(users_df.index)] = [username, password,'' ,'volunteer', 'TRUE']
                 print(tabulate(users_df.tail(1), headers='keys', tablefmt='psql', showindex=False))
                 while True:
                     commit = input('\nCommit changes? [y]/[n] ')
@@ -1481,7 +1484,7 @@ class Admin(CentralFunctions):
                     vol_df.loc[len(vol_df.index)] = [
                         'Volunteer' + str(new_usr_index + i), '', '', '', camp, '']
                     users_df.loc[len(users_df.index)] = [
-                        'Volunteer' + str(new_usr_index + i), '111', 'volunteer', 'TRUE', '']
+                        'Volunteer' + str(new_usr_index + i), '111', '','volunteer', 'TRUE']
 
                 df = users_df.tail(no_of_new_users)
                 print(tabulate(df, headers='keys', tablefmt='psql', showindex=False))
@@ -1555,8 +1558,8 @@ class Admin(CentralFunctions):
                 action = action_and_volunteer.split(' ')[0].lower()
                 volunteer_username = action_and_volunteer.split(' ')[1]
 
-                if volunteer_username in self.vol_db['Username'].values:
-                    index = self.user_db.index[self.user_db['username'] == volunteer_username].tolist()[0]
+                if volunteer_username in df1['Username'].values:
+                    index = self.user_db.index[df['username'] == volunteer_username].tolist()[0]
                     if action == 'd':
                         if self.user_db.at[index, 'activated']:
                             commit = input('\nCommit changes? [y]/[n] ')
@@ -2421,10 +2424,13 @@ class Volunteer(CentralFunctions):
             while True:
                 answers = go_back(questions)
                 df = vol_df.loc[vol_df['Username'] == self.current_user]
+
                 print([self.current_user, answers[0], answers[1], f'+{country_code}(0){str(answers[2])}', self.camp_of_user, answers[3]])
+                
                 vol_df.loc[vol_df['Username'] == self.current_user, list(df.columns)] = [self.current_user, answers[0],
                                                                                          answers[1], answers[2],
                                                                                          self.camp_of_user, answers[3]]
+                
                 users_df.loc[users_df['username'] == self.current_user, ['password', 'email']] = [answers[5],
                                                                                                   answers[4]]
 
@@ -2447,6 +2453,8 @@ class Volunteer(CentralFunctions):
                 if commit == 'y':
                     self.emergencies_db = vol_df.copy()
                     vol_df.to_csv('volunteer_database.csv', index=False)
+                    self.user_db = users_df.copy()
+                    users_df.to_csv('user_database.csv', index=False)
                     break
                 else:
                     answers = []
