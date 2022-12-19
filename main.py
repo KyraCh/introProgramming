@@ -1817,7 +1817,8 @@ class Admin(CentralFunctions):
         '''
         Allows admin to create meal plan for a camp.
         '''
-
+        self.count_ref_vol()
+        
         while True:
             counter = 0
             print(100 * '=')
