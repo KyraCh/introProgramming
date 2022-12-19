@@ -4,18 +4,29 @@
 ### LOGIN VIA GMAIL
 
 import os
+
+try:
+    import folium
+    from tabulate import tabulate
+    from colorama import Fore, Back, Style
+    import colorama
+except:
+    os.system("pip install folium")
+    os.system("pip install tabulate")
+    os.system("pip install colorama")
+    import folium
+    from tabulate import tabulate
+    from colorama import Fore, Back, Style
+    import colorama
+
 import webbrowser
-import folium
 import pandas as pd
 import datetime
-from tabulate import tabulate
 import re
 import smtplib
 import random
 from email.message import EmailMessage
 import ssl
-from colorama import Fore, Back, Style
-import colorama
 import logging
 
 
@@ -2053,10 +2064,6 @@ class Volunteer(CentralFunctions):
         If system detects no lack of an input it will launch a "flowing" version, otherwise it will launch
         "selective" version of this method.
         '''
-
-        # update the dataframes
-        self.download_all_data()
-
         current_name = self.vol_db[self.vol_db["Username"] == self.current_user]["First name"].values[0]
         current_second_name = self.vol_db[self.vol_db["Username"] == self.current_user]["Second name"].values[0]
         current_phone = str(self.vol_db[self.vol_db["Username"] == self.current_user]["Phone"].values[0])
@@ -2077,6 +2084,10 @@ class Volunteer(CentralFunctions):
         if '' not in self.vol_db.loc[self.vol_db['Username'] == self.current_user].values[0]:
 
             while True:
+
+                # update the dataframes
+                self.download_all_data()
+                
                 print(100 * '=')
                 print('\nPlease select which information you would like to change about yourself.')
                 print('Input a digit to change the correpsonding piece of information.')
@@ -2602,8 +2613,4 @@ def menu(functions):
 
 
 if __name__ == '__main__':
-    os.system("pip install folium")
-    os.system("pip install tabulate")
-    os.system("pip install colorama")
-
     login()
