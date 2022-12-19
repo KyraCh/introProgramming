@@ -4,18 +4,18 @@
 ### LOGIN VIA GMAIL
 
 import os
-import source_code.webbrowser_sc as webbrowser
-import source_code.folium_sc as folium
+import webbrowser
+import folium
 import pandas as pd
 import datetime
-from source_code.tabulate_sc import tabulate
-import source_code.re_sc as re
+from tabulate import tabulate
+import re
 import smtplib
 import random
 from email.message import EmailMessage
-import source_code.ssl_sc as ssl
-from source_code.colorama.ansi import Fore, Back, Style
-import source_code.colorama.initialise as colorama
+import ssl
+from colorama import Fore, Back, Style
+import colorama
 import logging
 
 
@@ -1818,7 +1818,7 @@ class Admin(CentralFunctions):
         Allows admin to create meal plan for a camp.
         '''
         self.count_ref_vol()
-        
+
         while True:
             counter = 0
             print(100 * '=')
@@ -2602,4 +2602,8 @@ def menu(functions):
 
 
 if __name__ == '__main__':
+    os.system("pip install folium")
+    os.system("pip install tabulate")
+    os.system("pip install colorama")
+
     login()
